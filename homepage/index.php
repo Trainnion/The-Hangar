@@ -1,6 +1,7 @@
 <?php
-$buttonsPath = file_exists('buttons/Search.svg') ? 'buttons' : (file_exists('../buttons/Search.svg') ? '../buttons' : 'buttons');
-$promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (file_exists('../promotional/Asset 8.png') ? '../promotional' : 'promotional');
+$buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
+$promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
+$footerPath = is_dir('footer') ? 'footer' : '../footer';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +44,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
         <div class="promotionalWrapper">
             <div class="slider">
                 <div class="slide" id="slide1">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Slide 1">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Slide 1">
                     <div class="slideContent">
                         <h2>FEATURED RELEASE</h2>
                         <p>Explore the latest additions to the hangar collection.</p>
@@ -52,7 +53,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
                 </div>
 
                 <div class="slide" id="slide2">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Slide 2">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Slide 2">
                     <div class="slideContent">
                         <h2>LIMITED EDITION</h2>
                         <p>Exclusive models available for a limited time.</p>
@@ -61,7 +62,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
                 </div>
 
                 <div class="slide" id="slide3">
-                    <img src="promotional/download (1).jpg" alt="Slide 3">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="Slide 3">
                     <div class="slideContent">
                         <h2>NEW ARRIVALS</h2>
                         <p>Discover fresh stock straight from the factory.</p>
@@ -88,7 +89,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
         <!-- Slide Item -->
         <div class="heroSlideSec2">
             <!-- Left Info Panel with Blurred Background -->
-            <div class="heroInfoPanelSec2" style="background-image: url('promotional/578079302143824449.jpg');">
+            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/578079302143824449.jpg');">
                 <div class="heroOverlaySec2"></div>
                 <div class="heroContentSec2">
                     <span class="badgeReprintSec2">REPRINT RUN!</span>
@@ -110,7 +111,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <!-- Right Image Banner -->
             <div class="heroImagePanelSec2">
-                <img src="promotional/578079302143824449.jpg" alt="FA-78 Full Armor Gundam Ver. Ka">
+                <img src="<?php echo $promotionalPath; ?>/578079302143824449.jpg" alt="FA-78 Full Armor Gundam Ver. Ka">
             </div>
         </div>
 
@@ -149,7 +150,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             
             <a href="product-details.php?id=1" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-01">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-01">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -166,7 +167,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=2" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-02">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-02">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -183,7 +184,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=3" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/download (1).jpg" alt="MODEL FX-03">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="MODEL FX-03">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -200,7 +201,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=4" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-04">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-04">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -217,7 +218,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=5" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-05">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-05">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -234,7 +235,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=6" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/download (1).jpg" alt="MODEL FX-06">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="MODEL FX-06">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -251,7 +252,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=7" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-07">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="MODEL FX-07">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -268,7 +269,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 
             <a href="product-details.php?id=8" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-08">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MODEL FX-08">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -312,31 +313,31 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Full Width Container: METALBUILD -->
             <div class="catBox catBoxFull">
                 <span class="catTitleText">METALBUILD</span>
-                <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Metalbuild">
+                <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Metalbuild">
             </div>
 
             <!-- Row 1 Left: PERFECT GRADE -->
             <div class="catBox">
                 <span class="catTitleText">PERFECT GRADE</span>
-                <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Perfect Grade">
+                <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Perfect Grade">
             </div>
 
             <!-- Row 1 Right: MASTER GRADE -->
             <div class="catBox">
                 <span class="catTitleText">MASTER GRADE</span>
-                <img src="promotional/download (1).jpg" alt="Master Grade">
+                <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="Master Grade">
             </div>
 
             <!-- Row 2 Left: REAL GRADE -->
             <div class="catBox">
                 <span class="catTitleText">REAL GRADE</span>
-                <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Real Grade">
+                <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Real Grade">
             </div>
 
             <!-- Row 2 Right: HIGH GRADE -->
             <div class="catBox">
                 <span class="catTitleText">HIGH GRADE</span>
-                <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="High Grade">
+                <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="High Grade">
             </div>
 
         </div>
@@ -361,7 +362,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 1 -->
             <a href="product-details.php?id=1" class="bsCard">
                 <div class="bsImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG RX-93 Nu Gundam">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG RX-93 Nu Gundam">
                 </div>
                 <div class="bsDetails">
                     <div class="bsBadges">
@@ -379,7 +380,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 2 -->
             <a href="product-details.php?id=2" class="bsCard">
                 <div class="bsImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MG FREEDOM GUNDAM 2.0">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MG FREEDOM GUNDAM 2.0">
                 </div>
                 <div class="bsDetails">
                     <div class="bsBadges">
@@ -397,7 +398,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 3 -->
             <a href="product-details.php?id=3" class="bsCard">
                 <div class="bsImgContainer">
-                    <img src="promotional/download (1).jpg" alt="MG JUSTICE GUNDAM 2.0">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="MG JUSTICE GUNDAM 2.0">
                 </div>
                 <div class="bsDetails">
                     <div class="bsBadges">
@@ -415,7 +416,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 4 -->
             <a href="product-details.php?id=4" class="bsCard">
                 <div class="bsImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG HI-NU GUNDAM">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG HI-NU GUNDAM">
                 </div>
                 <div class="bsDetails">
                     <div class="bsBadges">
@@ -472,7 +473,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 1 -->
             <a href="product-details.php?id=1" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG RX-93 Nu Gundam">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG RX-93 Nu Gundam">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -490,7 +491,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 2 -->
             <a href="product-details.php?id=2" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="RG SINANJU">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="RG SINANJU">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -508,7 +509,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 3 -->
             <a href="product-details.php?id=3" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/download (1).jpg" alt="RG Sazabi">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="RG Sazabi">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -526,7 +527,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 4 -->
             <a href="product-details.php?id=4" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG HI-NU GUNDAM">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="RG HI-NU GUNDAM">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -544,7 +545,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 5 -->
             <a href="product-details.php?id=5" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MG FREEDOM GUNDAM 2.0">
+                    <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="MG FREEDOM GUNDAM 2.0">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -562,7 +563,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Card 6 -->
             <a href="product-details.php?id=6" class="productCard">
                 <div class="productImgContainer">
-                    <img src="promotional/download (1).jpg" alt="MG JUSTICE GUNDAM 2.0">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="MG JUSTICE GUNDAM 2.0">
                 </div>
                 <div class="productDetails">
                     <div class="productBadges">
@@ -601,7 +602,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
 <div class="featuredContainerFT">
     <!-- Top Hero Banner -->
     <div class="topBannerFT">
-        <img src="promotional/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Gundam Featured Banner">
+        <img src="<?php echo $promotionalPath; ?>/285286ad-ebd9-494b-a0fe-cf91633042ed.webp" alt="Gundam Featured Banner">
         <div class="accentBarFT"></div>
     </div>
 
@@ -615,7 +616,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
         <!-- Left Column: Main Anniversary Feature -->
         <div class="featuredCardLeftFT">
             <div class="featuredImgContainerFT">
-                <img src="promotional/METAL BUILD ZGMF-X42S Destiny Gundam.jpg" alt="METAL BUILD Destiny Gundam">
+                <img src="<?php echo $promotionalPath; ?>/METAL BUILD ZGMF-X42S Destiny Gundam.jpg" alt="METAL BUILD Destiny Gundam">
             </div>
             <div class="featuredDetailsFT">
                 <h3 class="featuredTitleFT">DESTINY GUNDAM<br>SPECIAL EDITION</h3>
@@ -629,7 +630,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
             <!-- Top Stacked Banner -->
             <div class="featuredBannerRowFT">
                 <div class="bannerImgBoxFT">
-                    <img src="promotional/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Hi-Nu Hyper Mega Bazooka">
+                    <img src="<?php echo $promotionalPath; ?>/869ba4c1-0558-40ac-b57e-5f4d25f7958d.webp" alt="Hi-Nu Hyper Mega Bazooka">
                 </div>
                 <div class="bannerTextBoxFT textRightFT">
                     <span class="brandSubFT">METAL BUILD EXPO</span>
@@ -646,7 +647,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
                     <span class="featuredStatusFT">COMING SOON</span>
                 </div>
                 <div class="bannerImgBoxFT">
-                    <img src="promotional/download (1).jpg" alt="Mighty Strike Freedom">
+                    <img src="<?php echo $promotionalPath; ?>/download (1).jpg" alt="Mighty Strike Freedom">
                 </div>
             </div>
         </div>
@@ -657,7 +658,7 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
     <div class="footerContainerFT">
         
         <div class="footerLogoRowFT">
-            <img src="promotional/Asset 5.png" alt="THE HANGAR" class="footerLogoFT">
+            <img src="<?php echo $promotionalPath; ?>/Asset 5.png" alt="THE HANGAR" class="footerLogoFT">
         </div>
 
         <div class="footerSectionsWrapperFT">
@@ -695,8 +696,8 @@ $promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (fil
                 <div class="footerColFT">
                     <h4 class="footerHeadingFT">LOGISTICS</h4>
                     <div class="brandListFT logisticsLogosFT">
-                        <img src="footer/logo.5f09a646.png" alt="J&T Express">
-                        <img src="footer/ninjavan-logo-white.webp" alt="Ninja Van">
+                        <img src="<?php echo $footerPath; ?>/logo.5f09a646.png" alt="J&T Express">
+                        <img src="<?php echo $footerPath; ?>/ninjavan-logo-white.webp" alt="Ninja Van">
                     </div>
                 </div>
 
