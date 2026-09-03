@@ -1,3 +1,7 @@
+<?php
+$buttonsPath = file_exists('buttons/Search.svg') ? 'buttons' : (file_exists('../buttons/Search.svg') ? '../buttons' : 'buttons');
+$promotionalPath = file_exists('promotional/Asset 8.png') ? 'promotional' : (file_exists('../promotional/Asset 8.png') ? '../promotional' : 'promotional');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,24 +15,29 @@
     <!-- SECTION 0 & 1 -->
     <div class="promotionalContainer">
         <!-- SECTION 0: HEADER -->
-        <div class="headerContainer">
+        <header class="headerContainer">
             <div class="headerLeft">
-                <a href="#" class="navBtnHamburger" aria-label="Menu">
-                    <img src="buttons/hamberger menu icon.svg" alt="">
+                <a href="#" class="navItem navBtnHamburger" aria-label="Menu">
+                    <img src="<?php echo $buttonsPath; ?>/hamberger menu icon.svg" alt="Menu">
                 </a>
-                <a href="#" class="navBtn">LANGUAGE</a>
-                <a href="#" class="navBtn">PRODUCTS</a>
+                <a href="#" class="navItem navLink">LANGUAGE</a>
+                <a href="#" class="navItem navLink">PRODUCTS</a>
             </div>
 
             <div class="headerCenter">
-                <img src="promotional/Asset 8.png" alt="THE HANGAR Logo">
+                <a href="#" class="navBrand" aria-label="THE HANGAR Home">
+                    <img src="<?php echo $promotionalPath; ?>/Asset 8.png" alt="THE HANGAR Logo">
+                </a>
             </div>
 
             <div class="headerRight">
-                <button class="iconBtn">SEARCH</button>
-                <a href="#" class="actionBtn">CART (0)</a>
+                <a href="#" class="navItem navLink navCart">CART</a>
+                <a href="#" class="navItem navLink">LOG IN</a>
+                <button class="navItem navBtnSearch" type="button" aria-label="Search">
+                    <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
+                </button>
             </div>
-        </div>
+        </header>
 
         <!-- SECTION 1: SLIDER -->
         <div class="promotionalWrapper">
