@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* The Hangar Official Brand Guide Colors */
+    --brand-cyan: #3FC4E1;
+    --brand-cyan-rgb: 63, 196, 225;
+    --brand-dark: #231F20;
+    --brand-dark-rgb: 35, 31, 32;
+
+    /* The Hangar Official Typography */
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Poppins', sans-serif;
+    --font-logo: 'Orbitron', sans-serif;
+}
 
 * {
     margin: 0;
@@ -7,7 +20,11 @@
 }
 
 body, button, input, textarea, select {
-    font-family: 'Poppins', sans-serif;
+    font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
 }
 
 html, body {
@@ -204,57 +221,136 @@ html, body {
     pointer-events: none;
 }
 
+.heroTopTitle {
+    position: absolute;
+    top: 92px;
+    left: 3rem;
+    font-size: 3.4rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: #ffffff;
+    z-index: 15;
+    text-transform: uppercase;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
+    pointer-events: none;
+    margin: 0;
+}
+
 .slide img { width: 100%; height: 100%; object-fit: cover; }
 
 .slideContent {
     position: absolute;
-    bottom: 15rem;
+    bottom: 8rem;
     left: 3rem;
     color: #ffffff;
     z-index: 10;
-    max-width: 600px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    max-width: 650px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
 }
 
-.slideContent h2 { font-size: 2.5rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 0.5rem; }
-.slideContent p { font-size: 1.1rem; opacity: 0.9; }
+.heroGradeTag {
+    display: inline-block;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #ffffff;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+}
+
+.slideContent h2 { 
+    font-size: 2.6rem; 
+    font-weight: 900; 
+    letter-spacing: 2px; 
+    margin-bottom: 0.2rem; 
+    line-height: 1.15;
+}
+
+.heroWeaponSub { 
+    font-size: 1.15rem; 
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #e0e0e0;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
 
 .orderBtn {
     display: inline-block;
-    margin-top: 1.2rem;
-    padding: 0.8rem 2rem;
+    margin-top: 0.8rem;
+    padding: 0.75rem 2.2rem;
     background-color: #ffffff;
     color: #000000;
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 0.9rem;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     border: 2px solid #ffffff;
     transition: all 0.3s ease;
     cursor: pointer;
     border-radius: 2rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
 .orderBtn:hover { background-color: transparent; color: #ffffff; }
 
+.heroSliderControls {
+    position: absolute;
+    bottom: 3.5rem;
+    right: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.6rem;
+    z-index: 15;
+}
+
+.heroCounterSec1 {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+
+.heroCounterSec1 .activeNum {
+    color: var(--brand-cyan);
+}
+
+.heroCounterSec1 .divider,
+.heroCounterSec1 .totalNum {
+    color: var(--brand-dark);
+}
+
+.heroCounterSec1 .divider {
+    opacity: 0.6;
+    margin: 0 0.1rem;
+}
+
 .sliderNav {
     display: flex;
-    column-gap: 1rem;
-    position: absolute;
-    bottom: 5rem;
-    left: 95%;
-    transform: translateX(-50%);
-    z-index: 10;
+    column-gap: 0.6rem;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .sliderNav button {
-    width: 1rem;
-    height: 1rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
-    background-color: #fefefe;
-    opacity: 0.6;
+    background-color: var(--brand-dark);
+    opacity: 0.35;
     border: none;
     cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+}
+
+.sliderNav button.active {
+    background-color: var(--brand-cyan);
+    opacity: 1;
+    transform: scale(1.25);
 }
 
 /* SECTION 2 */
@@ -356,27 +452,57 @@ html, body {
     color: #d0d0d0;
 }
 
-/* Counter - Positioned Bottom-Right Inside Left Blur Container */
-.heroCounterSec2 {
-    position: relative;
+/* Counter Container - Positioned on the Right Side Inside Left Blurry Panel */
+.heroCounterContainerSec2 {
+    /* No relative position, so timer bar can anchor to heroInfoPanelSec2 */
     z-index: 2;
-    align-self: flex-end; /* Aligns specifically to the right edge of the container */
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    width: max-content;
+    margin-bottom: 0.5rem; /* Space above the absolute timer bar */
+}
+
+.heroCounterSec2 {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1.1rem;
+    gap: 0.45rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    border-bottom: 4px solid #00bcd4;
-    padding-bottom: 0.3rem;
-    width: max-content;
+    letter-spacing: 2px;
+    line-height: 1;
 }
 
 .activeNumSec2 {
-    color: #00bcd4;
+    color: var(--brand-cyan);
 }
 
 .dividerSec2, .totalNumSec2 {
     color: #ffffff;
+}
+
+.dividerSec2 {
+    opacity: 0.45;
+}
+
+/* The blue slab (timer progress bar) spans the entire bottom of the blurry background */
+.heroTimerBarSec2 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    z-index: 10;
+}
+
+.heroTimerFillSec2 {
+    height: 100%;
+    width: 0%;
+    background-color: var(--brand-cyan);
 }
 
 /* Right Panel */
@@ -399,7 +525,7 @@ html, body {
 .heroProgressBarSec2 {
     width: 100%;
     height: 40px;
-    background-color: #121212;
+    background-color: var(--brand-dark);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -421,7 +547,7 @@ html, body {
 }
 
 .activeDashSec2 {
-    background-color: #00bcd4;
+    background-color: var(--brand-cyan);
     opacity: 1;
 }
 /* SECTION 2 */
@@ -607,8 +733,28 @@ html, body {
     right: 1.5rem;
     z-index: 99999 !important;
     display: flex;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 1.2rem;
     pointer-events: auto !important;
+}
+
+.sliderCounterNR {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #080808;
+    letter-spacing: 2px;
+}
+
+.sliderCounterNR .divider {
+    opacity: 0.35;
+}
+
+.sliderBtnsNR {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .sliderBtnNR {
@@ -1141,8 +1287,8 @@ html, body {
     margin-top: 30px;
 }
 
-/* Wide Top Hero Banner */
-.topBannerFT {
+/* Wide Top Hero Banner Slider */
+.topBannerSliderFT {
     position: relative;
     width: 100%;
     height: 18rem;
@@ -1150,20 +1296,43 @@ html, body {
     border-bottom: 0.5px solid #080808;
 }
 
-.topBannerFT img {
+.topBannerTrackFT {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    cursor: grab;
+}
+
+.topBannerSlideFT {
+    min-width: 100%; /* Will size relative to its parent container */
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.topBannerSlideFT img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
 }
 
-.accentBarFT {
+/* Timer bar for Featured Banner */
+.featuredTimerBarFT {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 35%;
-    height: 6px;
-    background-color: #00bcd4; /* Cyan accent bar */
+    width: 100%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.15);
+    z-index: 10;
+}
+
+.featuredTimerFillFT {
+    height: 100%;
+    width: 0%;
+    background-color: var(--brand-cyan);
+    transition: width 0.05s linear;
 }
 
 /* Header */
@@ -1418,7 +1587,7 @@ html, body {
 }
 
 .footerLinksFT a:hover {
-    color: #00bcd4;
+    color: var(--brand-cyan);
 }
 
 /* Payment & Logistics Logos */
@@ -1460,13 +1629,13 @@ html, body {
 }
 
 .socialItemFT:hover {
-    color: #00bcd4;
+    color: var(--brand-cyan);
 }
 
 .socialIconFT {
     width: 22px;
     height: 22px;
-    fill: #00bcd4;
+    fill: var(--brand-cyan);
     flex-shrink: 0;
 }
 
@@ -1503,13 +1672,63 @@ html, body {
     text-transform: uppercase;
 }
 
+.featuredHeadlineFT {
+    letter-spacing: 14px;
+    font-weight: 900;
+    font-size: 2.2rem;
+    color: #ffffff;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.bannerLogoWrapperFT {
+    margin-bottom: 0.8rem;
+}
+
+.bannerLogoSvgFT {
+    height: 42px;
+    width: auto;
+    max-width: 240px;
+    object-fit: contain;
+    display: block;
+}
+
+.statusSpacedFT {
+    letter-spacing: 6px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #ffffff;
+    display: inline-block;
+}
+
+.payLogoImg {
+    max-height: 28px;
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logisticsLogoImg {
+    max-height: 32px;
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
 .officialLogosFT {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
+    gap: 1.5rem;
 }
 
-.officialLogosFT img {
+.partnerLogoBandaiNamco {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.partnerLogoBandaiSpirits,
+.partnerLogoBandai {
     height: 32px;
     width: auto;
     object-fit: contain;
@@ -1525,6 +1744,15 @@ html, body {
 }
 
 @media (max-width: 576px) {
+    .heroSliderControls {
+        bottom: 2rem;
+        right: 1.5rem;
+    }
+    .heroTopTitle {
+        font-size: 2.2rem;
+        top: 80px;
+        left: 1.5rem;
+    }
     .footerFT {
         padding: 2.5rem 1.5rem 1.5rem 1.5rem;
     }
