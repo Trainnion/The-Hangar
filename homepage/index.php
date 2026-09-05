@@ -41,7 +41,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                     <img src="<?php echo $buttonsPath; ?>/hamberger menu icon.svg" alt="Menu">
                 </a>
                 <a href="#" class="navItem navLink">LANGUAGE</a>
-                <a href="#" class="navItem navLink">PRODUCTS</a>
+                <a href="search.php" class="navItem navLink">PRODUCTS</a>
             </div>
 
             <div class="headerCenter">
@@ -551,7 +551,10 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 </footer>
 
 
-<!-- Replace your current script tag with this -->
+<!-- G.O.S SEARCH HUD OVERLAY (Self-contained: includes search.css & search.js) -->
+<?php require_once __DIR__ . '/search_modal.php'; ?>
+
+<!-- Script tags -->
 <script src="script.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
