@@ -80,6 +80,45 @@ function initDatabaseTables($pdo) {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // 3. Users Table (Role-based authentication)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `users` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `username` VARCHAR(100) NOT NULL UNIQUE,
+            `email` VARCHAR(255) NOT NULL UNIQUE,
+            `password` VARCHAR(255) NOT NULL,
+            `role` VARCHAR(50) NOT NULL DEFAULT 'user',
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Check if users table is empty, then seed initial admin and user accounts
+    $checkUsers = $pdo->query("SELECT COUNT(*) AS total FROM `users`")->fetch();
+    if ($checkUsers && (int)$checkUsers['total'] === 0) {
+        $insert = $pdo->prepare("
+            INSERT INTO `users` (`username`, `email`, `password`, `role`)
+            VALUES (:username, :email, :password, :role)
+        ");
+        $insert->execute([
+            ':username' => 'admin',
+            ':email'    => 'admin@thehangar.ph',
+            ':password' => password_hash('hangar2026', PASSWORD_DEFAULT),
+            ':role'     => 'admin',
+        ]);
+        $insert->execute([
+            ':username' => 'Amuro_Ray',
+            ':email'    => 'amuro@thehangar.ph',
+            ':password' => password_hash('pilot2026', PASSWORD_DEFAULT),
+            ':role'     => 'user',
+        ]);
+        $insert->execute([
+            ':username' => 'Char_Aznable',
+            ':email'    => 'char@thehangar.ph',
+            ':password' => password_hash('redcomet', PASSWORD_DEFAULT),
+            ':role'     => 'user',
+        ]);
+    }
+
     // Check if products table is empty, then seed initial data
     $check = $pdo->query("SELECT COUNT(*) AS total FROM `products`")->fetch();
     if ($check && (int)$check['total'] === 0) {

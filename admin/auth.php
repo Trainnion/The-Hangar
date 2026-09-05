@@ -1,30 +1,30 @@
 <?php
 // THE HANGAR - GUND-ORDER SYSTEM ADMIN AUTHENTICATION GUARD
+// Unified with primary login platform
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function isAdminLoggedIn() {
-    return isset($_SESSION['hangar_admin_logged']) && $_SESSION['hangar_admin_logged'] === true;
+function isAdminLoggedIn(): bool {
+    if (!empty($_SESSION['hangar_admin_logged']) && $_SESSION['hangar_admin_logged'] === true) {
+        return true;
+    }
+    if (!empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        return true;
+    }
+    return false;
 }
 
-function requireAdmin() {
+function requireAdmin(): void {
     if (!isAdminLoggedIn()) {
-        header('Location: login.php');
+        $msg = 'Administrator authorization required. Please authenticate with an admin account.';
+        header('Location: ../login/index.php?status=error&message=' . urlencode($msg));
         exit;
     }
 }
 
-function verifyAdminCredentials($username, $password) {
-    // Default Admin Credentials for GUND-ORDER SYSTEM
-    $validUser = 'admin';
-    $validPass = 'hangar2026';
-
-    return ($username === $validUser && $password === $validPass);
-}
-
-function logoutAdmin() {
+function logoutAdmin(): void {
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
@@ -34,6 +34,6 @@ function logoutAdmin() {
         );
     }
     session_destroy();
-    header('Location: login.php');
+    header('Location: ../login/index.php?status=success&message=' . urlencode('Session terminated. You have been logged out.'));
     exit;
 }

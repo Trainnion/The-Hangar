@@ -1,4 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$isLoggedIn = !empty($_SESSION['user_id']) || !empty($_SESSION['hangar_admin_logged']);
+$userRole   = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged']) ? 'admin' : null);
+$userName   = $_SESSION['username'] ?? ($_SESSION['hangar_admin_user'] ?? 'Pilot');
+
 $buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
 $promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
 $footerPath = is_dir('footer') ? 'footer' : '../footer';
@@ -44,7 +52,16 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 
             <div class="headerRight">
                 <a href="#" class="navItem navLink navCart">CART</a>
-                <a href="../login/" class="navItem navLink">LOG IN</a>
+                <?php if ($isLoggedIn): ?>
+                    <?php if ($userRole === 'admin'): ?>
+                        <a href="../admin/index.php" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
+                    <?php else: ?>
+                        <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                    <?php endif; ?>
+                    <a href="../login/logout.php" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
+                <?php else: ?>
+                    <a href="../login/" class="navItem navLink">LOG IN</a>
+                <?php endif; ?>
                 <button class="navItem navBtnSearch" type="button" aria-label="Search">
                     <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
                 </button>

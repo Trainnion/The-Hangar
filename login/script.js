@@ -35,37 +35,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
 
-    if (loginTabBtn && registerTabBtn && loginForm && registerForm) {
-        loginTabBtn.addEventListener('click', () => {
-            loginTabBtn.classList.add('activeTab');
-            registerTabBtn.classList.remove('activeTab');
-            loginForm.classList.remove('hiddenForm');
-            registerForm.classList.add('hiddenForm');
-        });
+    function switchTab(tabName) {
+        if (!loginTabBtn || !registerTabBtn || !loginForm || !registerForm) return;
 
-        registerTabBtn.addEventListener('click', () => {
+        if (tabName === 'register') {
             registerTabBtn.classList.add('activeTab');
             loginTabBtn.classList.remove('activeTab');
             registerForm.classList.remove('hiddenForm');
             loginForm.classList.add('hiddenForm');
-        });
+        } else {
+            loginTabBtn.classList.add('activeTab');
+            registerTabBtn.classList.remove('activeTab');
+            loginForm.classList.remove('hiddenForm');
+            registerForm.classList.add('hiddenForm');
+        }
     }
 
-    // 3. Prevent form submissions for non-functional mockup state
+    if (loginTabBtn && registerTabBtn) {
+        loginTabBtn.addEventListener('click', () => switchTab('login'));
+        registerTabBtn.addEventListener('click', () => switchTab('register'));
+
+        // Check if tab parameter is specified in URL (e.g. ?tab=register)
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'register') {
+            switchTab('register');
+        }
+    }
+
+    // 3. Form Submit Feedback (Provides tactile HUD feedback without blocking submit)
     const forms = document.querySelectorAll('.authForm');
     forms.forEach(form => {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const submitBtn = form.querySelector('.submitAuthBtn .btnText');
-            if (submitBtn) {
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'AUTHENTICATING...';
-                setTimeout(() => {
-                    submitBtn.textContent = 'ACCESS GRANTED (DEMO)';
-                    setTimeout(() => {
-                        submitBtn.textContent = originalText;
-                    }, 2000);
-                }, 1000);
+        form.addEventListener('submit', () => {
+            const submitBtn = form.querySelector('.submitAuthBtn');
+            const btnText = form.querySelector('.submitAuthBtn .btnText');
+            if (submitBtn && btnText) {
+                btnText.textContent = 'TRANSMITTING CREDENTIALS...';
+                submitBtn.style.opacity = '0.75';
+                submitBtn.style.pointerEvents = 'none';
             }
         });
     });

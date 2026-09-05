@@ -1,4 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$isLoggedIn = !empty($_SESSION['user_id']) || !empty($_SESSION['hangar_admin_logged']);
+$userRole   = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged']) ? 'admin' : null);
+$userName   = $_SESSION['username'] ?? ($_SESSION['hangar_admin_user'] ?? 'Pilot');
+
 $buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
 $promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
 $footerPath = is_dir('footer') ? 'footer' : '../footer';
@@ -43,6 +51,10 @@ if (!$product) {
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         :root {
             --brand-cyan: #3FC4E1;
             --brand-dark: #231F20;
@@ -57,14 +69,16 @@ if (!$product) {
             margin: 0;
             padding: 0;
             font-family: var(--font-body);
+            overflow-x: hidden;
         }
 
         /* Top Header Strip matching Sections 3, 5, 6 */
         .pdSectionHeader {
-            width: 100%;
+            width: 95%;
+            max-width: 110rem;
+            margin: 72px auto 0 auto;
             height: 90px;
-            margin-top: 72px;
-            padding: 0 3rem;
+            padding: 0 2.5rem;
             box-sizing: border-box;
             background-color: #ffffff;
             border-top: 0.5px solid #080808;
@@ -95,13 +109,14 @@ if (!$product) {
 
         .pdHeaderCenter h2 {
             font-family: var(--font-heading);
-            font-size: 3.25rem;
+            font-size: clamp(1.8rem, 2.8vw, 3.25rem);
             font-weight: 700;
             letter-spacing: 2px;
             color: #080808;
             text-transform: uppercase;
             margin: 0;
             line-height: 1;
+            text-align: center;
         }
 
         .pdHeaderRight {
@@ -147,15 +162,17 @@ if (!$product) {
             border-left: 0.5px solid #080808;
             border-right: 0.5px solid #080808;
             border-bottom: 0.5px solid #080808;
-            padding: 3.5rem 3rem;
+            padding: 3rem 2.5rem;
             background-color: #ffffff;
+            overflow: hidden;
         }
 
         .pdGrid {
             display: grid;
-            grid-template-columns: 46% 54%;
-            gap: 4rem;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+            gap: 3rem;
             align-items: start;
+            width: 100%;
         }
 
         /* Product Gallery Image Box */
@@ -166,14 +183,17 @@ if (!$product) {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 3rem 2rem;
-            min-height: 520px;
+            padding: 2.5rem 1.5rem;
+            min-height: 480px;
+            max-height: 600px;
             box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
         }
 
         .pdGalleryBox img {
             max-width: 100%;
-            max-height: 500px;
+            max-height: 460px;
             object-fit: contain;
             transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             user-select: none;
@@ -187,11 +207,15 @@ if (!$product) {
         .pdInfoCol {
             display: flex;
             flex-direction: column;
+            width: 100%;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .pdBadgesRow {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 0.8rem;
         }
@@ -222,37 +246,40 @@ if (!$product) {
 
         .pdTitle {
             font-family: var(--font-heading);
-            font-size: 2.5rem;
+            font-size: clamp(1.8rem, 2.5vw, 2.4rem);
             font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: 1px;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
             color: var(--brand-dark);
             text-transform: uppercase;
             margin: 0.4rem 0 0.4rem 0;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .pdScaleSub {
             font-family: var(--font-body);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             color: #666666;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin: 0 0 1.5rem 0;
+            margin: 0 0 1.2rem 0;
         }
 
         .pdPriceRow {
             display: flex;
             align-items: baseline;
-            gap: 1.2rem;
-            margin-bottom: 1.8rem;
-            padding-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.2rem;
             border-bottom: 0.5px solid #e5e5e5;
         }
 
         .pdPriceVal {
             font-family: var(--font-heading);
-            font-size: 2.6rem;
+            font-size: clamp(1.8rem, 2.5vw, 2.4rem);
             font-weight: 800;
             color: var(--brand-dark);
             line-height: 1;
@@ -260,29 +287,32 @@ if (!$product) {
 
         .pdSoldBadge {
             font-family: var(--font-heading);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             color: #333333;
             background-color: #f0f0f0;
-            padding: 0.35rem 0.85rem;
+            padding: 0.35rem 0.8rem;
             border-radius: 4px;
             letter-spacing: 0.8px;
         }
 
         .pdDesc {
             font-family: var(--font-body);
-            font-size: 0.95rem;
-            line-height: 1.75;
+            font-size: 0.92rem;
+            line-height: 1.7;
             color: #444444;
-            margin: 0 0 2rem 0;
+            margin: 0 0 1.8rem 0;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         /* Quantity & Action Buttons */
         .pdActionSection {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+            width: 100%;
         }
 
         .pdQuantityRow {
@@ -305,6 +335,7 @@ if (!$product) {
             border: 1.5px solid var(--brand-dark);
             border-radius: 4px;
             overflow: hidden;
+            box-sizing: border-box;
         }
 
         .pdQtyBtn {
@@ -317,6 +348,9 @@ if (!$product) {
             color: var(--brand-dark);
             cursor: pointer;
             transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pdQtyBtn:hover {
@@ -334,33 +368,41 @@ if (!$product) {
             font-size: 1rem;
             font-weight: 700;
             color: var(--brand-dark);
+            box-sizing: border-box;
         }
 
         .pdButtonsGroup {
             display: flex;
-            gap: 1.2rem;
+            gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
         }
 
         /* Uniform Pill Buttons Matching Section 1 Order Button */
         .pdBtnOrderNow {
-            flex: 1.4;
-            display: inline-block;
+            flex: 1 1 200px;
+            min-width: 160px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 0.95rem 2rem;
+            padding: 0.9rem 1.6rem;
             background-color: var(--brand-cyan);
             color: var(--brand-dark);
             text-decoration: none;
             font-family: var(--font-heading);
             font-weight: 800;
-            font-size: 0.95rem;
-            letter-spacing: 2px;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
             border: 2px solid var(--brand-cyan);
             transition: all 0.3s ease;
             cursor: pointer;
             border-radius: 2rem;
             box-shadow: 0 4px 14px rgba(63, 196, 225, 0.35);
             text-transform: uppercase;
+            box-sizing: border-box;
+            white-space: nowrap;
         }
 
         .pdBtnOrderNow:hover {
@@ -372,22 +414,27 @@ if (!$product) {
         }
 
         .pdBtnAddToCart {
-            flex: 1;
-            display: inline-block;
+            flex: 1 1 180px;
+            min-width: 160px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 0.95rem 1.8rem;
+            padding: 0.9rem 1.5rem;
             background-color: var(--brand-dark);
             color: #ffffff;
             text-decoration: none;
             font-family: var(--font-heading);
             font-weight: 800;
-            font-size: 0.95rem;
-            letter-spacing: 2px;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
             border: 2px solid var(--brand-dark);
             transition: all 0.3s ease;
             cursor: pointer;
             border-radius: 2rem;
             text-transform: uppercase;
+            box-sizing: border-box;
+            white-space: nowrap;
         }
 
         .pdBtnAddToCart:hover {
@@ -401,25 +448,28 @@ if (!$product) {
             background-color: #fafafa;
             border: 1px solid #e8e8e8;
             border-radius: 8px;
-            padding: 1.5rem 2rem;
+            padding: 1.2rem 1.5rem;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .pdSpecsHeading {
             font-family: var(--font-heading);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 800;
             letter-spacing: 1.5px;
             color: var(--brand-dark);
             text-transform: uppercase;
-            margin: 0 0 1rem 0;
-            padding-bottom: 0.5rem;
+            margin: 0 0 0.8rem 0;
+            padding-bottom: 0.4rem;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .pdSpecsTable {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
+            table-layout: fixed;
         }
 
         .pdSpecsTable tr {
@@ -431,14 +481,17 @@ if (!$product) {
         }
 
         .pdSpecsTable td {
-            padding: 0.65rem 0;
+            padding: 0.55rem 0;
+            vertical-align: top;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .pdSpecKey {
             font-family: var(--font-heading);
             font-weight: 700;
             color: #777777;
-            width: 35%;
+            width: 38%;
             letter-spacing: 0.5px;
         }
 
@@ -446,6 +499,7 @@ if (!$product) {
             font-family: var(--font-body);
             font-weight: 600;
             color: var(--brand-dark);
+            width: 62%;
         }
 
         @media (max-width: 1100px) {
@@ -453,14 +507,17 @@ if (!$product) {
                 padding: 0 1.5rem;
             }
             .pdHeaderCenter h2 {
-                font-size: 2.2rem;
+                font-size: 2rem;
             }
             .pdGrid {
                 grid-template-columns: 1fr;
-                gap: 2.5rem;
+                gap: 2rem;
             }
             .pdMainFrame {
                 padding: 2rem 1.5rem;
+            }
+            .pdGalleryBox {
+                min-height: 380px;
             }
         }
 
@@ -470,6 +527,18 @@ if (!$product) {
             }
             .pdBtnOrderNow, .pdBtnAddToCart {
                 width: 100%;
+                flex: 1 1 100%;
+            }
+            .pdSectionHeader {
+                height: auto;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .pdHeaderCenter {
+                border-left: none;
+                border-right: none;
+                padding: 0.5rem 0;
             }
         }
     </style>
@@ -494,7 +563,16 @@ if (!$product) {
 
         <div class="headerRight">
             <a href="#" class="navItem navLink navCart">CART</a>
-            <a href="../login/" class="navItem navLink">LOG IN</a>
+            <?php if ($isLoggedIn): ?>
+                <?php if ($userRole === 'admin'): ?>
+                    <a href="../admin/index.php" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
+                <?php else: ?>
+                    <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                <?php endif; ?>
+                <a href="../login/logout.php" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
+            <?php else: ?>
+                <a href="../login/" class="navItem navLink">LOG IN</a>
+            <?php endif; ?>
             <button class="navItem navBtnSearch" type="button" aria-label="Search">
                 <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
             </button>
