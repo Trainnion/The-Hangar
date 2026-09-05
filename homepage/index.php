@@ -3,6 +3,16 @@ $buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
 $promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
 $footerPath = is_dir('footer') ? 'footer' : '../footer';
 $logosPath = is_dir('logos') ? 'logos' : '../logos';
+
+require_once __DIR__ . '/db_helper.php';
+$sfData = getStorefrontData();
+
+$sec1Slides = !empty($sfData['section1Slides']) ? $sfData['section1Slides'] : [];
+$sec2Slides = !empty($sfData['section2Slides']) ? $sfData['section2Slides'] : [];
+$sec7Slides = !empty($sfData['section7Slides']) ? $sfData['section7Slides'] : [];
+$nrProducts = !empty($sfData['newReleases']) ? $sfData['newReleases'] : [];
+$bsProducts = !empty($sfData['bestSellers']) ? $sfData['bestSellers'] : [];
+$mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,58 +57,39 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
         <!-- SECTION 1: SLIDER -->
         <div class="promotionalWrapper">
             <div class="slider">
-                <div class="slide activeSlide" id="slide1">
-                    <img src="<?php echo $promotionalPath; ?>/cut-out metal build.webp" alt="RX-98-ν2 Hi-ν GUNDAM">
-                    <div class="slideContent">
-                        <span class="heroGradeTag">METALBUILD</span>
-                        <h2>RX-98-ν2 Hi-ν GUNDAM</h2>
-                        <p class="heroWeaponSub">HYPER MEGA BAZOOKA LAUNCER</p>
-                        <a href="#" class="orderBtn">ORDER NOW!</a>
+                <?php 
+                $s1Count = count($sec1Slides);
+                foreach ($sec1Slides as $i => $s): 
+                    $slideId = 'slide' . ($i + 1);
+                    $isActive = ($i === 0) ? 'activeSlide' : '';
+                    $targetUrl = !empty($s['product_id']) ? "product-details.php?id=" . $s['product_id'] : ($s['custom_url'] ?: '#');
+                ?>
+                    <div class="slide <?php echo $isActive; ?>" id="<?php echo $slideId; ?>">
+                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>">
+                        <div class="slideContent">
+                            <?php if (!empty($s['badge'])): ?>
+                                <span class="heroGradeTag"><?php echo htmlspecialchars($s['badge']); ?></span>
+                            <?php endif; ?>
+                            <h2><?php echo htmlspecialchars($s['title']); ?></h2>
+                            <?php if (!empty($s['subtitle'])): ?>
+                                <p class="heroWeaponSub"><?php echo htmlspecialchars($s['subtitle']); ?></p>
+                            <?php endif; ?>
+                            <a href="<?php echo htmlspecialchars($targetUrl); ?>" class="orderBtn"><?php echo htmlspecialchars($s['button_text'] ?: 'ORDER NOW!'); ?></a>
+                        </div>
                     </div>
-                </div>
-
-                <div class="slide" id="slide2">
-                    <img src="<?php echo $promotionalPath; ?>/rWKgWU4OCaLNzEFg20z6P7AroZR9iKXl66hhP6DL.jpg" alt="STRIKE FREEDOM">
-                    <div class="slideContent">
-                        <span class="heroGradeTag">METALBUILD</span>
-                        <h2>ZGMF-X20A STRIKE FREEDOM</h2>
-                        <p class="heroWeaponSub">SPECIAL EDITION</p>
-                        <a href="#" class="orderBtn">ORDER NOW!</a>
-                    </div>
-                </div>
-
-                <div class="slide" id="slide3">
-                    <img src="<?php echo $promotionalPath; ?>/METAL BUILD ZGMF-X42S Destiny Gundam.jpg" alt="DESTINY GUNDAM">
-                    <div class="slideContent">
-                        <span class="heroGradeTag">METALBUILD</span>
-                        <h2>ZGMF-X42S DESTINY GUNDAM</h2>
-                        <p class="heroWeaponSub">FULL PACKAGE</p>
-                        <a href="#" class="orderBtn">ORDER NOW!</a>
-                    </div>
-                </div>
-
-                <div class="slide" id="slide4">
-                    <img src="<?php echo $promotionalPath; ?>/bann04883_0.jpg" alt="FREEDOM GUNDAM 2.0">
-                    <div class="slideContent">
-                        <span class="heroGradeTag">MASTER GRADE</span>
-                        <h2>ZGMF-X10A FREEDOM 2.0</h2>
-                        <p class="heroWeaponSub">LIMITED PRODUCTION</p>
-                        <a href="#" class="orderBtn">ORDER NOW!</a>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
             
             <div class="heroSliderControls">
                 <div class="heroCounterSec1">
                     <span id="heroActiveNumSec1" class="activeNum">01</span>
                     <span class="divider">|</span>
-                    <span id="heroTotalNumSec1" class="totalNum">04</span>
+                    <span id="heroTotalNumSec1" class="totalNum"><?php echo str_pad($s1Count ?: 4, 2, '0', STR_PAD_LEFT); ?></span>
                 </div>
                 <div class="sliderNav">
-                    <button data-target="slide1" class="active" aria-label="Go to slide 1"></button>
-                    <button data-target="slide2" aria-label="Go to slide 2"></button>
-                    <button data-target="slide3" aria-label="Go to slide 3"></button>
-                    <button data-target="slide4" aria-label="Go to slide 4"></button>
+                    <?php for ($i = 0; $i < $s1Count; $i++): ?>
+                        <button data-target="slide<?php echo ($i + 1); ?>" class="<?php echo ($i === 0) ? 'active' : ''; ?>" aria-label="Go to slide <?php echo ($i + 1); ?>"></button>
+                    <?php endfor; ?>
                 </div>
             </div>
         </div>
@@ -110,222 +101,57 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
 <!-- SECTION 2: HERO CAROUSEL (FULLSCREEN) -->
 <div class="heroCarouselSec2">
     <div class="heroTrackSec2" id="heroTrackSec2">
-        
-        <!-- Slide 1 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/BAS5055457-6.jpg');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">MASTER GRADE</h2>
-                    <h3 class="heroSubtitleSec2">MSN-04 Sazabi<br>“Ver. Ka”</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “The Crimson Comet's masterpiece, engineered with unprecedented detail and psycho-frame expansion mechanics.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-Anaheim Electronics</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">01</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
+        <?php 
+        $s2Count = count($sec2Slides);
+        foreach ($sec2Slides as $i => $s): 
+            $targetUrl = !empty($s['product_id']) ? "product-details.php?id=" . $s['product_id'] : ($s['custom_url'] ?: '#');
+            $slideNum = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $totalNum = str_pad($s2Count, 2, '0', STR_PAD_LEFT);
+        ?>
+            <!-- Slide <?php echo $i + 1; ?> -->
+            <div class="heroSlideSec2">
+                <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>');">
+                    <div class="heroOverlaySec2"></div>
+                    <div class="heroContentSec2">
+                        <span class="badgeReprintSec2"><?php echo htmlspecialchars($s['badge'] ?: 'REPRINT RUN!'); ?></span>
+                        <h2 class="heroTitleSec2"><?php echo htmlspecialchars($s['subtitle'] ?: 'MASTER GRADE'); ?></h2>
+                        <h3 class="heroSubtitleSec2"><?php echo $s['title']; ?></h3>
+                        <?php if (!empty($s['quote'])): ?>
+                            <blockquote class="heroQuoteSec2">
+                                “<?php echo htmlspecialchars(trim($s['quote'], '“”"')); ?>”
+                            </blockquote>
+                        <?php endif; ?>
+                        <?php if (!empty($s['author'])): ?>
+                            <span class="heroAuthorSec2"><?php echo htmlspecialchars($s['author']); ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($s['product_id']) || !empty($s['custom_url'])): ?>
+                            <a href="<?php echo htmlspecialchars($targetUrl); ?>" class="orderBtn" style="margin-top: 1.5rem; display: inline-block;"><?php echo htmlspecialchars($s['button_text'] ?: 'ORDER NOW!'); ?></a>
+                        <?php endif; ?>
                     </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/BAS5055457-6.jpg" alt="MSN-04 Sazabi Ver. Ka">
-            </div>
-        </div>
-
-        <!-- Slide 2 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/bann04883_0.jpg');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">MASTER GRADE</h2>
-                    <h3 class="heroSubtitleSec2">ZGMF-X10A Freedom Gundam<br>Ver. 2.0</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “Even so, there is still a future we must protect! Unprecedented wings articulation and beam weaponry.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-Kira Yamato</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">02</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
+                    <div class="heroCounterContainerSec2">
+                        <div class="heroCounterSec2">
+                            <span class="activeNumSec2"><?php echo $slideNum; ?></span>
+                            <span class="dividerSec2">|</span>
+                            <span class="totalNumSec2"><?php echo $totalNum; ?></span>
+                        </div>
+                        <div class="heroTimerBarSec2">
+                            <div class="heroTimerFillSec2"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/bann04883_0.jpg" alt="Freedom Gundam 2.0">
-            </div>
-        </div>
-
-        <!-- Slide 3 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/BAN216382-1.jpg');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">MASTER GRADE</h2>
-                    <h3 class="heroSubtitleSec2">ZGMF-X09A Justice Gundam<br>Ver. 2.0</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “Equipped with the Fatum-00 sub-flight lifter unit, engineered for agile multi-range warfare.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-Athrun Zala</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">03</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
+                <div class="heroImagePanelSec2">
+                    <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo strip_tags($s['title']); ?>">
                 </div>
             </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/BAN216382-1.jpg" alt="Justice Gundam 2.0">
-            </div>
-        </div>
-
-        <!-- Slide 4 (Mockup Default) -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/578079302143824449.jpg');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">MASTER GRADE</h2>
-                    <h3 class="heroSubtitleSec2">FA-78 Full Armor Gundam<br>“Ver. Ka” (Thunderbolt Ver.)</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “This is a heavily armored highly maneuverable Mobile Suit and unfortunately, this is exactly what the Living Dead Division is least equipped to handle”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-Murroughs</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">04</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/578079302143824449.jpg" alt="FA-78 Full Armor Gundam Ver. Ka">
-            </div>
-        </div>
-
-        <!-- Slide 5 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/BAN230363-2.webp');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">REAL GRADE</h2>
-                    <h3 class="heroSubtitleSec2">RG RX-93-ν2<br>Hi-ν Gundam</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “Featuring realistic multi-joint armor sliding mechanics and fully articulated fin funnels.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-Amuro Ray</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">05</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/BAN230363-2.webp" alt="RG Hi-Nu Gundam">
-            </div>
-        </div>
-
-        <!-- Slide 6 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/PG NU GUNDAM.webp');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">PERFECT GRADE</h2>
-                    <h3 class="heroSubtitleSec2">PG RX-93<br>ν Gundam</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “The pinnacle of 1/60 engineering, delivering authentic internal frame exposure and die-cast stability.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-E.F.S.F. Londo Bell</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">06</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/PG NU GUNDAM.webp" alt="PG Nu Gundam">
-            </div>
-        </div>
-
-        <!-- Slide 7 -->
-        <div class="heroSlideSec2">
-            <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/METAL BUILD ZGMF-X42S Destiny Gundam.jpg');">
-                <div class="heroOverlaySec2"></div>
-                <div class="heroContentSec2">
-                    <span class="badgeReprintSec2">REPRINT RUN!</span>
-                    <h2 class="heroTitleSec2">METAL BUILD</h2>
-                    <h3 class="heroSubtitleSec2">ZGMF-X42S Destiny Gundam<br>Special Edition</h3>
-                    <blockquote class="heroQuoteSec2">
-                        “Composite die-cast frame paired with dynamic photon wings of light for ultimate display presence.”
-                    </blockquote>
-                    <span class="heroAuthorSec2">-ZAFT Armory</span>
-                </div>
-                <div class="heroCounterContainerSec2">
-                    <div class="heroCounterSec2">
-                        <span class="activeNumSec2">07</span>
-                        <span class="dividerSec2">|</span>
-                        <span class="totalNumSec2">07</span>
-                    </div>
-                    <div class="heroTimerBarSec2">
-                        <div class="heroTimerFillSec2"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="heroImagePanelSec2">
-                <img src="<?php echo $promotionalPath; ?>/METAL BUILD ZGMF-X42S Destiny Gundam.jpg" alt="Destiny Gundam Special Edition">
-            </div>
-        </div>
-
+        <?php endforeach; ?>
     </div>
 
     <!-- Bottom Progress Indicator Bar -->
     <div class="heroProgressBarSec2">
         <div class="heroProgressTrackSec2">
-            <span class="dashSec2" data-slide="0"></span>
-            <span class="dashSec2" data-slide="1"></span>
-            <span class="dashSec2" data-slide="2"></span>
-            <span class="dashSec2 activeDashSec2" data-slide="3"></span>
-            <span class="dashSec2" data-slide="4"></span>
-            <span class="dashSec2" data-slide="5"></span>
-            <span class="dashSec2" data-slide="6"></span>
+            <?php for ($i = 0; $i < $s2Count; $i++): ?>
+                <span class="dashSec2 <?php echo ($i === 0) ? 'activeDashSec2' : ''; ?>" data-slide="<?php echo $i; ?>"></span>
+            <?php endfor; ?>
         </div>
     </div>
 </div>
@@ -346,109 +172,27 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
     <div class="productSetContainer">
         <!-- Horizontal Sliding Track -->
         <div class="productTrackNR" id="productTrackNR">
-            
-            <a href="product-details.php?id=1" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/mg vidar.webp" alt="MG ASW-G-XX Gundam Vidar">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
+            <?php 
+            $nrTotal = count($nrProducts);
+            foreach ($nrProducts as $p): 
+            ?>
+                <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
+                    <div class="productImgContainer">
+                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
-                    <h3 class="productTitle">MG ASW-G-XX<br>Gundam Vidar</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,620.00</span>
-                        <span class="productSold">SOLD 250</span>
+                    <div class="productDetails">
+                        <div class="productBadges">
+                            <span class="productBadge"><?php echo htmlspecialchars($p['brand']); ?></span>
+                            <span class="productBadge"><?php echo htmlspecialchars($p['stock_status']); ?></span>
+                        </div>
+                        <h3 class="productTitle"><?php echo htmlspecialchars($p['name']); ?></h3>
+                        <div class="productFooter">
+                            <span class="productPrice">₱ <?php echo number_format($p['price'], 2); ?></span>
+                            <span class="productSold">SOLD <?php echo number_format($p['sold_count']); ?></span>
+                        </div>
                     </div>
-                </div>
-            </a>
-
-            <a href="product-details.php?id=2" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/156_3280_s_6ywqxydrxl8rgy6xgjcmsl8jdtkh_clipped_rev_2.webp" alt="MG ASW-G-08 Gundam Barbatos Lupus">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">MG ASW-G-08<br>Gundam Barbatos Lupus</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 3,035.25</span>
-                        <span class="productSold">SOLD 1089</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="product-details.php?id=3" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/153_3280_s_exe330sblcz1upy6isq1jrltmqqe_clipped_rev_1.webp" alt="RG XXXG-00W0 Wing Gundam Zero">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">RG XXXG-00W0 Wing<br>Gundam Zero</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 2,850.00</span>
-                        <span class="productSold">SOLD 420</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="product-details.php?id=4" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/PG NU GUNDAM.webp" alt="PG RX-93 ν Gundam">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">PG RX-93 ν<br>Gundam</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 40,760.00</span>
-                        <span class="productSold">SOLD 70</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="product-details.php?id=5" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/192_3280_s_9jvhk8pffn141y7xazrrd1sxbgay_clipped_rev_1.webp" alt="RG RX-93 Nu Gundam">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">RG RX-93 Nu Gundam</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,620.00</span>
-                        <span class="productSold">SOLD 10K+</span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="product-details.php?id=6" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/bann04883_0.jpg" alt="MG Freedom Gundam 2.0">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">MG Freedom Gundam 2.0</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,880.00</span>
-                        <span class="productSold">SOLD 9080</span>
-                    </div>
-                </div>
-            </a>
-
+                </a>
+            <?php endforeach; ?>
         </div>
 
         <!-- Counter & Navigation Controls -->
@@ -456,7 +200,7 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
             <div class="sliderCounterNR">
                 <span id="activeCountNR" class="activeCount">04</span>
                 <span class="divider">|</span>
-                <span id="totalCountNR" class="totalCount">20</span>
+                <span id="totalCountNR" class="totalCount"><?php echo str_pad($nrTotal ?: 4, 2, '0', STR_PAD_LEFT); ?></span>
             </div>
             <div class="sliderBtnsNR">
                 <button class="sliderBtnNR" id="prevBtnNR" type="button" aria-label="Previous Products">&lt;</button>
@@ -530,79 +274,24 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
     <!-- Centered Viewport Container -->
     <div class="productSetContainerBS">
         <div class="bestSellersGridBS">
-            
-            <!-- Card 1 -->
-            <a href="product-details.php?id=1" class="bsCard">
-                <div class="bsImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/192_3280_s_9jvhk8pffn141y7xazrrd1sxbgay_clipped_rev_1.webp" alt="RG RX-93 Nu Gundam">
-                </div>
-                <div class="bsDetails">
-                    <div class="bsBadges">
-                        <span class="bsBadge">BANDAI</span>
-                        <span class="bsBadge">IN-STOCK</span>
+            <?php foreach ($bsProducts as $p): ?>
+                <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
+                    <div class="productImgContainer">
+                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
-                    <h3 class="bsTitle">RG RX-93 Nu Gundam</h3>
-                    <div class="bsFooter">
-                        <span class="bsPrice">P 4,620.00</span>
-                        <span class="bsSold">SOLD 10K+</span>
+                    <div class="productDetails">
+                        <div class="productBadges">
+                            <span class="productBadge"><?php echo htmlspecialchars($p['brand']); ?></span>
+                            <span class="productBadge"><?php echo htmlspecialchars($p['stock_status']); ?></span>
+                        </div>
+                        <h3 class="productTitle"><?php echo htmlspecialchars($p['name']); ?></h3>
+                        <div class="productFooter">
+                            <span class="productPrice">₱ <?php echo number_format($p['price'], 2); ?></span>
+                            <span class="productSold">SOLD <?php echo number_format($p['sold_count']); ?></span>
+                        </div>
                     </div>
-                </div>
-            </a>
-
-            <!-- Card 2 -->
-            <a href="product-details.php?id=2" class="bsCard">
-                <div class="bsImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/bann04883_0.jpg" alt="MG FREEDOM GUNDAM 2.0">
-                </div>
-                <div class="bsDetails">
-                    <div class="bsBadges">
-                        <span class="bsBadge">BANDAI</span>
-                        <span class="bsBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="bsTitle">MG FREEDOM GUNDAM 2.0</h3>
-                    <div class="bsFooter">
-                        <span class="bsPrice">P 4,880.00</span>
-                        <span class="bsSold">SOLD 9080</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 3 -->
-            <a href="product-details.php?id=3" class="bsCard">
-                <div class="bsImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/BAN216382-1.jpg" alt="MG JUSTICE GUNDAM 2.0">
-                </div>
-                <div class="bsDetails">
-                    <div class="bsBadges">
-                        <span class="bsBadge">BANDAI</span>
-                        <span class="bsBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="bsTitle">MG JUSTICE GUNDAM 2.0</h3>
-                    <div class="bsFooter">
-                        <span class="bsPrice">P 4,880.00</span>
-                        <span class="bsSold">SOLD 8041</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 4 -->
-            <a href="product-details.php?id=4" class="bsCard">
-                <div class="bsImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/BAN230363-2.webp" alt="RG HI-NU GUNDAM">
-                </div>
-                <div class="bsDetails">
-                    <div class="bsBadges">
-                        <span class="bsBadge">BANDAI</span>
-                        <span class="bsBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="bsTitle">RG HI-NU GUNDAM</h3>
-                    <div class="bsFooter">
-                        <span class="bsPrice">P 3,709.00</span>
-                        <span class="bsSold">SOLD 8021</span>
-                    </div>
-                </div>
-            </a>
-
+                </a>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
@@ -641,115 +330,27 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
 
         <!-- Horizontal Sliding Track -->
         <div class="productTrackMK" id="productTrackMK">
-            
-            <!-- Card 1 -->
-            <a href="product-details.php?id=1" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/192_3280_s_9jvhk8pffn141y7xazrrd1sxbgay_clipped_rev_1.webp" alt="RG RX-93 Nu Gundam">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
+            <?php 
+            $mkTotal = count($mkProducts);
+            foreach ($mkProducts as $p): 
+            ?>
+                <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
+                    <div class="productImgContainer">
+                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
-                    <h3 class="productTitle">RG RX-93 Nu Gundam</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,620.00</span>
-                        <span class="productSold">SOLD 10K+</span>
+                    <div class="productDetails">
+                        <div class="productBadges">
+                            <span class="productBadge"><?php echo htmlspecialchars($p['brand']); ?></span>
+                            <span class="productBadge"><?php echo htmlspecialchars($p['stock_status']); ?></span>
+                        </div>
+                        <h3 class="productTitle"><?php echo htmlspecialchars($p['name']); ?></h3>
+                        <div class="productFooter">
+                            <span class="productPrice">₱ <?php echo number_format($p['price'], 2); ?></span>
+                            <span class="productSold">SOLD <?php echo number_format($p['sold_count']); ?></span>
+                        </div>
                     </div>
-                </div>
-            </a>
-
-            <!-- Card 2 -->
-            <a href="product-details.php?id=2" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/ban994380_0.webp" alt="RG SINANJU">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">RG SINANJU</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 3,035.25</span>
-                        <span class="productSold">SOLD 879</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 3 -->
-            <a href="product-details.php?id=3" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/rg-msn-04-sazabi-pa_clipped_rev_1_1024x1024_15dfa31b-379d-43dd-ac43-f418b5eb60d1.webp" alt="RG Sazabi">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">RG Sazabi "Chars Counterattack"</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 3,642.30</span>
-                        <span class="productSold">SOLD 420</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 4 -->
-            <a href="product-details.php?id=4" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/BAN230363-2.webp" alt="RG HI-NU GUNDAM">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">RG HI-NU GUNDAM</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 3,709.00</span>
-                        <span class="productSold">SOLD 8021</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 5 -->
-            <a href="product-details.php?id=5" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/bann04883_0.jpg" alt="MG FREEDOM GUNDAM 2.0">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">MG FREEDOM GUNDAM 2.0</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,880.00</span>
-                        <span class="productSold">SOLD 9080</span>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 6 -->
-            <a href="product-details.php?id=6" class="productCard">
-                <div class="productImgContainer">
-                    <img src="<?php echo $promotionalPath; ?>/BAN216382-1.jpg" alt="MG JUSTICE GUNDAM 2.0">
-                </div>
-                <div class="productDetails">
-                    <div class="productBadges">
-                        <span class="productBadge">BANDAI</span>
-                        <span class="productBadge">IN-STOCK</span>
-                    </div>
-                    <h3 class="productTitle">MG JUSTICE GUNDAM 2.0</h3>
-                    <div class="productFooter">
-                        <span class="productPrice">P 4,880.00</span>
-                        <span class="productSold">SOLD 8041</span>
-                    </div>
-                </div>
-            </a>
-
+                </a>
+            <?php endforeach; ?>
         </div>
 
         <!-- Counter & Navigation Controls -->
@@ -757,7 +358,7 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
             <div class="sliderCounterMK">
                 <span id="activeCountMK" class="activeCount">04</span>
                 <span class="divider">|</span>
-                <span id="totalCountMK" class="totalCount">20</span>
+                <span id="totalCountMK" class="totalCount"><?php echo str_pad($mkTotal ?: 4, 2, '0', STR_PAD_LEFT); ?></span>
             </div>
             <div class="sliderBtnsMK">
                 <button class="sliderBtnMK" id="prevBtnMK" type="button" aria-label="Previous Products">&lt;</button>
@@ -774,18 +375,19 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
     <!-- Top Hero Banner Slider -->
     <div class="topBannerSliderFT" id="featuredTopSlider">
         <div class="topBannerTrackFT" id="featuredTopTrack">
-            <!-- Slide 1: Destiny Wings of Light -->
-            <div class="topBannerSlideFT">
-                <img src="<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png" alt="Gundam Wings of Light Banner">
-            </div>
-            <!-- Slide 2: Strike Freedom Banner -->
-            <div class="topBannerSlideFT">
-                <img src="<?php echo $promotionalPath; ?>/rWKgWU4OCaLNzEFg20z6P7AroZR9iKXl66hhP6DL.jpg" alt="Strike Freedom Banner">
-            </div>
-            <!-- Slide 3: Thunderbolt -->
-            <div class="topBannerSlideFT">
-                <img src="<?php echo $promotionalPath; ?>/578079302143824449.jpg" alt="Thunderbolt Banner">
-            </div>
+            <?php foreach ($sec7Slides as $s): 
+                $targetUrl = !empty($s['product_id']) ? "product-details.php?id=" . $s['product_id'] : ($s['custom_url'] ?: '');
+            ?>
+                <div class="topBannerSlideFT">
+                    <?php if (!empty($targetUrl)): ?>
+                        <a href="<?php echo htmlspecialchars($targetUrl); ?>" style="display: block; width: 100%; height: 100%;">
+                            <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
+                        </a>
+                    <?php else: ?>
+                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
         </div>
         
         <!-- Timer Bar at bottom -->

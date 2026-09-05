@@ -920,17 +920,17 @@ html, body {
 .bestSellersContainerBS {
     position: relative; 
     width: 100%;
-    min-height: 100vh;      
+    height: 100vh;      
+    min-height: 52rem;
     overflow: hidden; 
     background-color: #ffffff;
-    border-top: 1px solid #131313;
+    border-top: 0.5px solid #080808;
     border-left: 0.5px solid #080808;
     border-right: 0.5px solid #080808;
     border-bottom: 0.5px solid #080808;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-bottom: 3.5rem;
 }
 
 .headerContainerBS {
@@ -941,9 +941,9 @@ html, body {
     height: 90px;
     padding: 0 3rem;
     z-index: 20;
-    color: #0c0b0b;
+    color: #080808;
     background-color: #ffffff;
-    border-bottom: 1px solid #131313;
+    border-bottom: 0.5px solid #080808;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -958,79 +958,52 @@ html, body {
 .headerLeftBS { justify-content: flex-start; gap: 1.25rem; }
 .headerCenterBS { 
     justify-content: center; 
-    border-left: 1px solid #141414; 
-    border-right: 1px solid #161616; 
+    border-left: 1px solid #080808; 
+    border-right: 1px solid #080808; 
 }
 .headerCenterBS h2 { 
-    font-size: 3rem; 
-    font-weight: 800; 
-    letter-spacing: 3px; 
-    color: #121111; 
+    font-size: 3.25rem; 
+    font-weight: 700; 
+    letter-spacing: 2px; 
+    color: #080808; 
     text-transform: uppercase; 
     margin: 0; 
 }
 .headerRightBS { justify-content: flex-end; gap: 1rem; }
 
-/* Border Container Anchored to Header */
+/* Border Container Anchored to Header - Exact Frame Matching Section 3 & 6 */
 .productSetContainerBS {
     position: absolute;
     top: 90px;
-    bottom: 3.5rem;
     left: 50%;
     transform: translateX(-50%);
+    height: 44rem;
     width: 95%;
     max-width: 110rem;
     padding: 2.5rem 2rem 1.5rem 2rem;
-    border: 1px solid #080808;
-    border-top: none;
+    border-left: 0.5px solid #080808;
+    border-right: 0.5px solid #080808;
+    border-bottom: 0.5px solid #080808;
     overflow: hidden; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* 4-Column Grid Layout */
+/* 4-Card Layout - Distributed Cleanly with Exact 22rem Uniform Cards */
 .bestSellersGridBS {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.8rem;
-    width: 100%;
-    height: 100%;
-}
-
-/* Clickable Card Link & Zero Underlines */
-.bsCard,
-.bsCard:hover,
-.bsCard:focus,
-.bsCard:active,
-.bsCard * {
-    text-decoration: none !important;
-}
-
-.bsCard {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    grid-template-columns: repeat(4, 22rem);
     justify-content: space-between;
-    color: inherit;
-    cursor: pointer;
+    align-items: stretch;
+    height: 34rem;
+    width: 100%;
 }
 
-/* Image Wrapper */
-.bsImgContainer {
-    width: 100%;
-    height: 62%;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: #f0f0f0;
-}
-
-.bsImgContainer img {
-    width: 100%;
+.bestSellersGridBS .productCard {
+    flex: 0 0 22rem;
+    width: 22rem;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-
-.bsCard:hover .bsImgContainer img {
-    transform: scale(1.04);
 }
 
 /* Content Details */
@@ -1735,6 +1708,16 @@ html, body {
 }
 
 /* Mobile & Tablet Responsiveness */
+@media (max-width: 1400px) {
+    .bestSellersGridBS {
+        display: flex;
+        justify-content: flex-start;
+        gap: 1.8rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+}
+
 @media (max-width: 992px) {
     .footerRow1FT, 
     .footerRow2FT {

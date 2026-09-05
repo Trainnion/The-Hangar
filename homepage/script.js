@@ -224,7 +224,7 @@ function initProductSlider() {
     if (cards.length === 0) return;
 
     let currentIndex = 0;
-    const totalCardsCount = 20;
+    const totalCardsCount = cards.length;
 
     if (totalCountEl) {
         totalCountEl.textContent = String(totalCardsCount).padStart(2, '0');
@@ -302,7 +302,7 @@ function initModelKitsSlider() {
     if (cards.length === 0) return;
 
     let currentIndex = 0;
-    const totalCount = 20;
+    const totalCount = cards.length;
 
     if (totalCountEl) {
         totalCountEl.textContent = String(totalCount).padStart(2, '0');
