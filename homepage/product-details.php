@@ -552,7 +552,7 @@ if (!$product) {
                 <img src="<?php echo $buttonsPath; ?>/hamberger menu icon.svg" alt="Menu">
             </a>
             <a href="index.php" class="navItem navLink">LANGUAGE</a>
-            <a href="search.php" class="navItem navLink">PRODUCTS</a>
+            <a href="search/search.php" class="navItem navLink">PRODUCTS</a>
         </div>
 
         <div class="headerCenter">
@@ -562,7 +562,7 @@ if (!$product) {
         </div>
 
         <div class="headerRight">
-            <a href="#" class="navItem navLink navCart">CART</a>
+            <a href="cart/cart.php" class="navItem navLink navCart">CART</a>
             <?php if ($isLoggedIn): ?>
                 <?php if ($userRole === 'admin'): ?>
                     <a href="../admin/index.php" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
@@ -638,10 +638,10 @@ if (!$product) {
                     </div>
 
                     <div class="pdButtonsGroup">
-                        <button type="button" class="pdBtnOrderNow" onclick="alert('Order initiated for <?php echo htmlspecialchars(addslashes($product['name'])); ?> (Qty: ' + document.getElementById('pdQty').value + ')!');">
+                        <button type="button" class="pdBtnOrderNow" id="pdBtnOrderNow">
                             ORDER NOW!
                         </button>
-                        <button type="button" class="pdBtnAddToCart" onclick="alert('Added <?php echo htmlspecialchars(addslashes($product['name'])); ?> to your Cart!');">
+                        <button type="button" class="pdBtnAddToCart" id="pdBtnAddToCart">
                             ADD TO CART
                         </button>
                     </div>
@@ -682,95 +682,12 @@ if (!$product) {
         </div>
     </main>
 
-    <!-- COMPLETE FOOTER (Matches Section 7 Exactly) -->
-    <footer class="footerFT">
-        <div class="footerContainerFT">
-            
-            <div class="footerLogoRowFT">
-                <img src="<?php echo $promotionalPath; ?>/Asset 5.png" alt="THE HANGAR" class="footerLogoFT">
-            </div>
+    <!-- FOOTER (Reusable Component) -->
+    <?php require_once __DIR__ . '/footer.php'; ?>
 
-            <div class="footerSectionsWrapperFT">
-                
-                <div class="footerRowFT footerRow1FT">
-                    <div class="footerColFT">
-                        <h4 class="footerHeadingFT">CUSTOMER SERVICE</h4>
-                        <ul class="footerLinksFT">
-                            <li><a href="#">return and refund</a></li>
-                            <li><a href="#">payment methods</a></li>
-                            <li><a href="#">contact us</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footerColFT">
-                        <h4 class="footerHeadingFT">ABOUT THE HANGAR</h4>
-                        <ul class="footerLinksFT">
-                            <li><a href="#">policy of privacy</a></li>
-                            <li><a href="#">about us</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footerColFT">
-                        <h4 class="footerHeadingFT">PAYMENT</h4>
-                        <div class="brandListFT paymentLogosFT">
-                            <img src="<?php echo $footerPath; ?>/banks/landbank-logo.png" alt="LANDBANK" class="payLogoImg">
-                            <img src="<?php echo $footerPath; ?>/banks/BDO_50th_362_x_126_px_reverse (1).svg" alt="BDO" class="payLogoImg">
-                            <img src="<?php echo $footerPath; ?>/banks/BPI_RT__96x42_header_Reverse.svg" alt="BPI" class="payLogoImg">
-                            <img src="<?php echo $footerPath; ?>/banks/logo.png" alt="VISA" class="payLogoImg">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="footerRowFT footerRow2FT">
-                    <div class="footerColFT">
-                        <h4 class="footerHeadingFT">LOGISTICS</h4>
-                        <div class="brandListFT logisticsLogosFT">
-                            <img src="<?php echo $footerPath; ?>/Logistics/logo.5f09a646.png" alt="J&T Express" class="logisticsLogoImg">
-                            <img src="<?php echo $footerPath; ?>/Logistics/ninjavan-logo-white.webp" alt="Ninja Van" class="logisticsLogoImg">
-                        </div>
-                    </div>
-
-                    <div class="footerColFT socialColFT">
-                        <h4 class="footerHeadingFT">FOLLOW US</h4>
-                        <div class="socialListFT">
-                            <a href="#" class="socialItemFT">
-                                <svg class="socialIconFT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg>
-                                <span>thehangarmodelshop</span>
-                            </a>
-                            <a href="#" class="socialItemFT">
-                                <svg class="socialIconFT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                                <span>@thehangarmodelshop</span>
-                            </a>
-                            <a href="#" class="socialItemFT">
-                                <svg class="socialIconFT" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                <span>thehangarmodelshop</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="footerDisclaimerFT">
-                <p>The image is for illustrative purposes only. The actual product may differ slightly from the image.</p>
-            </div>
-
-            <div class="footerBottomFT">
-                <div class="copyrightFT">
-                    &copy;2026, THE HANGAR, LLC<br>
-                    ALL COPYRIGHTS RESERVE
-                </div>
-                <div class="officialLogosFT">
-                    <img src="<?php echo $footerPath; ?>/bandaiTamiya/images.jpg" alt="BANDAI NAMCO" class="partnerLogoBandaiNamco">
-                    <img src="<?php echo $footerPath; ?>/bandaiTamiya/Logo_Bandai.svg.webp" alt="BANDAI SPIRITS" class="partnerLogoBandaiSpirits">
-                    <img src="<?php echo $footerPath; ?>/bandaiTamiya/bandai.webp" alt="BANDAI" class="partnerLogoBandai">
-                </div>
-            </div>
-
-        </div>
-    </footer>
-
-    <!-- G.O.S SEARCH HUD OVERLAY (Self-contained: includes search.css & search.js) -->
-    <?php require_once __DIR__ . '/search_modal.php'; ?>
+    <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
+    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional' };</script>
+    <?php $_searchAssetPrefix = 'search/'; require_once __DIR__ . '/search/search_modal.php'; ?>
+    <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 </body>
 </html>

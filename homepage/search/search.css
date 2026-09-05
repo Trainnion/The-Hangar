@@ -858,453 +858,309 @@ body.hangarModalOpen {
 }
 
 /* ==========================================================================
-   DEDICATED SEARCH PAGE STYLING (search.php)
+   MODEL KITS DESIGN SYSTEM FOR SEARCH PAGE (search.php)
+   Based on Homepage Section 6 (MODEL KITS)
    ========================================================================== */
 
-.searchPageBody {
-    background-color: #0b0e14;
-    color: #ffffff;
-    min-height: 100vh;
+body.searchPageBody {
+    background-color: #ffffff;
+    color: #080808;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.searchPageHeader {
-    position: relative !important;
-    background-color: rgba(14, 18, 24, 0.9) !important;
+/* Page Header Strip - Matching headerContainerMK */
+.headerContainerMK.searchHeaderContainerMK {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    padding: 0 3rem;
+    z-index: 20;
+    color: #080808;
+    border-bottom: 0.5px solid #080808;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    box-sizing: border-box;
 }
 
-.searchSectionHeader {
-    background: rgba(11, 15, 22, 0.85);
+.headerLeftMK, .headerCenterMK, .headerRightMK { 
+    flex: 1; 
+    display: flex; 
+    align-items: center; 
+    height: 100%; 
 }
 
-.searchPageMain {
-    max-width: 1360px;
-    margin: 0 auto;
-    padding: 2.5rem 2rem 5rem;
+.headerLeftMK { justify-content: flex-start; gap: 1.25rem; }
+.headerCenterMK { justify-content: center; border-left: 1px solid #080808; border-right: 1px solid #080808; }
+.headerCenterMK h2 { font-size: 3.25rem; font-weight: 800; letter-spacing: 2px; color: #080808; text-transform: uppercase; margin: 0; }
+.headerRightMK { justify-content: flex-end; gap: 1rem; }
+
+.spBackLink {
+    color: #080808;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: opacity 0.2s ease;
 }
 
-.searchTopBanner {
+.spBackLink:hover {
+    opacity: 0.7;
+}
+
+/* Main Viewport Container - Matching productSetContainerMK */
+.productSetContainerMK.searchContainerMK {
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 95%;
+    max-width: 110rem;
+    margin: 2rem auto 4rem auto;
+    padding: 2rem 2rem 2.5rem 2rem;
+    border: 0.5px solid #080808;
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+/* Filter Options Bar - Matching filterBarMK */
+.filterBarMK {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 2rem;
+    gap: 0.75rem;
+    margin-bottom: 1.2rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    z-index: 10;
 }
 
-.searchBreadcrumb {
-    font-size: 0.82rem;
-    letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.5);
-    font-family: 'Orbitron', sans-serif;
+.filterSearchInputWrapMK {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 240px;
 }
 
-.searchBreadcrumb a {
-    color: rgba(255, 255, 255, 0.7);
+.filterInputMK {
+    width: 100%;
+    padding: 0.4rem 2rem 0.4rem 1.1rem;
+    background-color: transparent;
+    border: 1px solid #080808;
+    color: #080808;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 3px;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.filterInputMK:focus {
+    background-color: #fbfbfb;
+    border-color: #080808;
+    box-shadow: 0 0 0 1px #080808;
+}
+
+.filterClearBtnMK {
+    position: absolute;
+    right: 0.6rem;
+    color: #080808;
     text-decoration: none;
-    transition: color 0.2s ease;
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
 }
 
-.searchBreadcrumb a:hover {
-    color: #3FC4E1;
-}
-
-.searchBreadcrumb .activeCrumb {
-    color: #3FC4E1;
-    font-weight: 700;
-}
-
-.searchCounterBadge {
+.filterBtnMK {
+    padding: 0.4rem 1.1rem;
+    background-color: transparent;
+    border: 1px solid #080808;
+    color: #080808;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.82rem;
-    letter-spacing: 1.5px;
-    color: #ffffff;
-    background: rgba(63, 196, 225, 0.12);
-    border: 1px solid rgba(63, 196, 225, 0.35);
-    border-radius: 20px;
-    padding: 0.35rem 0.95rem;
+    justify-content: center;
+    font-family: inherit;
+    box-sizing: border-box;
 }
 
-.radarDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #00e5a3;
-    box-shadow: 0 0 8px #00e5a3;
-}
-
-/* In-Page Search & Filter Control Bar */
-.searchControlDeck {
-    background: rgba(14, 18, 25, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2.5rem;
-}
-
-.searchDeckForm {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.searchDeckInputWrap {
-    display: flex;
-    align-items: center;
-    background: rgba(8, 11, 17, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 6px;
-    padding: 0.45rem 1rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.searchDeckInputWrap:focus-within {
-    border-color: #3FC4E1;
-    box-shadow: 0 0 16px rgba(63, 196, 225, 0.3);
-}
-
-.searchDeckSvg {
-    width: 20px;
-    height: 20px;
-    color: #3FC4E1;
-    margin-right: 0.85rem;
-    flex-shrink: 0;
-}
-
-.searchDeckInput {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff;
-    font-size: 1.05rem;
-    font-family: 'Poppins', sans-serif;
-}
-
-.searchDeckClear {
-    color: rgba(255, 255, 255, 0.5);
-    text-decoration: none;
-    font-size: 1.3rem;
-    padding: 0 0.4rem;
-    line-height: 1;
-}
-
-.searchDeckClear:hover {
+.filterBtnMK:hover,
+.filterBtnMK.active {
+    background-color: #080808;
     color: #ffffff;
 }
 
-.searchDeckSelects {
-    display: flex;
-    align-items: flex-end;
-    gap: 1.25rem;
-    flex-wrap: wrap;
+.selectWrapperMK {
+    position: relative;
+    display: inline-block;
 }
 
-.selectGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    flex: 1;
-    min-width: 180px;
-}
-
-.selectGroup label {
-    font-size: 0.72rem;
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 700;
-}
-
-.searchDeckSelect {
-    background: rgba(8, 11, 17, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #ffffff;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.85rem;
-    font-family: 'Poppins', sans-serif;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s ease;
-}
-
-.searchDeckSelect:focus {
-    border-color: #3FC4E1;
-}
-
-.searchDeckSubmitBtn {
-    background: #3FC4E1;
-    border: none;
-    border-radius: 6px;
-    color: #0b0f16;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    padding: 0.75rem 1.4rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.searchDeckSubmitBtn:hover {
-    background: #5fe0fc;
-    box-shadow: 0 0 16px rgba(63, 196, 225, 0.6);
-    transform: translateY(-1px);
-}
-
-.searchDeckResetBtn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: rgba(255, 255, 255, 0.7);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.82rem;
+.filterSelectMK {
+    padding: 0.4rem 2rem 0.4rem 1.1rem;
+    background-color: transparent;
+    border: 1px solid #080808;
+    color: #080808;
+    font-size: 0.8rem;
     font-weight: 600;
-    letter-spacing: 1.5px;
-    padding: 0.72rem 1.2rem;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: all 0.2s ease;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 3px;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path fill="%23000000" d="M0 0l5 6 5-6z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
 }
 
-.searchDeckResetBtn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.searchDeckPills {
+/* Quick Pills Strip */
+.quickPillsBarMK {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1.25rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 1rem;
+    border-bottom: 0.5px solid #080808;
 }
 
-.pillsLabel {
-    font-size: 0.72rem;
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1.5px;
-    color: rgba(255, 255, 255, 0.45);
-    font-weight: 700;
-    margin-right: 0.35rem;
+.quickPillLabelMK {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #080808;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
 }
 
-.searchPill {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
-    color: rgba(255, 255, 255, 0.75);
-    padding: 0.3rem 0.65rem;
-    font-size: 0.76rem;
-    font-family: 'Poppins', sans-serif;
-    text-decoration: none;
-    transition: all 0.18s ease;
-}
-
-.searchPill:hover,
-.searchPill.active {
-    background: rgba(63, 196, 225, 0.18);
-    border-color: #3FC4E1;
-    color: #3FC4E1;
-}
-
-/* Products Results Grid */
-.searchResultsGrid {
+/* Multi-Row Product Grid */
+.productGridMK {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, 22rem);
+    justify-content: space-between;
+    gap: 2.5rem 1.8rem;
+    width: 100%;
+    margin-bottom: 3rem;
 }
 
-.searchProductCard {
-    width: 100% !important;
-    max-width: none !important;
+/* Bottom Controls & Counter */
+.sliderControlsMK.searchFooterControlsMK {
+    position: relative;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.2rem;
+    z-index: 10;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid #080808;
 }
 
-/* Grade Badges In Grid */
-.gradeBadge-mg {
-    background-color: #3FC4E1 !important;
-    color: #0b0f16 !important;
-    font-weight: 700;
+.sliderCounterMK {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-family: monospace, sans-serif;
+    letter-spacing: 1px;
 }
 
-.gradeBadge-rg {
-    background-color: #ff3366 !important;
-    color: #ffffff !important;
-    font-weight: 700;
+.activeCount {
+    color: #00bcd4; /* Accent Cyan/Blue tone matching screenshot */
 }
 
-.gradeBadge-pg {
-    background-color: #ffaa00 !important;
-    color: #0b0f16 !important;
-    font-weight: 700;
+.divider {
+    color: #080808;
+    margin: 0 0.1rem;
 }
 
-.gradeBadge-hg {
-    background-color: #00e5a3 !important;
-    color: #0b0f16 !important;
-    font-weight: 700;
+.totalCount {
+    color: #080808;
 }
 
-.gradeBadge-metalbuild {
-    background-color: #b388ff !important;
-    color: #0b0f16 !important;
-    font-weight: 700;
-}
-
-/* Dedicated Page Empty State */
-.searchEmptyState {
+/* Empty State */
+.emptyStateMK {
     text-align: center;
-    padding: 4.5rem 2rem;
-    background: rgba(14, 18, 25, 0.6);
-    border: 1px dashed rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    padding: 5rem 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1rem;
 }
 
-.searchEmptyState .emptyTitle {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.3rem;
+.emptyTitleMK {
+    font-size: 1.8rem;
+    font-weight: 800;
     letter-spacing: 2px;
-    color: #ffffff;
+    color: #080808;
+    text-transform: uppercase;
+    margin: 0;
 }
 
-.searchEmptyState .emptySub {
+.emptySubMK {
     font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.6);
-    max-width: 520px;
-    line-height: 1.6;
+    color: #666666;
+    margin: 0 0 1rem 0;
 }
 
-.emptySuggestions {
-    background: rgba(8, 11, 16, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    padding: 1.25rem 1.75rem;
-    text-align: left;
-    margin: 1rem 0;
-    font-size: 0.85rem;
-}
-
-.emptySuggestions span {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 1.5px;
-    color: #3FC4E1;
-    font-weight: 700;
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.emptySuggestions ul {
-    list-style: square;
-    padding-left: 1.25rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.8;
-}
-
-.emptySuggestions a {
-    color: #3FC4E1;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.emptySuggestions a:hover {
-    text-decoration: underline;
-}
-
-.emptyActionBtns {
+.emptyActionsMK {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
 }
 
-.emptyBtnPrimary {
-    background: #3FC4E1;
-    border: none;
-    border-radius: 6px;
-    color: #0b0f16;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    padding: 0.75rem 1.5rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.emptyBtnPrimary:hover {
-    background: #5fe0fc;
-    box-shadow: 0 0 16px rgba(63, 196, 225, 0.6);
-}
-
-.emptyBtnSecondary {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    padding: 0.75rem 1.5rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.emptyBtnSecondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-@media (max-width: 1200px) {
-    .searchResultsGrid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+@media (max-width: 992px) {
+    .headerContainerMK.searchHeaderContainerMK {
+        padding: 0 1.5rem;
+    }
+    .headerCenterMK h2 {
+        font-size: 2.2rem;
+    }
+    .productSetContainerMK.searchContainerMK {
+        width: 98%;
+        padding: 1.25rem 1rem 2rem 1rem;
+    }
+    .productGridMK {
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: 1.8rem 1.2rem;
+    }
+    .productGridMK .productCard {
+        height: 28rem;
     }
 }
 
-@media (max-width: 860px) {
-    .searchResultsGrid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
+@media (max-width: 576px) {
+    .headerContainerMK.searchHeaderContainerMK {
+        height: 70px;
+        padding: 0 0.75rem;
     }
-
-    .searchDeckSelects {
-        flex-direction: column;
-        align-items: stretch;
+    .headerCenterMK h2 {
+        font-size: 1.4rem;
+        letter-spacing: 1px;
     }
-
-    .selectGroup {
-        width: 100%;
+    .spBackLink {
+        font-size: 0.75rem;
     }
-
-    .searchDeckSubmitBtn,
-    .searchDeckResetBtn {
-        text-align: center;
-    }
-}
-
-@media (max-width: 600px) {
-    .searchResultsGrid {
+    .productGridMK {
         grid-template-columns: 1fr;
     }
-
-    .searchPageMain {
-        padding: 1.5rem 1rem 3rem;
-    }
-
-    .searchControlDeck {
-        padding: 1rem;
-    }
 }
+

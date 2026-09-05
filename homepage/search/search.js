@@ -7,6 +7,14 @@
     if (window._hangarSearchInitialized) return;
     window._hangarSearchInitialized = true;
 
+    // Path config — set via window.HANGAR_PATHS by the hosting PHP page
+    const PATHS = Object.assign({
+        apiSearch:       'api_search.php',
+        searchPage:      'search.php',
+        productDetails:  '../product-details.php',
+        promotionalBase: '../promotional'
+    }, window.HANGAR_PATHS || {});
+
     // Cache DOM Elements
     const overlay         = document.getElementById('hangarSearchOverlay');
     const backdrop        = document.getElementById('hangarSearchBackdrop');
@@ -228,7 +236,7 @@
             limit: 8
         });
 
-        fetch(`api_search.php?${params.toString()}`, {
+        fetch(`${PATHS.apiSearch}?${params.toString()}`, {
             signal: currentAbortCtrl.signal
         })
         .then(res => {
@@ -344,7 +352,7 @@
             statusEl.textContent = `${count} TARGET${count === 1 ? '' : 'S'} ACQUIRED`;
         }
 
-        let fullSearchUrl = `search.php?q=${encodeURIComponent(query)}`;
+        let fullSearchUrl = `${PATHS.searchPage}?q=${encodeURIComponent(query)}`;
         if (grade) {
             fullSearchUrl += `&grade=${encodeURIComponent(grade)}`;
         }
@@ -359,10 +367,12 @@
 
         results.forEach((p, idx) => {
             const gradeClass = `grade-${(p.grade || 'default').toLowerCase().replace(/\s+/g, '')}`;
+            const productUrl = `${PATHS.productDetails}?id=${p.id}`;
+            const imgSrc = `${PATHS.promotionalBase}/${p.image_url}`;
             html += `
-                <a href="${escapeHtml(p.url)}" class="searchResultItem" role="option" data-index="${idx}" id="searchResult-${idx}">
+                <a href="${productUrl}" class="searchResultItem" role="option" data-index="${idx}" id="searchResult-${idx}">
                     <div class="searchResultImgWrap">
-                        <img src="${escapeHtml(p.image_full_path)}" alt="${escapeHtml(p.name)}" onerror="this.src='../promotional/Asset 8.png'">
+                        <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.name)}" onerror="this.src='${PATHS.promotionalBase}/Asset 8.png'">
                     </div>
                     <div class="searchResultInfo">
                         <div class="searchResultBadges">

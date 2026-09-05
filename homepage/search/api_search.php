@@ -5,7 +5,7 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../../admin/db.php';
 
 try {
     $pdo = getDBConnection();

@@ -1,11 +1,13 @@
 <?php
 // THE HANGAR - GUND-ORDER SYSTEM
 // SEARCH HUD MODAL OVERLAY COMPONENT (Self-contained & Reusable)
-$buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
-$promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
+// $_searchAssetPrefix should be set by the including page (e.g. 'search/' from homepage/, './' from search/)
+if (!isset($_searchAssetPrefix)) $_searchAssetPrefix = './';
+$buttonsPath = isset($buttonsPath) ? $buttonsPath : (is_dir('buttons') ? 'buttons' : '../buttons');
+$promotionalPath = isset($promotionalPath) ? $promotionalPath : (is_dir('promotional') ? 'promotional' : '../promotional');
 ?>
 <!-- Search Component Modular Stylesheet -->
-<link rel="stylesheet" href="search.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="<?php echo $_searchAssetPrefix; ?>search.css?v=<?php echo time(); ?>">
 
 <!-- GUND-ORDER SYSTEM SEARCH HUD OVERLAY -->
 <div id="hangarSearchOverlay" class="hangarSearchOverlay" aria-hidden="true">
@@ -88,4 +90,4 @@ $promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
 </div>
 
 <!-- Search Controller Script -->
-<script src="search.js?v=<?php echo time(); ?>"></script>
+<script src="<?php echo $_searchAssetPrefix; ?>search.js?v=<?php echo time(); ?>"></script>

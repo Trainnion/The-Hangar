@@ -54,6 +54,18 @@ html, body {
     box-sizing: border-box;
 }
 
+/* Static Header Variant for Standalone Pages (search, cart, product-details) */
+.headerContainer.headerStatic,
+.headerContainer.headerDark {
+    position: relative;
+    background-color: #080808;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 100;
+}
+
 .headerLeft, .headerRight {
     display: flex;
     align-items: stretch;
