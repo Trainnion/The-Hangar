@@ -1,7 +1,7 @@
 <?php
 // THE HANGAR - PUBLIC STOREFRONT DATABASE HELPER
 
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../shared/db.php';
 
 function getStorefrontData() {
     $pdo = getDBConnection();
@@ -94,3 +94,22 @@ function renderProductCard($p, $promotionalPath = 'promotional', $detailsPrefix 
 </a>
 HTML;
 }
+
+/**
+ * Global Grade Alias Map
+ */
+function getGradeAliases(): array {
+    return [
+        'master grade'  => 'MG',
+        'mastergrade'   => 'MG',
+        'real grade'    => 'RG',
+        'realgrade'     => 'RG',
+        'perfect grade' => 'PG',
+        'perfectgrade'  => 'PG',
+        'high grade'    => 'HG',
+        'highgrade'     => 'HG',
+        'metal build'   => 'METAL BUILD',
+        'metalbuild'    => 'METAL BUILD'
+    ];
+}
+

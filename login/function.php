@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/database/config.php';
+require_once __DIR__ . '/../shared/db.php';
 require_once __DIR__ . '/validation.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -41,7 +41,7 @@ function processLogin(): void
     $password   = $result['data']['password'];
 
     try {
-        $pdo = getConnection();
+        $pdo = getDBConnection();
 
         // Search for user by either username (callsign) or email address
         $sql = "SELECT id, username, email, password, role FROM users WHERE username = :ident OR email = :ident LIMIT 1";
@@ -105,7 +105,7 @@ function processRegister(): void
     $password = $result['data']['password'];
 
     try {
-        $pdo = getConnection();
+        $pdo = getDBConnection();
 
         // Check if callsign or email is already taken
         $checkStmt = $pdo->prepare("SELECT id, username, email FROM users WHERE username = :u OR email = :e LIMIT 1");

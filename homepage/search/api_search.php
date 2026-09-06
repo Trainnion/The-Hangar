@@ -5,7 +5,8 @@
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
 
-require_once __DIR__ . '/../../admin/db.php';
+require_once __DIR__ . '/../../shared/db.php';
+require_once __DIR__ . '/../db_helper.php';
 
 try {
     $pdo = getDBConnection();
@@ -24,18 +25,7 @@ try {
     $limit    = isset($_GET['limit']) ? min(max((int)$_GET['limit'], 1), 50) : 8;
 
     // Normalize grade aliases if typed into query
-    $gradeAliases = [
-        'master grade'  => 'MG',
-        'mastergrade'   => 'MG',
-        'real grade'    => 'RG',
-        'realgrade'     => 'RG',
-        'perfect grade' => 'PG',
-        'perfectgrade'  => 'PG',
-        'high grade'    => 'HG',
-        'highgrade'     => 'HG',
-        'metal build'   => 'METAL BUILD',
-        'metalbuild'    => 'METAL BUILD'
-    ];
+    $gradeAliases = getGradeAliases();
 
     $detectedGrade = '';
     $lowerQuery = strtolower($rawQuery);

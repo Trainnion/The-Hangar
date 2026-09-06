@@ -1,52 +1,12 @@
 <?php
 require_once __DIR__ . '/auth.php';
 requireAdmin();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/../shared/db.php';
+require_once __DIR__ . '/upload_helper.php';
 
 $pdo = getDBConnection();
 $message = '';
 $error = '';
-
-// Handle Image Upload / Cropped Image Base64
-function handleImageUpload($fileInputName, $croppedBase64InputName, $existingSelectName) {
-    // 1. Cropped base64 has highest priority
-    if (!empty($_POST[$croppedBase64InputName])) {
-        $base64Data = $_POST[$croppedBase64InputName];
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
-            $data = substr($base64Data, strpos($base64Data, ',') + 1);
-            $type = strtolower($type[1]); // jpg, png, webp
-            $decoded = base64_decode($data);
-
-            if ($decoded !== false) {
-                $filename = 'prod_' . time() . '_' . rand(100, 999) . '.' . ($type === 'jpeg' ? 'jpg' : $type);
-                $targetPath = __DIR__ . '/../promotional/' . $filename;
-                if (file_put_contents($targetPath, $decoded)) {
-                    return $filename;
-                }
-            }
-        }
-    }
-
-    // 2. Direct File upload without cropper
-    if (!empty($_FILES[$fileInputName]['name']) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($_FILES[$fileInputName]['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        if (in_array($ext, $allowed)) {
-            $filename = 'prod_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $targetPath = __DIR__ . '/../promotional/' . $filename;
-            if (move_uploaded_file($_FILES[$fileInputName]['tmp_name'], $targetPath)) {
-                return $filename;
-            }
-        }
-    }
-
-    // 3. Fallback to existing selected image
-    if (!empty($_POST[$existingSelectName])) {
-        return basename($_POST[$existingSelectName]);
-    }
-
-    return null;
-}
 
 // 1. Handle DELETE
 if (isset($_GET['delete']) && $pdo) {
@@ -71,13 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     $is_best_seller = isset($_POST['is_best_seller']) ? 1 : 0;
     $is_model_kit = isset($_POST['is_model_kit']) ? 1 : 0;
 
-    $uploadedImg = handleImageUpload('product_file', 'cropped_image_data', 'existing_image');
+    $uploadedImg = handleAssetUpload('prod_', 'product_file', 'cropped_image_data', 'existing_image');
 
     if ($action === 'add') {
         if (empty($name)) {
             $error = 'Product Name is required.';
         } else {
-            $imgUrl = $uploadedImg ?: 'cut-out metal build.webp';
+            $imgUrl = $uploadedImg ?: HANGAR_DEFAULT_IMAGE;
             $stmt = $pdo->prepare("
                 INSERT INTO `products` 
                 (`name`, `grade`, `scale`, `price`, `sold_count`, `brand`, `stock_status`, `image_url`, `is_new_release`, `is_best_seller`, `is_model_kit`) 

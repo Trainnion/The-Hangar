@@ -1,5 +1,10 @@
 <?php
-// THE HANGAR - GUND-ORDER SYSTEM DATABASE CONNECTION & AUTO-MIGRATION
+// THE HANGAR - GUND-ORDER SYSTEM
+// UNIFIED DATABASE CONNECTION, SCHEMA MIGRATION & SEED DATA
+// Single source of truth for all database operations across admin/, login/, homepage/
+
+// Default fallback image constant — used when no image is uploaded for a product or slider
+define('HANGAR_DEFAULT_IMAGE', 'cut-out metal build.webp');
 
 function getDBConnection() {
     static $pdo = null;
@@ -29,8 +34,13 @@ function getDBConnection() {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
 
-        // Run migrations & initial seeders
-        initDatabaseTables($pdo);
+        // Run migrations & initial seeders only if schema not yet installed
+        $markerFile = __DIR__ . '/.schema_installed';
+        if (!file_exists($markerFile)) {
+            initDatabaseTables($pdo);
+            // Write marker file so we skip schema checks on subsequent requests
+            file_put_contents($markerFile, date('Y-m-d H:i:s') . ' — schema installed');
+        }
 
         return $pdo;
     } catch (PDOException $e) {
@@ -92,44 +102,96 @@ function initDatabaseTables($pdo) {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
-    // Check if users table is empty, then seed initial admin and user accounts
+    // 4. Orders Table (Phase 1 — server-side checkout)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `orders` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id` INT NULL,
+            `order_code` VARCHAR(20) NOT NULL UNIQUE,
+            `subtotal` DECIMAL(10,2) NOT NULL,
+            `discount` DECIMAL(10,2) NOT NULL DEFAULT 0,
+            `shipping` DECIMAL(10,2) NOT NULL,
+            `total` DECIMAL(10,2) NOT NULL,
+            `promo_code` VARCHAR(50) NULL,
+            `status` VARCHAR(30) NOT NULL DEFAULT 'pending',
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // 5. Order Items Table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `order_items` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `order_id` INT NOT NULL,
+            `product_id` INT NOT NULL,
+            `name_snapshot` VARCHAR(255) NOT NULL,
+            `price_snapshot` DECIMAL(10,2) NOT NULL,
+            `quantity` INT NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // 6. Promo Codes Table
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `promo_codes` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `code` VARCHAR(50) NOT NULL UNIQUE,
+            `type` ENUM('percent','fixed') NOT NULL,
+            `value` DECIMAL(10,2) NOT NULL,
+            `active` TINYINT(1) NOT NULL DEFAULT 1,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // --- Seed initial data if tables are empty ---
+
+    // Seed users
     $checkUsers = $pdo->query("SELECT COUNT(*) AS total FROM `users`")->fetch();
     if ($checkUsers && (int)$checkUsers['total'] === 0) {
-        $insert = $pdo->prepare("
-            INSERT INTO `users` (`username`, `email`, `password`, `role`)
-            VALUES (:username, :email, :password, :role)
-        ");
-        $insert->execute([
-            ':username' => 'admin',
-            ':email'    => 'admin@thehangar.ph',
-            ':password' => password_hash('hangar2026', PASSWORD_DEFAULT),
-            ':role'     => 'admin',
-        ]);
-        $insert->execute([
-            ':username' => 'Amuro_Ray',
-            ':email'    => 'amuro@thehangar.ph',
-            ':password' => password_hash('pilot2026', PASSWORD_DEFAULT),
-            ':role'     => 'user',
-        ]);
-        $insert->execute([
-            ':username' => 'Char_Aznable',
-            ':email'    => 'char@thehangar.ph',
-            ':password' => password_hash('redcomet', PASSWORD_DEFAULT),
-            ':role'     => 'user',
-        ]);
+        seedInitialUsers($pdo);
     }
 
-    // Check if products table is empty, then seed initial data
+    // Seed products
     $check = $pdo->query("SELECT COUNT(*) AS total FROM `products`")->fetch();
     if ($check && (int)$check['total'] === 0) {
         seedInitialProducts($pdo);
     }
 
-    // Check if sliders table is empty, then seed initial data
+    // Seed sliders
     $checkSliders = $pdo->query("SELECT COUNT(*) AS total FROM `sliders`")->fetch();
     if ($checkSliders && (int)$checkSliders['total'] === 0) {
         seedInitialSliders($pdo);
     }
+
+    // Seed promo codes
+    $checkPromos = $pdo->query("SELECT COUNT(*) AS total FROM `promo_codes`")->fetch();
+    if ($checkPromos && (int)$checkPromos['total'] === 0) {
+        seedInitialPromoCodes($pdo);
+    }
+}
+
+function seedInitialUsers($pdo) {
+    $insert = $pdo->prepare("
+        INSERT INTO `users` (`username`, `email`, `password`, `role`)
+        VALUES (:username, :email, :password, :role)
+    ");
+    $insert->execute([
+        ':username' => 'admin',
+        ':email'    => 'admin@thehangar.ph',
+        ':password' => password_hash('hangar2026', PASSWORD_DEFAULT),
+        ':role'     => 'admin',
+    ]);
+    $insert->execute([
+        ':username' => 'Amuro_Ray',
+        ':email'    => 'amuro@thehangar.ph',
+        ':password' => password_hash('pilot2026', PASSWORD_DEFAULT),
+        ':role'     => 'user',
+    ]);
+    $insert->execute([
+        ':username' => 'Char_Aznable',
+        ':email'    => 'char@thehangar.ph',
+        ':password' => password_hash('redcomet', PASSWORD_DEFAULT),
+        ':role'     => 'user',
+    ]);
 }
 
 function seedInitialProducts($pdo) {
@@ -270,7 +332,7 @@ function seedInitialProducts($pdo) {
             'is_model_kit' => 1
         ],
         [
-            'name' => 'MG MSN-04 Sazabi “Ver. Ka”',
+            'name' => 'MG MSN-04 Sazabi "Ver. Ka"',
             'grade' => 'MG',
             'scale' => '1/100',
             'price' => 5900.00,
@@ -283,7 +345,7 @@ function seedInitialProducts($pdo) {
             'is_model_kit' => 1
         ],
         [
-            'name' => 'FA-78 Full Armor Gundam “Ver. Ka”',
+            'name' => 'FA-78 Full Armor Gundam "Ver. Ka"',
             'grade' => 'MG',
             'scale' => '1/100',
             'price' => 4950.00,
@@ -366,7 +428,7 @@ function seedInitialSliders($pdo) {
     $sec2 = [
         [
             'section_key' => 'section2',
-            'title' => 'MSN-04 Sazabi<br>“Ver. Ka”',
+            'title' => 'MSN-04 Sazabi<br>"Ver. Ka"',
             'subtitle' => 'MASTER GRADE',
             'badge' => 'REPRINT RUN!',
             'quote' => 'The Crimson Comet\'s masterpiece, engineered with unprecedented detail and psycho-frame expansion mechanics.',
@@ -402,7 +464,7 @@ function seedInitialSliders($pdo) {
         ],
         [
             'section_key' => 'section2',
-            'title' => 'FA-78 Full Armor Gundam<br>“Ver. Ka” (Thunderbolt Ver.)',
+            'title' => 'FA-78 Full Armor Gundam<br>"Ver. Ka" (Thunderbolt Ver.)',
             'subtitle' => 'MASTER GRADE',
             'badge' => 'REPRINT RUN!',
             'quote' => 'This is a heavily armored highly maneuverable Mobile Suit and unfortunately, this is exactly what the Living Dead Division is least equipped to handle',
@@ -501,3 +563,19 @@ function seedInitialSliders($pdo) {
         $stmt->execute($s);
     }
 }
+
+function seedInitialPromoCodes($pdo) {
+    $stmt = $pdo->prepare("
+        INSERT INTO `promo_codes` (`code`, `type`, `value`, `active`)
+        VALUES (:code, :type, :value, :active)
+    ");
+    // Migrated from the original client-side ACTIVE_PROMOS in cart.js
+    $stmt->execute([':code' => 'PILOT10',    ':type' => 'percent', ':value' => 10,  ':active' => 1]);
+    $stmt->execute([':code' => 'GUNDAM2026', ':type' => 'fixed',   ':value' => 500, ':active' => 1]);
+}
+
+// Compatibility wrapper for modules expecting getConnection()
+function getConnection(): ?PDO {
+    return getDBConnection();
+}
+

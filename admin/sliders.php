@@ -1,49 +1,12 @@
 <?php
 require_once __DIR__ . '/auth.php';
 requireAdmin();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/../shared/db.php';
+require_once __DIR__ . '/upload_helper.php';
 
 $pdo = getDBConnection();
 $message = '';
 $error = '';
-
-// Handle Image Upload / Cropped Base64 for Sliders
-function handleSliderImageUpload($fileInputName, $croppedBase64InputName, $existingSelectName) {
-    if (!empty($_POST[$croppedBase64InputName])) {
-        $base64Data = $_POST[$croppedBase64InputName];
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
-            $data = substr($base64Data, strpos($base64Data, ',') + 1);
-            $type = strtolower($type[1]);
-            $decoded = base64_decode($data);
-
-            if ($decoded !== false) {
-                $filename = 'slider_' . time() . '_' . rand(100, 999) . '.' . ($type === 'jpeg' ? 'jpg' : $type);
-                $targetPath = __DIR__ . '/../promotional/' . $filename;
-                if (file_put_contents($targetPath, $decoded)) {
-                    return $filename;
-                }
-            }
-        }
-    }
-
-    if (!empty($_FILES[$fileInputName]['name']) && $_FILES[$fileInputName]['error'] === UPLOAD_ERR_OK) {
-        $ext = strtolower(pathinfo($_FILES[$fileInputName]['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        if (in_array($ext, $allowed)) {
-            $filename = 'slider_' . time() . '_' . rand(100, 999) . '.' . $ext;
-            $targetPath = __DIR__ . '/../promotional/' . $filename;
-            if (move_uploaded_file($_FILES[$fileInputName]['tmp_name'], $targetPath)) {
-                return $filename;
-            }
-        }
-    }
-
-    if (!empty($_POST[$existingSelectName])) {
-        return basename($_POST[$existingSelectName]);
-    }
-
-    return null;
-}
 
 // 1. Handle DELETE
 if (isset($_GET['delete']) && $pdo) {
@@ -69,13 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     $sort_order = (int)($_POST['sort_order'] ?? 1);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
-    $uploadedImg = handleSliderImageUpload('slider_file', 'cropped_image_data', 'existing_image');
+    $uploadedImg = handleAssetUpload('slider_', 'slider_file', 'cropped_image_data', 'existing_image');
 
     if ($action === 'add') {
         if (empty($title)) {
             $error = 'Slide Title is required.';
         } else {
-            $imgUrl = $uploadedImg ?: 'cut-out metal build.webp';
+            $imgUrl = $uploadedImg ?: HANGAR_DEFAULT_IMAGE;
             $stmt = $pdo->prepare("
                 INSERT INTO `sliders` 
                 (`section_key`, `title`, `subtitle`, `badge`, `quote`, `author`, `image_url`, `button_text`, `product_id`, `custom_url`, `sort_order`, `is_active`) 

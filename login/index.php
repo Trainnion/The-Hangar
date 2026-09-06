@@ -7,10 +7,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once __DIR__ . '/database/config.php';
+require_once __DIR__ . '/../shared/db.php';
 
 // Ensure database connection and tables exist
-getConnection();
+getDBConnection();
 
 $status    = $_GET['status'] ?? null;
 $message   = $_GET['message'] ?? null;

@@ -46,7 +46,7 @@ function validateLoginInput(array $post): array
     return [
         'errors' => $errors,
         'data'   => [
-            'identifier' => htmlspecialchars($identifier),
+            'identifier' => $identifier, // raw value for parameterized DB comparison; escape only at HTML output time
             'password'   => $password,
         ],
     ];
@@ -71,8 +71,8 @@ function validateRegisterInput(array $post): array
     return [
         'errors' => $errors,
         'data'   => [
-            'callsign' => htmlspecialchars($callsign),
-            'email'    => htmlspecialchars($email),
+            'callsign' => $callsign,
+            'email'    => $email,
             'password' => $password,
         ],
     ];

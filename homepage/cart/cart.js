@@ -6,23 +6,20 @@
 
     const STORAGE_KEY = 'hangar_cart_manifest';
     const PROMO_KEY = 'hangar_cart_promo';
-    
-    // Promo code registry
-    const ACTIVE_PROMOS = {
-        'PILOT10': { type: 'percent', value: 10, label: '10% Pilot Clearance Discount' },
-        'GUNDAM2026': { type: 'fixed', value: 500, label: '₱500 Gund-Format Requisition Credit' }
-    };
+    const PROMO_META_KEY = 'hangar_cart_promo_meta';
 
     // Path config — set via window.HANGAR_PATHS by the hosting PHP page
     const PATHS = Object.assign({
         cartPage:       'cart.php',
         searchPage:     '../search/search.php',
-        productDetails: '../product-details.php'
+        productDetails: '../product-details.php',
+        apiCheckout:    'api_checkout.php'
     }, window.HANGAR_PATHS || {});
 
     const HangarCart = {
         items: [],
         activePromo: null,
+        promoDetails: null,
         promotionalPath: 'promotional',
 
         init: function() {
@@ -39,26 +36,18 @@
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 this.items = stored ? JSON.parse(stored) : [];
-                
-                // If user visits fresh, seed with 1 sample iconic kit so cart is immediately demonstrable
-                if (!stored) {
-                    this.items = [
-                        {
-                            id: 1,
-                            name: 'MG ASW-G-XX Gundam Vidar',
-                            grade: 'MG',
-                            brand: 'BANDAI SPIRITS',
-                            price: 4620.00,
-                            image_url: 'mg vidar.webp',
-                            quantity: 1
-                        }
-                    ];
-                    this.saveCart(false);
-                }
 
                 const promoStored = localStorage.getItem(PROMO_KEY);
-                if (promoStored && ACTIVE_PROMOS[promoStored]) {
+                const promoMeta = localStorage.getItem(PROMO_META_KEY);
+                if (promoStored) {
                     this.activePromo = promoStored;
+                    if (promoMeta) {
+                        try {
+                            this.promoDetails = JSON.parse(promoMeta);
+                        } catch (err) {
+                            this.promoDetails = null;
+                        }
+                    }
                 }
             } catch (e) {
                 console.warn('Cart storage error:', e);
@@ -142,23 +131,45 @@
             }
         },
 
-        applyPromo: function(code) {
+        applyPromo: async function(code) {
             code = (code || '').trim().toUpperCase();
             if (!code) {
                 this.activePromo = null;
+                this.promoDetails = null;
                 localStorage.removeItem(PROMO_KEY);
+                localStorage.removeItem(PROMO_META_KEY);
                 this.renderDrawer();
                 this.renderDedicatedPage();
                 return;
             }
 
-            if (ACTIVE_PROMOS[code]) {
-                this.activePromo = code;
-                localStorage.setItem(PROMO_KEY, code);
-                this.showToast('ACCESS CODE ACCEPTED', ACTIVE_PROMOS[code].label);
-            } else {
-                this.showToast('INVALID CODE', `"${code}" not recognized. Try: PILOT10, GUNDAM2026`, true);
+            try {
+                const apiUrl = (PATHS.apiCheckout) ? PATHS.apiCheckout : 'api_checkout.php';
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'validate_promo', code: code })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.success && data.promo) {
+                    this.activePromo = data.promo.code;
+                    this.promoDetails = data.promo;
+                    localStorage.setItem(PROMO_KEY, data.promo.code);
+                    localStorage.setItem(PROMO_META_KEY, JSON.stringify(data.promo));
+                    this.showToast('ACCESS CODE ACCEPTED', data.promo.label);
+                } else {
+                    this.activePromo = null;
+                    this.promoDetails = null;
+                    localStorage.removeItem(PROMO_KEY);
+                    localStorage.removeItem(PROMO_META_KEY);
+                    this.showToast('INVALID CODE', data.message || `"${code}" not recognized.`, true);
+                }
+            } catch (err) {
+                console.error('Promo verification error:', err);
+                this.showToast('VERIFICATION ERROR', 'Failed to communicate with promo verification service.', true);
             }
+
             this.renderDrawer();
             this.renderDedicatedPage();
         },
@@ -172,12 +183,12 @@
                 subtotal += item.price * item.quantity;
             });
 
-            // Shipping is always ₱150 (no free shipping threshold)
+            // Flat rate shipping
             let shipping = this.items.length > 0 ? 150.00 : 0;
             let discount = 0;
 
-            if (this.activePromo && ACTIVE_PROMOS[this.activePromo]) {
-                const promo = ACTIVE_PROMOS[this.activePromo];
+            if (this.activePromo && this.promoDetails) {
+                const promo = this.promoDetails;
                 if (promo.type === 'percent') {
                     discount = (subtotal * promo.value) / 100;
                 } else if (promo.type === 'fixed') {
@@ -577,7 +588,7 @@
 
             // Multi-tab synchronization
             window.addEventListener('storage', function(e) {
-                if (e.key === STORAGE_KEY || e.key === PROMO_KEY) {
+                if (e.key === STORAGE_KEY || e.key === PROMO_KEY || e.key === PROMO_META_KEY) {
                     self.loadCart();
                     self.updateNavBadges();
                     self.renderDrawer();

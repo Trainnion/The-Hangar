@@ -2,18 +2,8 @@
 // THE HANGAR - GUND-ORDER SYSTEM
 // DEDICATED CART & SUPPLY REQUISITION DECK (cart.php)
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-$isLoggedIn = !empty($_SESSION['user_id']) || !empty($_SESSION['hangar_admin_logged']);
-$userRole   = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged']) ? 'admin' : null);
-$userName   = $_SESSION['username'] ?? ($_SESSION['hangar_admin_user'] ?? 'Pilot');
-
-$buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
-$promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
-$footerPath = is_dir('footer') ? 'footer' : '../footer';
-$logosPath = is_dir('logos') ? 'logos' : '../logos';
+require_once __DIR__ . '/../../shared/bootstrap.php';
+extract(hangarBootstrap());
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +14,7 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="cart.css?v=<?php echo time(); ?>">
     <style>
         body {
@@ -37,66 +27,6 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
 
         .mainCartWrapper {
             flex: 1;
-        }
-
-        /* Top Header Strip matching Sections 3, 5, 6 */
-        .pdSectionHeader {
-            width: 95%;
-            max-width: 110rem;
-            margin: 72px auto 0 auto;
-            height: 90px;
-            padding: 0 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 0.5px solid #080808;
-            box-sizing: border-box;
-        }
-
-        .pdHeaderLeft, .pdHeaderRight {
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .pdHeaderLeft { justify-content: flex-start; }
-        .pdHeaderRight { justify-content: flex-end; }
-
-        .pdHeaderCenter {
-            flex: 2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            border-left: 1px solid #e0e0e0;
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .pdHeaderCenter h2 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: #080808;
-            text-transform: uppercase;
-            margin: 0;
-            text-align: center;
-        }
-
-        .backStorefrontLink {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #080808;
-            text-decoration: none;
-            font-size: 0.82rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-
-        .backStorefrontLink:hover {
-            color: var(--brand-cyan, #3FC4E1);
-            transform: translateX(-4px);
         }
 
         .statusTagHeader {
@@ -209,13 +139,13 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
             <a href="cart.php" class="navItem navLink navCart" style="color: var(--brand-cyan);">CART</a>
             <?php if ($isLoggedIn): ?>
                 <?php if ($userRole === 'admin'): ?>
-                    <a href="../admin/index.php" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
+                    <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                 <?php else: ?>
                     <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
                 <?php endif; ?>
-                <a href="../login/logout.php" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
+                <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
             <?php else: ?>
-                <a href="../login/" class="navItem navLink">LOG IN</a>
+                <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
             <button class="navItem navBtnSearch" type="button" aria-label="Search">
                 <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
@@ -375,7 +305,7 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
     <?php require_once __DIR__ . '/../footer.php'; ?>
 
     <!-- GUND-ORDER SYSTEM SEARCH & CART HUD OVERLAYS -->
-    <script>window.HANGAR_PATHS = { cartPage: 'cart.php', searchPage: '../search/search.php', apiSearch: '../search/api_search.php', productDetails: '../product-details.php', promotionalBase: '../promotional' };</script>
+    <script>window.HANGAR_PATHS = { cartPage: 'cart.php', searchPage: '../search/search.php', apiSearch: '../search/api_search.php', productDetails: '../product-details.php', promotionalBase: '../promotional', apiCheckout: 'api_checkout.php' };</script>
     <?php $_searchAssetPrefix = './'; require_once __DIR__ . '/../search/search_modal.php'; ?>
     <?php $_cartAssetPrefix   = './'; require_once __DIR__ . '/cart_modal.php'; ?>
 
@@ -390,32 +320,85 @@ $logosPath = is_dir('logos') ? 'logos' : '../logos';
             const orderNumberEl = document.getElementById('successOrderNumber');
 
             if (dispatchBtn && successOverlay) {
-                dispatchBtn.addEventListener('click', function() {
+                dispatchBtn.addEventListener('click', async function() {
                     const items = window.HangarCart ? window.HangarCart.getItems() : [];
-                    if (items.length === 0) {
+                    if (!items || items.length === 0) {
                         if (window.HangarCart) {
                             window.HangarCart.showToast('MANIFEST EMPTY', 'Requisition Mobile Suit units before dispatching.', true);
                         }
                         return;
                     }
 
-                    // Generate random military order code
-                    const randOrder = 'HGR-' + Math.floor(100000 + Math.random() * 900000);
-                    if (orderNumberEl) orderNumberEl.textContent = `MANIFEST ORDER #${randOrder}`;
+                    // Format payload: ONLY product_id and quantity (never client-supplied prices)
+                    const payloadItems = items.map(function(item) {
+                        return {
+                            product_id: parseInt(item.id, 10),
+                            quantity: parseInt(item.quantity, 10) || 1
+                        };
+                    });
 
-                    successOverlay.classList.add('show');
-                    successOverlay.setAttribute('aria-hidden', 'false');
-                    document.body.style.overflow = 'hidden';
+                    const promoCode = (window.HangarCart && window.HangarCart.activePromo) ? window.HangarCart.activePromo : '';
 
-                    // Clear cart upon successful order dispatch
-                    if (window.HangarCart) {
-                        localStorage.removeItem('hangar_cart_manifest');
-                        localStorage.removeItem('hangar_cart_promo');
-                        window.HangarCart.items = [];
-                        window.HangarCart.activePromo = null;
-                        window.HangarCart.saveCart(false);
-                        window.HangarCart.updateNavBadges();
-                        window.HangarCart.renderDedicatedPage();
+                    // UI Loading State
+                    dispatchBtn.disabled = true;
+                    const originalBtnContent = dispatchBtn.innerHTML;
+                    dispatchBtn.innerHTML = '<span>TRANSMITTING ORDER...</span>';
+
+                    try {
+                        const apiUrl = (window.HANGAR_PATHS && window.HANGAR_PATHS.apiCheckout) ? window.HANGAR_PATHS.apiCheckout : 'api_checkout.php';
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                action: 'checkout',
+                                items: payloadItems,
+                                promo_code: promoCode
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok && result.success) {
+                            if (orderNumberEl) {
+                                orderNumberEl.textContent = `MANIFEST ORDER #${result.order_code}`;
+                            }
+
+                            successOverlay.classList.add('show');
+                            successOverlay.setAttribute('aria-hidden', 'false');
+                            document.body.style.overflow = 'hidden';
+
+                            // Clear cart upon verified server-side order dispatch
+                            if (window.HangarCart) {
+                                localStorage.removeItem('hangar_cart_manifest');
+                                localStorage.removeItem('hangar_cart_promo');
+                                localStorage.removeItem('hangar_cart_promo_meta');
+                                window.HangarCart.items = [];
+                                window.HangarCart.activePromo = null;
+                                window.HangarCart.promoDetails = null;
+                                window.HangarCart.saveCart(false);
+                                window.HangarCart.updateNavBadges();
+                                window.HangarCart.renderDedicatedPage();
+                            }
+                        } else {
+                            const errorMsg = result.message || 'Dispatch authorization failed. Please try again.';
+                            if (window.HangarCart) {
+                                window.HangarCart.showToast('DISPATCH REJECTED', errorMsg, true);
+                            } else {
+                                alert(errorMsg);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Checkout error:', err);
+                        if (window.HangarCart) {
+                            window.HangarCart.showToast('TRANSMISSION ERROR', 'Failed to communicate with Hangar Command.', true);
+                        } else {
+                            alert('Network error connecting to logistics dispatch.');
+                        }
+                    } finally {
+                        dispatchBtn.disabled = false;
+                        dispatchBtn.innerHTML = originalBtnContent;
                     }
                 });
             }

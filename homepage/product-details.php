@@ -1,31 +1,25 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../shared/bootstrap.php';
+extract(hangarBootstrap());
 
-$isLoggedIn = !empty($_SESSION['user_id']) || !empty($_SESSION['hangar_admin_logged']);
-$userRole   = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged']) ? 'admin' : null);
-$userName   = $_SESSION['username'] ?? ($_SESSION['hangar_admin_user'] ?? 'Pilot');
-
-$buttonsPath = is_dir('buttons') ? 'buttons' : '../buttons';
-$promotionalPath = is_dir('promotional') ? 'promotional' : '../promotional';
-$footerPath = is_dir('footer') ? 'footer' : '../footer';
-$logosPath = is_dir('logos') ? 'logos' : '../logos';
-
-require_once __DIR__ . '/../admin/db.php';
+require_once __DIR__ . '/../shared/db.php';
 $pdo = getDBConnection();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
 $product = null;
+$dbOffline = false;
 
 if ($pdo) {
     $stmt = $pdo->prepare("SELECT * FROM `products` WHERE `id` = :id");
     $stmt->execute(['id' => $id]);
     $product = $stmt->fetch();
-}
 
-// Fallback if product id not found
-if (!$product) {
+    if (!$product) {
+        header('Location: search/search.php?notfound=1');
+        exit;
+    }
+} else {
+    $dbOffline = true;
     $product = [
         'id' => $id,
         'name' => 'MG ASW-G-XX Gundam Vidar',
@@ -70,83 +64,6 @@ if (!$product) {
             padding: 0;
             font-family: var(--font-body);
             overflow-x: hidden;
-        }
-
-        /* Top Header Strip matching Sections 3, 5, 6 */
-        .pdSectionHeader {
-            width: 95%;
-            max-width: 110rem;
-            margin: 72px auto 0 auto;
-            height: 90px;
-            padding: 0 2.5rem;
-            box-sizing: border-box;
-            background-color: #ffffff;
-            border-top: 0.5px solid #080808;
-            border-bottom: 0.5px solid #080808;
-            border-left: 0.5px solid #080808;
-            border-right: 0.5px solid #080808;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pdHeaderLeft, .pdHeaderCenter, .pdHeaderRight {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            height: 100%;
-        }
-
-        .pdHeaderLeft {
-            justify-content: flex-start;
-        }
-
-        .pdHeaderCenter {
-            justify-content: center;
-            border-left: 1px solid #080808;
-            border-right: 1px solid #080808;
-        }
-
-        .pdHeaderCenter h2 {
-            font-family: var(--font-heading);
-            font-size: clamp(1.8rem, 2.8vw, 3.25rem);
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #080808;
-            text-transform: uppercase;
-            margin: 0;
-            line-height: 1;
-            text-align: center;
-        }
-
-        .pdHeaderRight {
-            justify-content: flex-end;
-        }
-
-        .backStorefrontLink {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.6rem;
-            color: var(--brand-dark);
-            text-decoration: none;
-            font-family: var(--font-heading);
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            transition: color 0.2s ease;
-        }
-
-        .backStorefrontLink:hover {
-            color: var(--brand-cyan);
-        }
-
-        .systemBadgeText {
-            font-family: var(--font-system);
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: var(--brand-dark);
         }
 
         .systemBadgeText span {
@@ -503,12 +420,6 @@ if (!$product) {
         }
 
         @media (max-width: 1100px) {
-            .pdSectionHeader {
-                padding: 0 1.5rem;
-            }
-            .pdHeaderCenter h2 {
-                font-size: 2rem;
-            }
             .pdGrid {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -528,17 +439,6 @@ if (!$product) {
             .pdBtnOrderNow, .pdBtnAddToCart {
                 width: 100%;
                 flex: 1 1 100%;
-            }
-            .pdSectionHeader {
-                height: auto;
-                padding: 1rem;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .pdHeaderCenter {
-                border-left: none;
-                border-right: none;
-                padding: 0.5rem 0;
             }
         }
     </style>
@@ -565,13 +465,13 @@ if (!$product) {
             <a href="cart/cart.php" class="navItem navLink navCart">CART</a>
             <?php if ($isLoggedIn): ?>
                 <?php if ($userRole === 'admin'): ?>
-                    <a href="../admin/index.php" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
+                    <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                 <?php else: ?>
                     <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
                 <?php endif; ?>
-                <a href="../login/logout.php" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
+                <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
             <?php else: ?>
-                <a href="../login/" class="navItem navLink">LOG IN</a>
+                <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
             <button class="navItem navBtnSearch" type="button" aria-label="Search">
                 <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
@@ -686,7 +586,7 @@ if (!$product) {
     <?php require_once __DIR__ . '/footer.php'; ?>
 
     <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
-    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional' };</script>
+    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional', apiCheckout: 'cart/api_checkout.php' };</script>
     <?php $_searchAssetPrefix = 'search/'; require_once __DIR__ . '/search/search_modal.php'; ?>
     <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 </body>

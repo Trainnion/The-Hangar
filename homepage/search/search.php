@@ -2,20 +2,10 @@
 // THE HANGAR - GUND-ORDER SYSTEM
 // MODEL KITS CATALOG SEARCH & PRODUCT GRID
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../../shared/bootstrap.php';
+extract(hangarBootstrap());
 
-$isLoggedIn  = !empty($_SESSION['user_id']) || !empty($_SESSION['hangar_admin_logged']);
-$userRole    = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged']) ? 'admin' : null);
-$userName    = $_SESSION['username'] ?? ($_SESSION['hangar_admin_user'] ?? 'Pilot');
-
-$buttonsPath     = is_dir('../../buttons')     ? '../../buttons'     : (is_dir('../buttons')     ? '../buttons'     : 'buttons');
-$promotionalPath = is_dir('../../promotional') ? '../../promotional' : (is_dir('../promotional') ? '../promotional' : 'promotional');
-$footerPath      = is_dir('../../footer')      ? '../../footer'      : (is_dir('../footer')      ? '../footer'      : 'footer');
-$logosPath       = is_dir('../../logos')       ? '../../logos'       : (is_dir('../logos')       ? '../logos'       : 'logos');
-
-require_once __DIR__ . '/../../admin/db.php';
+require_once __DIR__ . '/../../shared/db.php';
 require_once __DIR__ . '/../db_helper.php';
 $pdo = getDBConnection();
 
@@ -23,18 +13,7 @@ $query       = trim($_GET['q'] ?? '');
 $filterGrade = trim($_GET['grade'] ?? '');
 $sort        = trim($_GET['sort'] ?? 'sold_desc');
 
-$gradeAliases = [
-    'master grade'  => 'MG',
-    'mastergrade'   => 'MG',
-    'real grade'    => 'RG',
-    'realgrade'     => 'RG',
-    'perfect grade' => 'PG',
-    'perfectgrade'  => 'PG',
-    'high grade'    => 'HG',
-    'highgrade'     => 'HG',
-    'metal build'   => 'METAL BUILD',
-    'metalbuild'    => 'METAL BUILD'
-];
+$gradeAliases = getGradeAliases();
 $lowerQuery = strtolower($query);
 if (isset($gradeAliases[$lowerQuery]) && empty($filterGrade)) {
     $filterGrade = $gradeAliases[$lowerQuery];
@@ -115,13 +94,13 @@ if ($pdo) {
             <a href="../cart/cart.php" class="navItem navLink navCart">CART</a>
             <?php if ($isLoggedIn): ?>
                 <?php if ($userRole === 'admin'): ?>
-                    <a href="../../admin/index.php" class="navItem navLink" style="color:#ffaa00;font-weight:700;">[COMMAND DECK]</a>
+                    <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color:#ffaa00;font-weight:700;">[COMMAND DECK]</a>
                 <?php else: ?>
                     <span class="navItem navLink" style="color:var(--brand-cyan);cursor:default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
                 <?php endif; ?>
-                <a href="../login/logout.php" class="navItem navLink">LOG OUT</a>
+                <a href="<?php echo $logoutPath; ?>" class="navItem navLink">LOG OUT</a>
             <?php else: ?>
-                <a href="../login/" class="navItem navLink">LOG IN</a>
+                <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
             <button class="navItem navBtnSearch" type="button" aria-label="Search">
                 <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
@@ -146,6 +125,13 @@ if ($pdo) {
 
     <!-- MAIN VIEWPORT CONTAINER - Matching SECTION 6: MODEL KITS -->
     <main class="productSetContainerMK searchContainerMK">
+
+        <?php if (!empty($_GET['notfound'])): ?>
+            <div style="width: 100%; margin-bottom: 1.5rem; padding: 1rem 1.5rem; background: #fff8e1; border: 1px solid #ffe082; color: #b78103; font-family: 'Poppins', sans-serif; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>REQUISITION NOTICE: The requested Mobile Suit unit could not be located in Hangar active inventory. Please browse available units below.</span>
+            </div>
+        <?php endif; ?>
 
         <!-- Filter Options Bar -->
         <form method="GET" action="search.php" class="filterBarMK" id="spSearchForm">
@@ -247,7 +233,7 @@ if ($pdo) {
     <?php require_once __DIR__ . '/../footer.php'; ?>
 
     <!-- G.O.S SEARCH & CART HUD OVERLAYS -->
-    <script>window.HANGAR_PATHS = { cartPage: '../cart/cart.php', searchPage: 'search.php', apiSearch: 'api_search.php', productDetails: '../product-details.php', promotionalBase: '../../promotional' };</script>
+    <script>window.HANGAR_PATHS = { cartPage: '../cart/cart.php', searchPage: 'search.php', apiSearch: 'api_search.php', productDetails: '../product-details.php', promotionalBase: '../../promotional', apiCheckout: '../cart/api_checkout.php' };</script>
     <?php $_searchAssetPrefix = './'; require_once __DIR__ . '/search_modal.php'; ?>
     <?php $_cartAssetPrefix   = './'; require_once __DIR__ . '/../cart/cart_modal.php'; ?>
 </body>
