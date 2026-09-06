@@ -589,5 +589,70 @@ if ($pdo) {
     <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional', apiCheckout: 'cart/api_checkout.php' };</script>
     <?php $_searchAssetPrefix = 'search/'; require_once __DIR__ . '/search/search_modal.php'; ?>
     <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
+
+    <!-- PRODUCT PURCHASE ACTIONS CONTROLLER -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentProduct = <?php echo json_encode([
+                'id'        => (int)$product['id'],
+                'name'      => (string)$product['name'],
+                'grade'     => (string)($product['grade'] ?? ''),
+                'brand'     => (string)($product['brand'] ?? 'BANDAI'),
+                'price'     => (float)($product['price'] ?? 0),
+                'image_url' => (string)($product['image_url'] ?? '')
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+
+            const btnAddToCart = document.getElementById('pdBtnAddToCart');
+            const btnOrderNow  = document.getElementById('pdBtnOrderNow');
+            const qtyInput     = document.getElementById('pdQty');
+
+            function getSelectedQty() {
+                const val = parseInt(qtyInput ? qtyInput.value : 1, 10);
+                return (!isNaN(val) && val > 0) ? val : 1;
+            }
+
+            let isBusy = false;
+            function throttleAction(actionFn) {
+                if (isBusy) return;
+                isBusy = true;
+                if (btnAddToCart) btnAddToCart.disabled = true;
+                if (btnOrderNow) btnOrderNow.disabled = true;
+
+                try {
+                    actionFn();
+                } finally {
+                    setTimeout(function() {
+                        isBusy = false;
+                        if (btnAddToCart) btnAddToCart.disabled = false;
+                        if (btnOrderNow) btnOrderNow.disabled = false;
+                    }, 800);
+                }
+            }
+
+            if (btnAddToCart) {
+                btnAddToCart.addEventListener('click', function() {
+                    throttleAction(function() {
+                        if (window.HangarCart) {
+                            window.HangarCart.addItem(currentProduct, getSelectedQty());
+                        }
+                    });
+                });
+            }
+
+            if (btnOrderNow) {
+                btnOrderNow.addEventListener('click', function() {
+                    throttleAction(function() {
+                        if (window.HangarCart) {
+                            window.HangarCart.addItem(currentProduct, getSelectedQty());
+                        }
+                        const cartUrl = (window.HANGAR_PATHS && window.HANGAR_PATHS.cartPage)
+                            ? window.HANGAR_PATHS.cartPage
+                            : 'cart/cart.php';
+                        window.location.href = cartUrl;
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>

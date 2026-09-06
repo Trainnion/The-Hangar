@@ -23,13 +23,15 @@
         promotionalPath: 'promotional',
 
         init: function() {
-            // Determine relative promotional path based on directory
-            this.promotionalPath = document.querySelector('img[src*="promotional/"]') ? 'promotional' : '../promotional';
+            this.promotionalPath = (window.HANGAR_PATHS && window.HANGAR_PATHS.promotionalBase)
+                ? window.HANGAR_PATHS.promotionalBase
+                : 'promotional';
 
             this.loadCart();
             this.setupEventListeners();
             this.updateNavBadges();
             this.renderDrawer();
+            this.renderDedicatedPage();
         },
 
         loadCart: function() {

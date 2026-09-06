@@ -311,8 +311,8 @@ extract(hangarBootstrap());
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // NOTE: HangarCart.init() already runs via cart_modal.php and calls renderDedicatedPage()
-            // We only need page-specific logic here.
+            // HangarCart.init() (in cart.js) renders both the drawer and this page's
+            // table on load. We only need page-specific dispatch/checkout logic here.
 
             const dispatchBtn = document.getElementById('cartFinalizeDispatchBtn');
             const successOverlay = document.getElementById('orderSuccessOverlay');
