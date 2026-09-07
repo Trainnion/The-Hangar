@@ -10,7 +10,7 @@
     /* The Hangar Official Typography */
     --font-heading: 'Poppins', sans-serif;
     --font-body: 'Poppins', sans-serif;
-    --font-logo: 'Orbitron', sans-serif;
+    --font-logo: 'Poppins', sans-serif;
 }
 
 * {
@@ -96,7 +96,7 @@ html, body {
     color: #ffffff;
     font-family: 'Poppins', sans-serif;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: 1.5px;
     text-decoration: none;
     background: transparent;
@@ -238,7 +238,7 @@ html, body {
     top: 92px;
     left: 3rem;
     font-size: 3.4rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 4px;
     color: #ffffff;
     z-index: 15;
@@ -263,7 +263,7 @@ html, body {
 .heroGradeTag {
     display: inline-block;
     font-size: 1.3rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 3px;
     color: #ffffff;
     margin-bottom: 0.2rem;
@@ -272,7 +272,7 @@ html, body {
 
 .slideContent h2 { 
     font-size: 2.6rem; 
-    font-weight: 900; 
+    font-weight: 700; 
     letter-spacing: 2px; 
     margin-bottom: 0.2rem; 
     line-height: 1.15;
@@ -294,7 +294,7 @@ html, body {
     background-color: #ffffff;
     color: #000000;
     text-decoration: none;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 0.9rem;
     letter-spacing: 2px;
     border: 2px solid #ffffff;
@@ -322,7 +322,7 @@ html, body {
     align-items: center;
     gap: 0.35rem;
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     line-height: 1;
 }
@@ -423,7 +423,7 @@ html, body {
 .badgeReprintSec2 {
     display: inline-block;
     font-size: 2.8rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #ffffff;
     text-transform: uppercase;
@@ -432,7 +432,7 @@ html, body {
 
 .heroTitleSec2 {
     font-size: 2.2rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #ffffff;
     text-transform: uppercase;
@@ -441,7 +441,7 @@ html, body {
 
 .heroSubtitleSec2 {
     font-size: 1.4rem;
-    font-weight: 500;
+    font-weight: 400;
     color: #e0e0e0;
     line-height: 1.35;
     margin: 0 0 2.5rem 0;
@@ -460,7 +460,7 @@ html, body {
 .heroAuthorSec2 {
     display: block;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 400;
     color: #d0d0d0;
 }
 
@@ -482,7 +482,7 @@ html, body {
     align-items: center;
     gap: 0.45rem;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     line-height: 1;
 }
@@ -652,7 +652,7 @@ html, body {
     align-items: center;
     gap: 0.4rem;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #080808;
     letter-spacing: 2px;
 }
@@ -746,7 +746,7 @@ html, body {
 }
 .headerCatCenter h2 { 
     font-size: 3rem; 
-    font-weight: 800; 
+    font-weight: 700; 
     letter-spacing: 3px; 
     color: #121111; 
     text-transform: uppercase; 
@@ -804,7 +804,7 @@ html, body {
     z-index: 10;
     color: #ffffff;
     font-size: 1.4rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     pointer-events: none;
@@ -943,7 +943,7 @@ html, body {
 
 .bsTitle {
     font-size: 1.05rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #080808;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -961,7 +961,7 @@ html, body {
 
 .bsPrice {
     font-size: 0.95rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #080808;
 }
 
@@ -1029,7 +1029,7 @@ html, body {
     border: 1px solid #080808;
     color: #080808;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     border-radius: 3px;
     transition: all 0.2s ease;
@@ -1052,7 +1052,7 @@ html, body {
     border: 1px solid #080808;
     color: #080808;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 400;
     font-family: inherit;
     cursor: pointer;
     border-radius: 3px;
@@ -1088,7 +1088,7 @@ html, body {
     align-items: center;
     gap: 0.25rem;
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     font-family: monospace, sans-serif;
     letter-spacing: 1px;
 }
@@ -1208,7 +1208,7 @@ html, body {
 
 .headerContainerFT h2 {
     font-size: 3rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 12px;
     color: #ffffff;
     text-transform: uppercase;
@@ -1254,7 +1254,7 @@ html, body {
 
 .featuredTitleFT {
     font-size: 1.6rem;
-    font-weight: 900;
+    font-weight: 700;
     line-height: 1.15;
     letter-spacing: 1.5px;
     margin-bottom: 0.5rem;
@@ -1271,7 +1271,7 @@ html, body {
 
 .featuredStatusFT {
     font-size: 0.95rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: #ffffff;
@@ -1347,7 +1347,7 @@ html, body {
 
 .bannerTitleFT {
     font-size: 2.2rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 3px;
     color: #ffffff;
     line-height: 1;
@@ -1423,7 +1423,7 @@ html, body {
 
 .footerHeadingFT {
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     margin-bottom: 1.5rem;
     color: #ffffff;
@@ -1444,7 +1444,7 @@ html, body {
     color: #d0d0d0;
     text-decoration: none;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 400;
     transition: color 0.2s ease;
 }
 
@@ -1486,7 +1486,7 @@ html, body {
     color: #d0d0d0;
     text-decoration: none;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 400;
     transition: color 0.2s ease;
 }
 
@@ -1510,7 +1510,7 @@ html, body {
 
 .footerDisclaimerFT p {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 400;
     color: #a0a0a0;
     margin: 0;
     letter-spacing: 0.5px;
@@ -1536,7 +1536,7 @@ html, body {
 
 .featuredHeadlineFT {
     letter-spacing: 14px;
-    font-weight: 900;
+    font-weight: 700;
     font-size: 2.2rem;
     color: #ffffff;
     text-transform: uppercase;
@@ -1557,7 +1557,7 @@ html, body {
 
 .statusSpacedFT {
     letter-spacing: 6px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 1rem;
     color: #ffffff;
     display: inline-block;
@@ -1705,9 +1705,9 @@ html, body {
 }
 
 .systemBadgeText {
-    font-family: var(--font-system, 'Orbitron', sans-serif);
+    font-family: var(--font-system, 'Poppins', sans-serif);
     font-size: 0.85rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #080808;
 }

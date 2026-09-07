@@ -11,6 +11,10 @@ $error = '';
 // 1. Handle DELETE
 if (isset($_GET['delete']) && $pdo) {
     $delId = (int)$_GET['delete'];
+    if (!isset($_GET['token']) || !hash_equals($_SESSION['csrf_token'] ?? '', (string)$_GET['token'])) {
+        header('Location: products.php?msg=csrf');
+        exit;
+    }
     $stmt = $pdo->prepare("DELETE FROM `products` WHERE `id` = :id");
     $stmt->execute(['id' => $delId]);
     header('Location: products.php?msg=deleted');
@@ -19,6 +23,10 @@ if (isset($_GET['delete']) && $pdo) {
 
 // 2. Handle ADD / EDIT POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
+    if (!csrfValid() || !in_array($_POST['form_action'] ?? '', ['add', 'edit'], true)) {
+        header('Location: products.php?msg=csrf');
+        exit;
+    }
     $action = $_POST['form_action'] ?? 'add';
     $name = trim($_POST['name'] ?? '');
     $grade = trim($_POST['grade'] ?? 'MG');
@@ -30,8 +38,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     $is_new_release = isset($_POST['is_new_release']) ? 1 : 0;
     $is_best_seller = isset($_POST['is_best_seller']) ? 1 : 0;
     $is_model_kit = isset($_POST['is_model_kit']) ? 1 : 0;
+    // Server-side validation (T18)
+    $grade = in_array(trim($_POST['grade'] ?? 'MG'), ['MG','RG','PG','HG','SD','FG','BB','METAL BUILD','HI-RES','RE 1/100','RE'], true) ? trim($_POST['grade']) : 'MG';
+    $scale = in_array(trim($_POST['scale'] ?? '1/100'), ['1/60','1/100','1/144','1/220','NONSCALE'], true) ? trim($_POST['scale']) : '1/100';
+    $price = max(0.0, (float)($_POST['price'] ?? 0));
+    $sold_count = max(0, (int)($_POST['sold_count'] ?? 0));
+    $brand = (trim($_POST['brand'] ?? '') === '') ? 'BANDAI' : trim($_POST['brand']);
+    $stock_status = in_array(trim($_POST['stock_status'] ?? 'IN-STOCK'), ['IN-STOCK','PRE-ORDER','SOLD OUT'], true) ? trim($_POST['stock_status']) : 'IN-STOCK';
 
-    $uploadedImg = handleAssetUpload('prod_', 'product_file', 'cropped_image_data', 'existing_image');
+    $uploadedImg = handleAssetUpload('prod_', 'product_file', 'cropped_image_data', 'existing_image', 'assets/uploads/products');
 
     if ($action === 'add') {
         if (empty($name)) {
@@ -115,6 +130,18 @@ if (is_dir($promotionalDir)) {
         }
     }
 }
+// Include admin-uploaded product images (managed paths under assets/uploads/products/)
+$uploadProdDir = __DIR__ . '/../assets/uploads/products';
+if (is_dir($uploadProdDir)) {
+    foreach (scandir($uploadProdDir) as $f) {
+        if ($f !== '.' && $f !== '..' && !is_dir($uploadProdDir . '/' . $f)) {
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $existingImages[] = 'assets/uploads/products/' . $f;
+            }
+        }
+    }
+}
 
 // Fetch products with search/filter
 $search = trim($_GET['search'] ?? '');
@@ -153,7 +180,7 @@ if (isset($_GET['edit']) && $pdo) {
     <title>Product Catalog Manager | THE HANGAR ADMIN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Cropper.js CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
@@ -190,6 +217,14 @@ if (isset($_GET['edit']) && $pdo) {
                     </svg>
                     <span>PRODUCTS</span>
                 </a>
+                <a href="orders.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
+                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
+                        <line x1="5" y1="6" x2="13" y2="6"></line>
+                    </svg>
+                    <span>ORDERS</span>
+                </a>
                 <a href="sliders.php" class="navLink">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -197,6 +232,13 @@ if (isset($_GET['edit']) && $pdo) {
                         <line x1="12" y1="17" x2="12" y2="21"></line>
                     </svg>
                     <span>SLIDERS (SEC 1, 2, 7)</span>
+                </a>
+                <a href="gcash.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>GCASH &amp; PAYMENTS</span>
                 </a>
             </nav>
         </div>
@@ -296,7 +338,7 @@ if (isset($_GET['edit']) && $pdo) {
                                 <?php foreach ($products as $p): ?>
                                     <tr>
                                         <td>
-                                            <img src="../promotional/<?php echo htmlspecialchars($p['image_url']); ?>" alt="" class="prodThumbnail" onerror="this.src='../promotional/Asset 8.png'">
+                                            <img src="<?php echo htmlspecialchars(adminAssetUrl($p['image_url'])); ?>" alt="" class="prodThumbnail" onerror="this.src='../promotional/Asset 8.png'">
                                         </td>
                                         <td>
                                             <strong style="font-size: 0.95rem;"><?php echo htmlspecialchars($p['name']); ?></strong>
@@ -328,7 +370,7 @@ if (isset($_GET['edit']) && $pdo) {
                                         <td>
                                             <div class="actionBtns">
                                                 <a href="products.php?edit=<?php echo $p['id']; ?>" class="btnSecondary btnSmall">EDIT</a>
-                                                <a href="products.php?delete=<?php echo $p['id']; ?>" class="btnDanger" onclick="return confirm('Are you sure you want to remove this product?');">DELETE</a>
+                                                <a href="products.php?delete=<?php echo $p['id']; ?>&token=<?php echo csrfToken(); ?>" class="btnDanger" onclick="return confirm('Are you sure you want to remove this product?');">DELETE</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -351,6 +393,7 @@ if (isset($_GET['edit']) && $pdo) {
 
             <form method="POST" action="products.php" enctype="multipart/form-data" id="productForm">
                 <input type="hidden" name="form_action" value="<?php echo $editProduct ? 'edit' : 'add'; ?>">
+                <?php echo csrfField(); ?>
                 <?php if ($editProduct): ?>
                     <input type="hidden" name="product_id" value="<?php echo $editProduct['id']; ?>">
                     <input type="hidden" name="current_image_url" value="<?php echo htmlspecialchars($editProduct['image_url']); ?>">
@@ -471,7 +514,7 @@ if (isset($_GET['edit']) && $pdo) {
                     <div id="imagePreviewBox" style="margin-top: 1rem; display: <?php echo !empty($editProduct['image_url']) ? 'block' : 'none'; ?>;">
                         <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">CURRENT PREVIEW:</span>
                         <div style="display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;">
-                            <img id="previewImg" src="<?php echo !empty($editProduct['image_url']) ? '../promotional/' . htmlspecialchars($editProduct['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <img id="previewImg" src="<?php echo !empty($editProduct['image_url']) ? adminAssetUrl($editProduct['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
                             <button type="button" class="btnSecondary btnSmall" id="cropCurrentProductBtn" style="border-color: var(--brand-cyan); color: var(--brand-cyan);">
                                 ✂️ CROP THIS CURRENT PICTURE
                             </button>
@@ -649,7 +692,7 @@ if (isset($_GET['edit']) && $pdo) {
         if (existingImageSelect) {
             existingImageSelect.addEventListener('change', (e) => {
                 if (e.target.value) {
-                    previewImg.src = '../promotional/' + e.target.value;
+                    previewImg.src = (e.target.value.indexOf('/') !== -1) ? '../' + e.target.value : '../promotional/' + e.target.value;
                     imagePreviewBox.style.display = 'block';
                     croppedImageData.value = ''; // Reset custom crop
                 }

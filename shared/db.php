@@ -6,48 +6,13 @@
 // Default fallback image constant — used when no image is uploaded for a product or slider
 define('HANGAR_DEFAULT_IMAGE', 'cut-out metal build.webp');
 
-function getDBConnection() {
-    static $pdo = null;
-    if ($pdo !== null) {
-        return $pdo;
-    }
-
-    $host = '127.0.0.1';
-    $user = 'root';
-    $pass = '';
-    $dbname = 'the_hangar_db';
-    $charset = 'utf8mb4';
-
-    try {
-        // Connect to MySQL server first without selecting DB to check/create it
-        $rootPdo = new PDO("mysql:host=$host;charset=$charset", $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-
-        // Create database if it does not exist
-        $rootPdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-
-        // Now connect to the specific database
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=$charset", $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-
-        // Run migrations & initial seeders only if schema not yet installed
-        $markerFile = __DIR__ . '/.schema_installed';
-        if (!file_exists($markerFile)) {
-            initDatabaseTables($pdo);
-            // Write marker file so we skip schema checks on subsequent requests
-            file_put_contents($markerFile, date('Y-m-d H:i:s') . ' — schema installed');
-        }
-
-        return $pdo;
-    } catch (PDOException $e) {
-        error_log("Database connection failed: " . $e->getMessage());
-        return null;
-    }
-}
+// ---------------------------------------------------------------------------
+// DATABASE CONNECTION
+// The connection logic (hangarDatabaseConfig() + getDBConnection()) now lives in
+// database/config.php. Loading that file here exposes the shared PDO connection
+// to every module that requires this file.
+// ---------------------------------------------------------------------------
+require_once __DIR__ . '/../database/config.php';
 
 function initDatabaseTables($pdo) {
     // 1. Products Table
@@ -114,6 +79,15 @@ function initDatabaseTables($pdo) {
             `total` DECIMAL(10,2) NOT NULL,
             `promo_code` VARCHAR(50) NULL,
             `status` VARCHAR(30) NOT NULL DEFAULT 'pending',
+            -- Payment & fulfilment capture (Phase 2 — GCash-ready checkout)
+            `payment_method` VARCHAR(30) NULL,
+            `payment_status` VARCHAR(30) NOT NULL DEFAULT 'pending',
+            `payment_ref` VARCHAR(100) NULL,
+            `gcash_ref` VARCHAR(100) NULL,
+            `customer_name` VARCHAR(150) NULL,
+            `customer_email` VARCHAR(255) NULL,
+            `customer_phone` VARCHAR(30) NULL,
+            `shipping_address` TEXT NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -142,6 +116,15 @@ function initDatabaseTables($pdo) {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // 7. Settings Table (simple key/value store — e.g. GCash QR image path)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `settings` (
+            `skey` VARCHAR(64) NOT NULL PRIMARY KEY,
+            `svalue` TEXT NULL,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
     // --- Seed initial data if tables are empty ---
 
     // Seed users
@@ -166,6 +149,47 @@ function initDatabaseTables($pdo) {
     $checkPromos = $pdo->query("SELECT COUNT(*) AS total FROM `promo_codes`")->fetch();
     if ($checkPromos && (int)$checkPromos['total'] === 0) {
         seedInitialPromoCodes($pdo);
+    }
+}
+
+/**
+ * Idempotent migration for EXISTING databases created before payment capture existed.
+ * Ensures the `orders` table carries the Phase 2 payment/customer columns, adding any
+ * missing ones via ALTER (MySQL pre-8 does not support "ADD COLUMN IF NOT EXISTS", so we
+ * ignore the duplicate-column error when a column already exists).
+ * Safe to call on every connection open.
+ */
+function ensureOrderPaymentColumns($pdo) {
+    if (!$pdo) return;
+    $migrations = [
+        "ALTER TABLE `orders` ADD COLUMN `payment_method` VARCHAR(30) NULL AFTER `status`",
+        "ALTER TABLE `orders` ADD COLUMN `payment_status` VARCHAR(30) NOT NULL DEFAULT 'pending' AFTER `payment_method`",
+        "ALTER TABLE `orders` ADD COLUMN `payment_ref` VARCHAR(100) NULL AFTER `payment_status`",
+        "ALTER TABLE `orders` ADD COLUMN `gcash_ref` VARCHAR(100) NULL AFTER `payment_ref`",
+        "ALTER TABLE `orders` ADD COLUMN `customer_name` VARCHAR(150) NULL AFTER `promo_code`",
+        "ALTER TABLE `orders` ADD COLUMN `customer_email` VARCHAR(255) NULL AFTER `customer_name`",
+        "ALTER TABLE `orders` ADD COLUMN `customer_phone` VARCHAR(30) NULL AFTER `customer_email`",
+        "ALTER TABLE `orders` ADD COLUMN `shipping_address` TEXT NULL AFTER `customer_phone`"
+    ];
+    foreach ($migrations as $stmt) {
+        try {
+            $pdo->exec($stmt);
+        } catch (Exception $e) {
+            // Column already present (or table layout differs) — non-fatal
+        }
+    }
+
+    // Ensure the settings key/value table exists (idempotent)
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `settings` (
+                `skey` VARCHAR(64) NOT NULL PRIMARY KEY,
+                `svalue` TEXT NULL,
+                `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+    } catch (Exception $e) {
+        // non-fatal
     }
 }
 
@@ -577,5 +601,34 @@ function seedInitialPromoCodes($pdo) {
 // Compatibility wrapper for modules expecting getConnection()
 function getConnection(): ?PDO {
     return getDBConnection();
+}
+
+/**
+ * Read a value from the `settings` key/value store.
+ * Returns $default when unset, DB unavailable, or empty.
+ */
+function getSetting($pdo, string $key, $default = null) {
+    if (!$pdo) return $default;
+    try {
+        $stmt = $pdo->prepare('SELECT `svalue` FROM `settings` WHERE `skey` = :k LIMIT 1');
+        $stmt->execute(['k' => $key]);
+        $row = $stmt->fetch();
+        return ($row && $row['svalue'] !== null && trim($row['svalue']) !== '') ? $row['svalue'] : $default;
+    } catch (Exception $e) {
+        return $default;
+    }
+}
+
+/**
+ * Write a value into the `settings` key/value store (upsert).
+ */
+function setSetting($pdo, string $key, $value) {
+    if (!$pdo) return;
+    try {
+        $stmt = $pdo->prepare('INSERT INTO `settings` (`skey`, `svalue`) VALUES (:k, :v) ON DUPLICATE KEY UPDATE `svalue` = :v');
+        $stmt->execute(['k' => $key, 'v' => $value]);
+    } catch (Exception $e) {
+        // non-fatal
+    }
 }
 

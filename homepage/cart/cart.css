@@ -26,7 +26,7 @@
     color: #0A0D14;
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1;
     box-shadow: 0 0 10px rgba(63, 196, 225, 0.6);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
@@ -87,7 +87,7 @@
 .cartItemsHeaderTitle {
     font-family: var(--font-heading);
     font-size: 1.15rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: #080808;
     text-transform: uppercase;
@@ -147,7 +147,7 @@
     background: transparent;
     font-family: var(--font-system);
     font-size: 0.88rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #080808;
 }
 
@@ -159,7 +159,7 @@
     height: 32px;
     border-radius: 3px;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 400;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -175,7 +175,7 @@
 
 /* ==========================================================================
    ORDER SUMMARY PANEL (Section 7 Look Static Banner)
-   Dark background, Orbitron typography, high contrast, clean minimal layout
+   Dark background, Poppins typography, high contrast, clean minimal layout
    ========================================================================== */
 .cartSummarySectionMK {
     position: sticky;
@@ -206,14 +206,14 @@
     color: var(--brand-cyan);
     font-size: 0.72rem;
     font-family: var(--font-system);
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
 }
 
 .cartBannerHeaderMK .staticBannerTitle {
     font-family: var(--font-heading);
     font-size: 1.5rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 1.5px;
     color: #ffffff;
     text-transform: uppercase;
@@ -254,13 +254,13 @@
     margin-top: 0.5rem;
     font-size: 1rem;
     color: #ffffff;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .summaryValMK.grandTotalMK {
     font-size: 1.35rem;
     color: var(--brand-cyan);
-    font-weight: 900;
+    font-weight: 700;
     text-shadow: 0 0 12px rgba(63, 196, 225, 0.4);
 }
 
@@ -276,7 +276,7 @@
 .cartPromoLabelMK {
     font-family: var(--font-system);
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: #888888;
     text-transform: uppercase;
@@ -311,7 +311,7 @@
     color: var(--brand-cyan);
     font-family: var(--font-system);
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 700;
     padding: 0.55rem 1.2rem;
     cursor: pointer;
     border-radius: 3px;
@@ -326,7 +326,7 @@
 .cartPromoStatusMK {
     font-size: 0.75rem;
     color: var(--brand-cyan);
-    font-weight: 600;
+    font-weight: 400;
 }
 
 /* Dispatch CTA Button */
@@ -338,7 +338,7 @@
     color: #080808;
     font-family: var(--font-heading);
     font-size: 0.95rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 1.5px;
     cursor: pointer;
     display: flex;
@@ -431,6 +431,134 @@
     pointer-events: auto;
 }
 
+/* ==========================================================================
+   PILOT CONTACT & GCash PAYMENT DECK (Phase 2 onboarding)
+   ========================================================================== */
+.cartContactDeckMK {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.1rem;
+    background: #111111;
+    border: 1px solid #2a2a2a;
+    border-radius: 3px;
+    margin-top: 1.25rem;
+}
+
+.cartContactDeckMK .cartPromoLabelMK {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--brand-cyan);
+    text-transform: uppercase;
+}
+
+.cartContactDeckMK input,
+.cartContactDeckMK textarea {
+    width: 100%;
+    background: #181818;
+    border: 1px solid #333333;
+    color: #ffffff;
+    padding: 0.6rem 0.85rem;
+    font-family: var(--font-system);
+    font-size: 0.82rem;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.cartContactDeckMK input:focus,
+.cartContactDeckMK textarea:focus {
+    border-color: var(--brand-cyan);
+}
+
+.cartContactDeckMK textarea {
+    resize: vertical;
+    min-height: 3.2rem;
+}
+
+.cartPayMethodRowMK {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.1rem;
+}
+
+.payMethodBadgeMK {
+    background: #00abe4;
+    color: #ffffff;
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 0.3rem 0.75rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.payMethodNoteMK {
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    color: #9ea4b0;
+    letter-spacing: 0.3px;
+}
+
+/* GCash QR scan-to-pay deck */
+.payDividerMK {
+    height: 0.5px;
+    background: #2a2a2a;
+    margin: 0.9rem 0;
+}
+
+.gcashQrBoxMK {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem;
+    background: #121212;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.gcashQrImageMK {
+    max-width: 180px;
+    max-height: 180px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
+}
+
+.gcashQrMissingMK {
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    color: #ff6b6b;
+    text-align: center;
+    padding: 1rem;
+}
+
+.cartContactDeckMK #coGcashRef {
+    width: 100%;
+    background: #181818;
+    border: 1px solid #333333;
+    color: #ffffff;
+    padding: 0.6rem 0.85rem;
+    font-family: var(--font-system);
+    font-size: 0.82rem;
+    border-radius: 3px;
+    outline: none;
+    letter-spacing: 1px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.cartContactDeckMK #coGcashRef:focus {
+    border-color: var(--brand-cyan);
+}
+
 .hangarToast.show {
     opacity: 1;
     transform: translateY(0);
@@ -439,7 +567,7 @@
 .hangarToastTitle {
     font-family: var(--font-system);
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
 }
 

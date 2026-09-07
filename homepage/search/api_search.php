@@ -99,7 +99,7 @@ try {
             'brand'           => $p['brand'],
             'stock_status'    => $p['stock_status'],
             'image_url'       => $imgFile,
-            'image_full_path' => $promotionalDir . '/' . $imgFile,
+            'image_full_path' => (strpos($imgFile, '/') !== false) ? $imgFile : $promotionalDir . '/' . $imgFile,
             'is_new_release'  => (bool)$p['is_new_release'],
             'is_best_seller'  => (bool)$p['is_best_seller'],
             'url'             => 'product-details.php?id=' . (int)$p['id']

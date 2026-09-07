@@ -36,9 +36,8 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Background Ambient Glow & Cockpit Grid -->
+    <!-- Background: minimalist Gundam-style panel-line texture (black & white) -->
     <div class="loginBg">
-        <div class="bgOverlay"></div>
         <div class="hudGrid"></div>
     </div>
 

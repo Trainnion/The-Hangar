@@ -72,7 +72,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                     $targetUrl = !empty($s['product_id']) ? "product-details.php?id=" . $s['product_id'] : ($s['custom_url'] ?: '#');
                 ?>
                     <div class="slide <?php echo $isActive; ?>" id="<?php echo $slideId; ?>">
-                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>">
+                        <img src="<?php echo htmlspecialchars(assetUrl($s['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>">
                         <div class="slideContent">
                             <?php if (!empty($s['badge'])): ?>
                                 <span class="heroGradeTag"><?php echo htmlspecialchars($s['badge']); ?></span>
@@ -117,7 +117,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
         ?>
             <!-- Slide <?php echo $i + 1; ?> -->
             <div class="heroSlideSec2">
-                <div class="heroInfoPanelSec2" style="background-image: url('<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>');">
+                <div class="heroInfoPanelSec2" style="background-image: url('<?php echo htmlspecialchars(assetUrl($s['image_url'], $promotionalPath)); ?>');">
                     <div class="heroOverlaySec2"></div>
                     <div class="heroContentSec2">
                         <span class="badgeReprintSec2"><?php echo htmlspecialchars($s['badge'] ?: 'REPRINT RUN!'); ?></span>
@@ -147,7 +147,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                     </div>
                 </div>
                 <div class="heroImagePanelSec2">
-                    <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo strip_tags($s['title']); ?>">
+                    <img src="<?php echo htmlspecialchars(assetUrl($s['image_url'], $promotionalPath)); ?>" alt="<?php echo strip_tags($s['title']); ?>">
                 </div>
             </div>
         <?php endforeach; ?>
@@ -185,7 +185,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
             ?>
                 <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
                     <div class="productImgContainer">
-                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
+                        <img src="<?php echo htmlspecialchars(assetUrl($p['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
                     <div class="productDetails">
                         <div class="productBadges">
@@ -284,7 +284,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
             <?php foreach ($bsProducts as $p): ?>
                 <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
                     <div class="productImgContainer">
-                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
+                        <img src="<?php echo htmlspecialchars(assetUrl($p['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
                     <div class="productDetails">
                         <div class="productBadges">
@@ -344,7 +344,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
             ?>
                 <a href="product-details.php?id=<?php echo $p['id']; ?>" class="productCard">
                     <div class="productImgContainer">
-                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($p['image_url']); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
+                        <img src="<?php echo htmlspecialchars(assetUrl($p['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($p['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
                     </div>
                     <div class="productDetails">
                         <div class="productBadges">
@@ -389,10 +389,10 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                 <div class="topBannerSlideFT">
                     <?php if (!empty($targetUrl)): ?>
                         <a href="<?php echo htmlspecialchars($targetUrl); ?>" style="display: block; width: 100%; height: 100%;">
-                            <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
+                            <img src="<?php echo htmlspecialchars(assetUrl($s['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
                         </a>
                     <?php else: ?>
-                        <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($s['image_url']); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
+                        <img src="<?php echo htmlspecialchars(assetUrl($s['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($s['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/SEED_kv_main001(2012Mecha)_base_withLogo.png'">
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
@@ -458,7 +458,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 
 
 <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
-<script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional', apiCheckout: 'cart/api_checkout.php' };</script>
+<script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: '../promotional', apiCheckout: 'cart/api_checkout.php' };</script>
 <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 
 <!-- Script tags -->

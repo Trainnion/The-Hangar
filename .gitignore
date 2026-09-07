@@ -12,3 +12,6 @@ ehthumbs_vista.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Credentials / local configuration
+database/config.php

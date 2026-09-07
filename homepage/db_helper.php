@@ -63,12 +63,30 @@ function getStorefrontData() {
 }
 
 /**
+ * Resolve an image_url into a web-relative URL.
+ * - Legacy rows store a bare filename (rendered under the legacy 'promotional'/seed base).
+ * - Admin-uploaded rows store a managed path (e.g. assets/uploads/products/prod_...webp) used as-is。
+ * @return string
+ */
+function assetUrl($imageUrl, $basePath = 'promotional') {
+    $img = trim((string)$imageUrl);
+    if ($img === '') {
+        return $basePath . '/Asset 8.png';
+    }
+    // Already a managed path (or absolute URL) -> use as-is
+    if (strpos($img, '/') !== false || stripos($img, 'http') === 0) {
+        return $img;
+    }
+    return $basePath . '/' . $img;
+}
+
+/**
  * Reusable Product Card Component Renderer
  */
 function renderProductCard($p, $promotionalPath = 'promotional', $detailsPrefix = '') {
     $id    = (int)($p['id'] ?? 0);
     $name  = htmlspecialchars($p['name'] ?? '');
-    $img   = htmlspecialchars($p['image_url'] ?? '');
+    $img   = htmlspecialchars(assetUrl($p['image_url'] ?? '', $promotionalPath), ENT_QUOTES);
     $brand = htmlspecialchars(!empty($p['brand']) ? $p['brand'] : 'BANDAI');
     $stock = htmlspecialchars(!empty($p['stock_status']) ? $p['stock_status'] : 'IN-STOCK');
     $price = number_format((float)($p['price'] ?? 0), 2);
@@ -78,7 +96,7 @@ function renderProductCard($p, $promotionalPath = 'promotional', $detailsPrefix 
     return <<<HTML
 <a href="{$url}" class="productCard">
     <div class="productImgContainer">
-        <img src="{$promotionalPath}/{$img}" alt="{$name}" onerror="this.src='{$promotionalPath}/Asset 8.png'">
+        <img src="{$img}" alt="{$name}" onerror="this.src='{$promotionalPath}/Asset 8.png'">
     </div>
     <div class="productDetails">
         <div class="productBadges">

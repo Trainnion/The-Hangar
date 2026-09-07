@@ -106,6 +106,8 @@
             results.forEach((item, idx) => {
                 const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
                     ? item.image_url 
+                    : (item.image_url && item.image_url.indexOf('/') !== -1)
+                    ? item.image_url
                     : `${promotionalPath}/${item.image_url || 'Asset 8.png'}`;
 
                 html += `

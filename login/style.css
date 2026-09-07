@@ -1,7 +1,7 @@
 /* ============================================================
    THE HANGAR - GUND-ORDER SYSTEM (G.O.S) AUTHENTICATION STYLING
    Reskinned to Section 6 & 7 minimal design language:
-   Clean borders, Orbitron typography, generous spacing, no HUD chrome.
+   Clean borders, Poppins typography (Regular & Bold), generous spacing, no HUD chrome.
    ============================================================ */
 
 @import url('../shared/hud-design.css');
@@ -16,9 +16,9 @@
     --card-bg: #14171e;
     --border-color: rgba(255, 255, 255, 0.1);
 
-    --font-heading: 'Orbitron', 'Poppins', sans-serif;
+    --font-heading: 'Poppins', sans-serif;
     --font-body: 'Poppins', sans-serif;
-    --font-system: 'Orbitron', monospace, sans-serif;
+    --font-system: 'Poppins', sans-serif;
 }
 
 * {
@@ -47,7 +47,17 @@ body {
     z-index: 0;
     pointer-events: none;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 30%, rgba(63, 196, 225, 0.06) 0%, rgba(12, 14, 18, 0.98) 70%, #0c0e12 100%);
+    background-color: #0c0e12;
+}
+
+/* Minimalist Gundam-style panel-line detail layer (thin, sparse, black & white) */
+.hudGrid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url('panel-lines.svg');
+    background-size: 1400px 900px;
+    background-repeat: repeat;
 }
 
 /* Top Left Quick Return (Section 6 back link style) */
@@ -123,7 +133,7 @@ body {
 .authTitle {
     font-family: var(--font-heading);
     font-size: 1.35rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 2px;
     color: #ffffff;
     text-transform: uppercase;
@@ -145,7 +155,7 @@ body {
 .sessionBannerHeader {
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     color: var(--brand-cyan);
     text-transform: uppercase;
@@ -164,7 +174,7 @@ body {
 .sessionRoleBadge {
     font-family: var(--font-system);
     font-size: 0.65rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     padding: 0.2rem 0.5rem;
     border-radius: 3px;
@@ -194,7 +204,7 @@ body {
     padding: 0.45rem 0.9rem;
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
     text-decoration: none;
@@ -281,7 +291,7 @@ body {
     color: #717886;
     font-family: var(--font-heading);
     font-size: 0.78rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     padding: 0.7rem 0;
     cursor: pointer;
@@ -297,7 +307,7 @@ body {
 .tabBtn.activeTab {
     background-color: var(--brand-cyan);
     color: #080808;
-    font-weight: 900;
+    font-weight: 700;
 }
 
 /* Form Styling (Matches Admin & Cart standards) */
@@ -320,7 +330,7 @@ body {
 .inputGroup label {
     font-family: var(--font-system);
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: #9ea4b0;
     text-transform: uppercase;
@@ -424,7 +434,7 @@ body {
     color: #080808;
     font-family: var(--font-heading);
     font-size: 0.88rem;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     cursor: pointer;

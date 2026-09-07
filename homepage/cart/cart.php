@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/../../shared/bootstrap.php';
 extract(hangarBootstrap());
+require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() for the GCash QR path
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +15,7 @@ extract(hangarBootstrap());
     <title>CART // SUPPLY MANIFEST | THE HANGAR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../shared/hud-design.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="cart.css?v=<?php echo time(); ?>">
@@ -74,9 +75,9 @@ extract(hangarBootstrap());
         }
 
         .successOrderTitle {
-            font-family: var(--font-heading, 'Orbitron');
+            font-family: var(--font-heading, 'Poppins', sans-serif);
             font-size: 1.4rem;
-            font-weight: 800;
+            font-weight: 700;
             color: #ffffff;
             letter-spacing: 2px;
             margin-bottom: 0.5rem;
@@ -84,9 +85,9 @@ extract(hangarBootstrap());
         }
 
         .successOrderCode {
-            font-family: var(--font-system, monospace);
+            font-family: var(--font-system, 'Poppins', sans-serif);
             font-size: 0.95rem;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--brand-cyan, #3FC4E1);
             margin-bottom: 1.25rem;
             letter-spacing: 1px;
@@ -106,9 +107,9 @@ extract(hangarBootstrap());
             background: var(--brand-cyan, #3FC4E1);
             color: #080808;
             border: 1px solid var(--brand-cyan, #3FC4E1);
-            font-family: var(--font-heading, 'Orbitron');
+            font-family: var(--font-heading, 'Poppins', sans-serif);
             font-size: 0.88rem;
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
             cursor: pointer;
@@ -248,6 +249,40 @@ extract(hangarBootstrap());
                             <div id="cartPagePromoStatus" class="cartPromoStatusMK" style="display: none;"></div>
                         </div>
 
+                        <!-- Contact & Payment Deck (GCash QR scan-to-pay) -->
+                        <div class="cartContactDeckMK">
+                            <label class="cartPromoLabelMK" for="coCustomerName">PILOT CONTACT DETAILS</label>
+                            <input type="text" id="coCustomerName" class="cartPromoInputMK" placeholder="Full Name *" autocomplete="name">
+                            <input type="email" id="coCustomerEmail" class="cartPromoInputMK" placeholder="Email Address *" autocomplete="email">
+                            <input type="tel" id="coCustomerPhone" class="cartPromoInputMK" placeholder="Mobile Number *" autocomplete="tel">
+                            <textarea id="coShippingAddress" class="cartPromoInputMK" placeholder="Delivery Address (street, city, province) *" rows="2" autocomplete="street-address"></textarea>
+
+                            <div class="payDividerMK"></div>
+
+                            <label class="cartPromoLabelMK" for="coGcashRef">PAY VIA GCASH QR (Amount shown at order total)</label>
+                            <div class="gcashQrBoxMK">
+                                <?php
+                                    $gcashCfg = hangarPaymentConfig();
+                                    $gcashQrPdo = getDBConnection();
+                                    $gcashQrUrl = getSetting($gcashQrPdo, 'gcash_qr_url', '');
+                                    if ($gcashQrUrl === '') {
+                                        $gcashQrUrl = trim((string)($gcashCfg['qr_image_url'] ?? ''));
+                                    }
+                                    $gcashQrExists = ($gcashQrUrl !== '' && is_file(__DIR__ . '/../../' . $gcashQrUrl));
+                                ?>
+                                <?php if ($gcashQrExists): ?>
+                                    <img id="coGcashQr" class="gcashQrImageMK" src="../../<?php echo htmlspecialchars($gcashQrUrl); ?>" alt="GCash QR">
+                                <?php else: ?>
+                                    <div class="gcashQrMissingMK">GCash QR not set yet.<br>Upload it in <strong>Admin &rarr; GCash &amp; Payments</strong>.</div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="cartPayMethodRowMK">
+                                <span class="payMethodBadgeMK">GCASH</span>
+                                <span class="payMethodNoteMK">1. Open GCash &nbsp;&bull;&nbsp; 2. Scan QR &nbsp;&bull;&nbsp; 3. Pay exact total &nbsp;&bull;&nbsp; 4. Paste reference below</span>
+                            </div>
+                            <input type="text" id="coGcashRef" class="cartPromoInputMK" placeholder="GCash reference / transaction number *" autocomplete="off">
+                        </div>
+
                         <!-- Dispatch Button -->
                         <button type="button" class="cartDispatchBtnMK" id="cartFinalizeDispatchBtn">
                             <span>INITIATE ORDER DISPATCH</span>
@@ -278,7 +313,7 @@ extract(hangarBootstrap());
         <div class="orderSuccessDialog">
             <h2 class="successOrderTitle">SORTIE DISPATCH AUTHORIZED!</h2>
             <div class="successOrderCode" id="successOrderNumber">MANIFEST ORDER #HGR-984271</div>
-            <p class="successOrderDesc">
+            <p class="successOrderDesc" id="successOrderDesc">
                 Your Gundam Mobile Suit units have been logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.
             </p>
             <button type="button" class="successDismissBtn" id="successDismissBtn">
@@ -297,7 +332,7 @@ extract(hangarBootstrap());
             searchPage: '../search/search.php',
             apiSearch: '../search/api_search.php',
             productDetails: '../product-details.php',
-            promotionalBase: '../promotional',
+            promotionalBase: '../../promotional',
             apiCheckout: 'api_checkout.php'
         };
     </script>
@@ -330,6 +365,36 @@ extract(hangarBootstrap());
 
                     const promoCode = (window.HangarCart && window.HangarCart.activePromo) ? window.HangarCart.activePromo : '';
 
+                    // Collect + validate pilot contact / delivery details (GCash checkout)
+                    const coNameEl = document.getElementById('coCustomerName');
+                    const coEmailEl = document.getElementById('coCustomerEmail');
+                    const coPhoneEl = document.getElementById('coCustomerPhone');
+                    const coAddressEl = document.getElementById('coShippingAddress');
+                    const coGcashRefEl = document.getElementById('coGcashRef');
+
+                    const customerName = coNameEl ? coNameEl.value.trim() : '';
+                    const customerEmail = coEmailEl ? coEmailEl.value.trim() : '';
+                    const customerPhone = coPhoneEl ? coPhoneEl.value.trim() : '';
+                    const shippingAddress = coAddressEl ? coAddressEl.value.trim() : '';
+                    const gcashRef = coGcashRefEl ? coGcashRefEl.value.trim() : '';
+
+                    if (!customerName || !customerEmail || !customerPhone || !shippingAddress) {
+                        if (window.HangarCart) {
+                            window.HangarCart.showToast('DETAILS REQUIRED', 'Complete your contact & delivery details before dispatching.', true);
+                        } else {
+                            alert('Please complete your contact & delivery details before dispatching.');
+                        }
+                        return;
+                    }
+                    if (!gcashRef) {
+                        if (window.HangarCart) {
+                            window.HangarCart.showToast('GCASH REFERENCE REQUIRED', 'Pay via the QR code, then paste your GCash reference number.', true);
+                        } else {
+                            alert('Please enter your GCash reference number after paying via the QR code.');
+                        }
+                        return;
+                    }
+
                     // UI Loading State
                     dispatchBtn.disabled = true;
                     const originalBtnContent = dispatchBtn.innerHTML;
@@ -345,7 +410,13 @@ extract(hangarBootstrap());
                             body: JSON.stringify({
                                 action: 'checkout',
                                 items: payloadItems,
-                                promo_code: promoCode
+                                promo_code: promoCode,
+                                payment_method: 'gcash',
+                                customer_name: customerName,
+                                customer_email: customerEmail,
+                                customer_phone: customerPhone,
+                                shipping_address: shippingAddress,
+                                gcash_ref: gcashRef
                             })
                         });
 
@@ -354,6 +425,18 @@ extract(hangarBootstrap());
                         if (response.ok && result.success) {
                             if (orderNumberEl) {
                                 orderNumberEl.textContent = `MANIFEST ORDER #${result.order_code}`;
+                            }
+
+                            // Reflect payment outcome in confirmation dialog (GCash)
+                            const successDesc = document.getElementById('successOrderDesc');
+                            if (successDesc) {
+                                if (result.payment_status === 'paid') {
+                                    successDesc.textContent = `GCash payment authorized (Reference: ${result.payment_ref}). Your Gundam Mobile Suit units are PAID and logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.`;
+                                } else if (result.payment_status === 'payment_pending') {
+                                    successDesc.textContent = `Order #${result.order_code} received. Your payment of ${'₱' + (result.total || '0.00')} is being verified against GCash reference ${result.gcash_ref || '—'}. We'll confirm once checked.`;
+                                } else {
+                                    successDesc.textContent = `Your Gundam Mobile Suit units are logged into the Hangar queue. Payment is pending confirmation. Tracking will be relayed to your registered pilot terminal.`;
+                                }
                             }
 
                             successOverlay.classList.add('show');

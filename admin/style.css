@@ -1,7 +1,7 @@
 /* ============================================================
    THE HANGAR - GUND-ORDER SYSTEM ADMIN PORTAL STYLING
    Reskinned to align with Section 6 & 7 design language:
-   Clean, minimal aesthetic with Orbitron & Poppins typography,
+   Clean, minimal aesthetic with Poppins typography (Regular & Bold),
    plain borders, high contrast, and no sci-fi HUD clutter.
    ============================================================ */
 
@@ -23,9 +23,9 @@
     --text-sub: #9ea4b0;
     --text-muted: #717886;
 
-    --font-heading: 'Orbitron', 'Poppins', sans-serif;
+    --font-heading: 'Poppins', sans-serif;
     --font-body: 'Poppins', sans-serif;
-    --font-system: 'Orbitron', monospace, sans-serif;
+    --font-system: 'Poppins', sans-serif;
 }
 
 * {
@@ -83,7 +83,7 @@ body {
     display: inline-block;
     font-family: var(--font-system);
     font-size: 0.68rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     color: var(--brand-cyan);
     text-transform: uppercase;
@@ -107,7 +107,7 @@ body {
     text-decoration: none;
     font-family: var(--font-body);
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: 0.8px;
     transition: all 0.2s ease;
 }
@@ -120,7 +120,7 @@ body {
 .navLink.active {
     background-color: var(--brand-cyan);
     color: #080808;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .sidebarFooter {
@@ -201,7 +201,7 @@ body {
 .topBarTitle {
     font-family: var(--font-heading);
     font-size: 1.2rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     display: flex;
     align-items: center;
@@ -268,7 +268,7 @@ body {
 .statLabel {
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -276,7 +276,7 @@ body {
 
 .statValue {
     font-size: 2.2rem;
-    font-weight: 900;
+    font-weight: 700;
     font-family: var(--font-system);
     color: #ffffff;
     line-height: 1;
@@ -309,7 +309,7 @@ body {
 .cardTitle {
     font-family: var(--font-heading);
     font-size: 1.1rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
@@ -325,7 +325,7 @@ body {
     padding: 0.6rem 1.4rem;
     font-family: var(--font-heading);
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
     cursor: pointer;
@@ -374,7 +374,7 @@ body {
     padding: 0.4rem 0.8rem;
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -405,7 +405,7 @@ body {
     color: var(--text-muted);
     font-family: var(--font-system);
     font-size: 0.7rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
     border-bottom: 1px solid var(--border-color);
@@ -526,7 +526,7 @@ body {
 .modalTitle {
     font-family: var(--font-heading);
     font-size: 1.25rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
 }
@@ -570,7 +570,7 @@ body {
     display: block;
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: var(--text-sub);
     margin-bottom: 0.4rem;
@@ -659,7 +659,7 @@ body {
     border-radius: 3px;
     font-family: var(--font-system);
     font-size: 0.72rem;
-    font-weight: 800;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }

@@ -60,7 +60,7 @@
     border: 1px solid #080808;
     color: #080808;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 400;
     font-family: inherit;
     border-radius: 3px;
     outline: none;
@@ -106,7 +106,7 @@
     padding: 0.6rem 1rem;
     font-family: var(--font-system);
     font-size: 0.68rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: #666666;
     border-bottom: 1px solid #eeeeee;
@@ -172,7 +172,7 @@
 .searchSuggestPriceMK {
     font-family: var(--font-system);
     font-size: 0.85rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #080808;
     flex-shrink: 0;
 }
@@ -183,7 +183,7 @@
     color: #ffffff;
     font-family: var(--font-system);
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     text-align: center;
     text-decoration: none;
@@ -216,7 +216,7 @@
 
 .quickPillLabelMK {
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 1px;
     color: #080808;
     text-transform: uppercase;

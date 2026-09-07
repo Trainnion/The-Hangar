@@ -17,6 +17,17 @@
         apiCheckout:    'api_checkout.php'
     }, window.HANGAR_PATHS || {});
 
+    // Defensive image-path normalisation: ensure only a bare filename (or an
+    // already-absolute http(s) URL) is ever used for thumbnails. This repairs
+    // stale localStorage entries that may already carry a path prefix (e.g.
+    // "promotional/xyz.webp"), which previously produced doubled/broken paths.
+    function normalizeImageFilename(value) {
+        if (!value || typeof value !== 'string') return 'Asset 8.png';
+        if (value.startsWith('http') || value.startsWith('assets/')) return value;
+        const parts = value.split('/');
+        return parts[parts.length - 1] || 'Asset 8.png';
+    }
+
     const HangarCart = {
         items: [],
         activePromo: null,
@@ -38,6 +49,21 @@
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 this.items = stored ? JSON.parse(stored) : [];
+
+                // Repair any stale image paths persisted before normalization existed
+                let stale = false;
+                this.items.forEach(it => {
+                    const normalized = normalizeImageFilename(it.image_url);
+                    if (it.image_url !== normalized) {
+                        it.image_url = normalized;
+                        stale = true;
+                    }
+                });
+                if (stale) {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
+                    } catch (err) { /* non-fatal */ }
+                }
 
                 const promoStored = localStorage.getItem(PROMO_KEY);
                 const promoMeta = localStorage.getItem(PROMO_META_KEY);
@@ -89,7 +115,7 @@
                     grade: product.grade || 'GUNPLA',
                     brand: product.brand || 'BANDAI SPIRITS',
                     price: parseFloat(product.price) || 0,
-                    image_url: product.image_url || 'Asset 8.png',
+                    image_url: normalizeImageFilename(product.image_url),
                     quantity: qty
                 });
             }
@@ -307,9 +333,8 @@
                 let cardsHtml = '';
                 this.items.forEach(item => {
                     const lineTotal = item.price * item.quantity;
-                    const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
-                        ? item.image_url 
-                        : `${this.promotionalPath}/${item.image_url}`;
+                    const srcFile = normalizeImageFilename(item.image_url);
+                    const imgSrc = (srcFile.startsWith('http') || srcFile.indexOf('/') !== -1) ? srcFile : `${this.promotionalPath}/${srcFile}`;
 
                     cardsHtml += `
                         <div class="cartProductCard" data-id="${item.id}">
@@ -346,9 +371,8 @@
                 let rowsHtml = '';
                 this.items.forEach(item => {
                     const lineTotal = item.price * item.quantity;
-                    const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
-                        ? item.image_url 
-                        : `${this.promotionalPath}/${item.image_url}`;
+                    const srcFile = normalizeImageFilename(item.image_url);
+                    const imgSrc = (srcFile.startsWith('http') || srcFile.indexOf('/') !== -1) ? srcFile : `${this.promotionalPath}/${srcFile}`;
 
                     rowsHtml += `
                         <tr>
@@ -361,7 +385,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="font-family:'Orbitron', monospace; font-weight:700;">${this.formatCurrency(item.price)}</td>
+                            <td style="font-family:var(--font-system,'Poppins',sans-serif); font-weight:700;">${this.formatCurrency(item.price)}</td>
                             <td>
                                 <div class="cartQtyPicker">
                                     <button type="button" class="cartQtyBtn" data-qty-dec="${item.id}">-</button>
@@ -369,7 +393,7 @@
                                     <button type="button" class="cartQtyBtn" data-qty-inc="${item.id}">+</button>
                                 </div>
                             </td>
-                            <td style="font-family:'Orbitron', monospace; font-weight:800; color:var(--brand-dark);">${this.formatCurrency(lineTotal)}</td>
+                            <td style="font-family:var(--font-system,'Poppins',sans-serif); font-weight:700; color:var(--brand-dark);">${this.formatCurrency(lineTotal)}</td>
                             <td>
                                 <button type="button" class="cartItemRemoveBtn" data-remove="${item.id}" title="Remove item" style="font-size:1.5rem;">&times;</button>
                             </td>

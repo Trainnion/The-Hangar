@@ -2,6 +2,7 @@
 require_once __DIR__ . '/auth.php';
 requireAdmin();
 require_once __DIR__ . '/../shared/db.php';
+require_once __DIR__ . '/upload_helper.php';
 
 $pdo = getDBConnection();
 
@@ -11,7 +12,10 @@ $nrCount = 0;
 $bsCount = 0;
 $mkCount = 0;
 $sliderCount = 0;
+$orderCount = 0;
+$pendingOrders = 0;
 $recentProducts = [];
+$recentOrders = [];
 $activeSliders = [];
 
 if ($pdo) {
@@ -20,8 +24,11 @@ if ($pdo) {
     $bsCount = (int)$pdo->query("SELECT COUNT(*) FROM `products` WHERE `is_best_seller` = 1")->fetchColumn();
     $mkCount = (int)$pdo->query("SELECT COUNT(*) FROM `products` WHERE `is_model_kit` = 1")->fetchColumn();
     $sliderCount = (int)$pdo->query("SELECT COUNT(*) FROM `sliders` WHERE `is_active` = 1")->fetchColumn();
+    $orderCount = (int)$pdo->query("SELECT COUNT(*) FROM `orders`")->fetchColumn();
+    $pendingOrders = (int)$pdo->query("SELECT COUNT(*) FROM `orders` WHERE `status` = 'pending'")->fetchColumn();
 
     $recentProducts = $pdo->query("SELECT * FROM `products` ORDER BY `id` DESC LIMIT 6")->fetchAll();
+    $recentOrders = $pdo->query("SELECT * FROM `orders` ORDER BY `id` DESC LIMIT 6")->fetchAll();
     $activeSliders = $pdo->query("
         SELECT s.*, p.name AS linked_product_name 
         FROM `sliders` s 
@@ -39,7 +46,7 @@ if ($pdo) {
     <title>Command Dashboard | THE HANGAR ADMIN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -73,6 +80,14 @@ if ($pdo) {
                     </svg>
                     <span>PRODUCTS</span>
                 </a>
+                <a href="orders.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
+                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
+                        <line x1="5" y1="6" x2="13" y2="6"></line>
+                    </svg>
+                    <span>ORDERS</span>
+                </a>
                 <a href="sliders.php" class="navLink">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -80,6 +95,20 @@ if ($pdo) {
                         <line x1="12" y1="17" x2="12" y2="21"></line>
                     </svg>
                     <span>SLIDERS (SEC 1, 2, 7)</span>
+                </a>
+                <a href="promos.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    <span>PROMO CODES</span>
+                </a>
+                <a href="gcash.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>GCASH &amp; PAYMENTS</span>
                 </a>
             </nav>
         </div>
@@ -143,6 +172,11 @@ if ($pdo) {
                     <span class="statValue"><?php echo $sliderCount; ?></span>
                     <span class="statSub">Across Sec 1, 2, and 7</span>
                 </div>
+                <div class="statCard">
+                    <span class="statLabel">PENDING ORDERS</span>
+                    <span class="statValue"><?php echo $pendingOrders; ?></span>
+                    <span class="statSub"><?php echo $orderCount; ?> Total Manifests</span>
+                </div>
             </div>
 
             <!-- Quick Action Bar -->
@@ -160,6 +194,9 @@ if ($pdo) {
                     </a>
                     <a href="sliders.php" class="btnSecondary">
                         <span>CUSTOMIZE HERO &amp; REPRINT SLIDERS</span>
+                    </a>
+                    <a href="orders.php" class="btnSecondary">
+                        <span>MANAGE ORDER DISPATCH</span>
                     </a>
                 </div>
             </div>
@@ -193,7 +230,7 @@ if ($pdo) {
                                 <?php foreach ($recentProducts as $prod): ?>
                                     <tr>
                                         <td>
-                                            <img src="../promotional/<?php echo htmlspecialchars($prod['image_url']); ?>" alt="" class="prodThumbnail" onerror="this.src='../promotional/Asset 8.png'">
+                                            <img src="<?php echo htmlspecialchars(adminAssetUrl($prod['image_url'])); ?>" alt="" class="prodThumbnail" onerror="this.src='../promotional/Asset 8.png'">
                                         </td>
                                         <td>
                                             <strong style="font-size: 0.92rem;"><?php echo htmlspecialchars($prod['name']); ?></strong>
@@ -264,7 +301,7 @@ if ($pdo) {
                                         </span>
                                     </td>
                                     <td>
-                                        <img src="../promotional/<?php echo htmlspecialchars($slider['image_url']); ?>" alt="" class="prodThumbnail" style="width: 70px; height: 40px; object-fit: cover;">
+                                        <img src="<?php echo htmlspecialchars(adminAssetUrl($slider['image_url'])); ?>" alt="" class="prodThumbnail" style="width: 70px; height: 40px; object-fit: cover;">
                                     </td>
                                     <td><strong><?php echo strip_tags($slider['title']); ?></strong></td>
                                     <td><?php echo htmlspecialchars($slider['subtitle'] ?: $slider['badge'] ?: '-'); ?></td>

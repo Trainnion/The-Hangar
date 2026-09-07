@@ -11,6 +11,10 @@ $error = '';
 // 1. Handle DELETE
 if (isset($_GET['delete']) && $pdo) {
     $delId = (int)$_GET['delete'];
+    if (!isset($_GET['token']) || !hash_equals($_SESSION['csrf_token'] ?? '', (string)$_GET['token'])) {
+        header('Location: sliders.php?msg=csrf');
+        exit;
+    }
     $stmt = $pdo->prepare("DELETE FROM `sliders` WHERE `id` = :id");
     $stmt->execute(['id' => $delId]);
     header('Location: sliders.php?msg=deleted');
@@ -19,6 +23,10 @@ if (isset($_GET['delete']) && $pdo) {
 
 // 2. Handle ADD / EDIT POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
+    if (!csrfValid() || !in_array($_POST['form_action'] ?? '', ['add', 'edit'], true)) {
+        header('Location: sliders.php?msg=csrf');
+        exit;
+    }
     $action = $_POST['form_action'] ?? 'add';
     $section_key = trim($_POST['section_key'] ?? 'section1');
     $title = trim($_POST['title'] ?? '');
@@ -31,8 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     $custom_url = trim($_POST['custom_url'] ?? '');
     $sort_order = (int)($_POST['sort_order'] ?? 1);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
+    // Server-side validation (T18)
+    $section_key =in_array(trim($_POST['section_key'] ?? 'section1'), ['section1','section2','section7'], true) ? trim($_POST['section_key']) : 'section1';
+    $button_text = (trim($_POST['button_text'] ?? '') === '') ? 'ORDER NOW!' : trim($_POST['button_text']);
+    $sort_order = max(1, (int)$_POST['sort_order'] ?? 1);
+    $product_id = (isset($_POST['product_id']) && $_POST['product_id'] !== '') ? max(1,(int)$_POST['product_id']) : null;
 
-    $uploadedImg = handleAssetUpload('slider_', 'slider_file', 'cropped_image_data', 'existing_image');
+    $uploadedImg = handleAssetUpload('slider_', 'slider_file', 'cropped_image_data', 'existing_image', 'assets/uploads/sliders');
 
     if ($action === 'add') {
         if (empty($title)) {
@@ -125,6 +138,18 @@ if (is_dir($promotionalDir)) {
         }
     }
 }
+// Include admin-uploaded slider images (managed paths under assets/uploads/sliders/)
+$uploadSliderDir = __DIR__ . '/../assets/uploads/sliders';
+if (is_dir($uploadSliderDir)) {
+    foreach (scandir($uploadSliderDir) as $f) {
+        if ($f !== '.' && $f !== '..' && !is_dir($uploadSliderDir . '/' . $f)) {
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                $existingImages[] = 'assets/uploads/sliders/' . $f;
+            }
+        }
+    }
+}
 
 // Fetch sliders with section filtering
 $filterSec = trim($_GET['sec'] ?? '');
@@ -161,7 +186,7 @@ if (isset($_GET['edit']) && $pdo) {
     <title>Slider Customizer (Sec 1, 2, 7) | THE HANGAR ADMIN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     
     <!-- Cropper.js CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
@@ -198,6 +223,14 @@ if (isset($_GET['edit']) && $pdo) {
                     </svg>
                     <span>PRODUCTS</span>
                 </a>
+                <a href="orders.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
+                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
+                        <line x1="5" y1="6" x2="13" y2="6"></line>
+                    </svg>
+                    <span>ORDERS</span>
+                </a>
                 <a href="sliders.php" class="navLink active">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -205,6 +238,20 @@ if (isset($_GET['edit']) && $pdo) {
                         <line x1="12" y1="17" x2="12" y2="21"></line>
                     </svg>
                     <span>SLIDERS (SEC 1, 2, 7)</span>
+                </a>
+                <a href="promos.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    <span>PROMO CODES</span>
+                </a>
+                <a href="gcash.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>GCASH &amp; PAYMENTS</span>
                 </a>
             </nav>
         </div>
@@ -301,7 +348,7 @@ if (isset($_GET['edit']) && $pdo) {
                                             </span>
                                         </td>
                                         <td>
-                                            <img src="../promotional/<?php echo htmlspecialchars($s['image_url']); ?>" alt="" class="prodThumbnail" style="width: 80px; height: 45px; object-fit: cover;" onerror="this.src='../promotional/Asset 8.png'">
+                                            <img src="<?php echo htmlspecialchars(adminAssetUrl($s['image_url'])); ?>" alt="" class="prodThumbnail" style="width: 80px; height: 45px; object-fit: cover;" onerror="this.src='../promotional/Asset 8.png'">
                                         </td>
                                         <td>
                                             <strong style="font-size: 0.95rem;"><?php echo strip_tags($s['title']); ?></strong>
@@ -335,7 +382,7 @@ if (isset($_GET['edit']) && $pdo) {
                                         <td>
                                             <div class="actionBtns">
                                                 <a href="sliders.php?edit=<?php echo $s['id']; ?>" class="btnSecondary btnSmall">EDIT</a>
-                                                <a href="sliders.php?delete=<?php echo $s['id']; ?>" class="btnDanger" onclick="return confirm('Remove this slide from the rotation?');">DELETE</a>
+                                                <a href="sliders.php?delete=<?php echo $s['id']; ?>&token=<?php echo csrfToken(); ?>" class="btnDanger" onclick="return confirm('Remove this slide from the rotation?');">DELETE</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -358,6 +405,7 @@ if (isset($_GET['edit']) && $pdo) {
 
             <form method="POST" action="sliders.php" enctype="multipart/form-data" id="slideForm">
                 <input type="hidden" name="form_action" value="<?php echo $editSlide ? 'edit' : 'add'; ?>">
+                <?php echo csrfField(); ?>
                 <?php if ($editSlide): ?>
                     <input type="hidden" name="slider_id" value="<?php echo $editSlide['id']; ?>">
                     <input type="hidden" name="current_image_url" value="<?php echo htmlspecialchars($editSlide['image_url']); ?>">
@@ -474,7 +522,7 @@ if (isset($_GET['edit']) && $pdo) {
                     <div id="sliderImagePreviewBox" style="margin-top: 1rem; display: <?php echo !empty($editSlide['image_url']) ? 'block' : 'none'; ?>;">
                         <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">CURRENT PREVIEW:</span>
                         <div style="display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;">
-                            <img id="sliderPreviewImg" src="<?php echo !empty($editSlide['image_url']) ? '../promotional/' . htmlspecialchars($editSlide['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <img id="sliderPreviewImg" src="<?php echo !empty($editSlide['image_url']) ? adminAssetUrl($editSlide['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
                             <button type="button" class="btnSecondary btnSmall" id="cropCurrentSlideBtn" style="border-color: var(--brand-cyan); color: var(--brand-cyan);">
                                 ✂️ CROP THIS CURRENT BANNER
                             </button>
@@ -648,7 +696,7 @@ if (isset($_GET['edit']) && $pdo) {
         if (existingSliderImageSelect) {
             existingSliderImageSelect.addEventListener('change', (e) => {
                 if (e.target.value) {
-                    sliderPreviewImg.src = '../promotional/' + e.target.value;
+                    sliderPreviewImg.src = (e.target.value.indexOf('/') !== -1) ? '../' + e.target.value : '../promotional/' + e.target.value;
                     sliderImagePreviewBox.style.display = 'block';
                     croppedImageData.value = '';
                 }

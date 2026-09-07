@@ -3,6 +3,7 @@ require_once __DIR__ . '/../shared/bootstrap.php';
 extract(hangarBootstrap());
 
 require_once __DIR__ . '/../shared/db.php';
+require_once __DIR__ . '/db_helper.php';
 $pdo = getDBConnection();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
@@ -42,7 +43,7 @@ if ($pdo) {
     <title><?php echo htmlspecialchars($product['name']); ?> | THE HANGAR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
     <style>
         *, *::before, *::after {
@@ -52,7 +53,7 @@ if ($pdo) {
         :root {
             --brand-cyan: #3FC4E1;
             --brand-dark: #231F20;
-            --font-system: 'Orbitron', sans-serif;
+            --font-system: 'Poppins', sans-serif;
             --font-heading: 'Poppins', sans-serif;
             --font-body: 'Poppins', sans-serif;
         }
@@ -502,7 +503,7 @@ if ($pdo) {
             
             <!-- Left Column: Product Image Gallery -->
             <div class="pdGalleryBox">
-                <img src="<?php echo $promotionalPath; ?>/<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
+                <img src="<?php echo htmlspecialchars(assetUrl($product['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
             </div>
 
             <!-- Right Column: Product Details & Purchase Actions -->
@@ -586,7 +587,7 @@ if ($pdo) {
     <?php require_once __DIR__ . '/footer.php'; ?>
 
     <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
-    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional', apiCheckout: 'cart/api_checkout.php' };</script>
+    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: '../promotional', apiCheckout: 'cart/api_checkout.php' };</script>
     <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 
     <!-- PRODUCT PURCHASE ACTIONS CONTROLLER -->

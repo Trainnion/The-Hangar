@@ -165,23 +165,66 @@ try {
         $checkCodeStmt->execute([':code' => $orderCode]);
     } while ($checkCodeStmt->fetch());
 
+    // GCash-ready payment capture (Phase 2 — QR scan-to-pay / manual verification)
+    $paymentCfg = hangarPaymentConfig();
+    $payMode = trim($paymentCfg['mode'] ?? 'qr');
+    if (!in_array($payMode, ['qr', 'stub', 'live'], true)) $payMode = 'qr';
+
+    $paymentMethod = trim($data['payment_method'] ?? 'gcash');
+    $customerName  = trim($data['customer_name']  ?? '');
+    $customerEmail = trim($data['customer_email'] ?? '');
+    $customerPhone = trim($data['customer_phone'] ?? '');
+    $shippingAddr  = trim($data['shipping_address'] ?? '');
+    $gcashRef      = trim($data['gcash_ref'] ?? '');
+
+    // Determine payment outcome based on the configured mode.
+    if ($payMode === 'qr') {
+        // QR scan-to-pay: NOT auto-confirmed. The customer pays in their GCash app and
+        // provides the transaction reference; the order waits for admin verification.
+        $paymentStatus = 'payment_pending';
+        $paymentRef    = null;
+        if ($gcashRef === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Enter the GCash transaction reference after paying via the QR code.']);
+            exit;
+        }
+    } elseif ($payMode === 'stub') {
+        // Dev-only simulation: immediate approval.
+        $paymentStatus = 'paid';
+        $paymentRef    = 'GCASH-STUB-' . $orderCode;
+    } else { // 'live'
+        // Reserved: real automated GCash/PSP integration (webhook confirmation).
+        $paymentStatus = 'pending';
+        $paymentRef    = null;
+    }
+
     // Begin transaction for order and order items
     $pdo->beginTransaction();
 
     $orderInsert = $pdo->prepare("
-        INSERT INTO `orders` 
-        (`user_id`, `order_code`, `subtotal`, `discount`, `shipping`, `total`, `promo_code`, `status`, `created_at`) 
-        VALUES 
-        (:user_id, :order_code, :subtotal, :discount, :shipping, :total, :promo_code, 'pending', NOW())
+        INSERT INTO `orders`
+        (`user_id`, `order_code`, `subtotal`, `discount`, `shipping`, `total`, `promo_code`, `status`,
+         `payment_method`, `payment_status`, `payment_ref`, `gcash_ref`, `customer_name`, `customer_email`, `customer_phone`, `shipping_address`, `created_at`)
+        VALUES
+        (:user_id, :order_code, :subtotal, :discount, :shipping, :total, :promo_code, 'pending',
+         :payment_method, :payment_status, :payment_ref, :gcash_ref, :customer_name, :customer_email, :customer_phone, :shipping_address, NOW())
     ");
     $orderInsert->execute([
-        ':user_id'    => $userId,
-        ':order_code' => $orderCode,
-        ':subtotal'   => $subtotal,
-        ':discount'   => $discount,
-        ':shipping'   => $shipping,
-        ':total'      => $total,
-        ':promo_code' => $appliedPromo
+        ':user_id'          => $userId,
+        ':order_code'       => $orderCode,
+        ':subtotal'         => $subtotal,
+        ':discount'         => $discount,
+        ':shipping'         => $shipping,
+        ':total'            => $total,
+        ':promo_code'       => $appliedPromo,
+        ':payment_method'   => $paymentMethod,
+        ':payment_status'   => $paymentStatus,
+        ':payment_ref'      => $paymentRef,
+        ':gcash_ref'        => $gcashRef,
+        ':customer_name'    => $customerName,
+        ':customer_email'   => $customerEmail,
+        ':customer_phone'   => $customerPhone,
+        ':shipping_address' => $shippingAddr
     ]);
 
     $orderId = (int)$pdo->lastInsertId();
@@ -206,14 +249,23 @@ try {
     $pdo->commit();
 
     echo json_encode([
-        'success'    => true,
-        'order_code' => $orderCode,
-        'subtotal'   => $subtotal,
-        'discount'   => $discount,
-        'shipping'   => $shipping,
-        'total'      => $total,
-        'promo_code' => $appliedPromo,
-        'message'    => "Sortie Dispatch Authorized. Manifest Order #{$orderCode} confirmed."
+        'success'         => true,
+        'order_code'      => $orderCode,
+        'subtotal'        => $subtotal,
+        'discount'        => $discount,
+        'shipping'        => $shipping,
+        'total'           => $total,
+        'promo_code'      => $appliedPromo,
+        'payment_method'  => $paymentMethod,
+        'payment_status'  => $paymentStatus,
+        'payment_ref'     => $paymentRef,
+        'gcash_ref'       => $gcashRef,
+        'pay_mode'        => $payMode,
+        'message'         => ($paymentStatus === 'paid')
+            ? "GCash payment authorized. Manifest Order #{$orderCode} confirmed."
+            : (($paymentStatus === 'payment_pending')
+                ? "Order #{$orderCode} logged. Payment is pending GCash verification — we'll confirm shortly."
+                : "Sortie Dispatch Authorized. Manifest Order #{$orderCode} pending payment confirmation.")
     ]);
 
 } catch (Exception $e) {
