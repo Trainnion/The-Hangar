@@ -1,7 +1,11 @@
 /* ============================================================
    THE HANGAR - GUND-ORDER SYSTEM ADMIN PORTAL STYLING
-   Brand Guide: #3FC4E1 (Cyan), #231F20 (Dark), Orbitron, Poppins
-============================================================ */
+   Reskinned to align with Section 6 & 7 design language:
+   Clean, minimal aesthetic with Orbitron & Poppins typography,
+   plain borders, high contrast, and no sci-fi HUD clutter.
+   ============================================================ */
+
+@import url('../shared/hud-design.css');
 
 :root {
     --brand-cyan: #3FC4E1;
@@ -10,18 +14,18 @@
     --brand-dark-rgb: 35, 31, 32;
 
     --bg-main: #0c0e12;
-    --bg-card: #151920;
-    --bg-card-hover: #1b2029;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --bg-card: #14171e;
+    --bg-card-hover: #1c202a;
+    --border-color: rgba(255, 255, 255, 0.1);
     --border-accent: rgba(63, 196, 225, 0.4);
 
     --text-main: #ffffff;
     --text-sub: #9ea4b0;
-    --text-muted: #656b78;
+    --text-muted: #717886;
 
-    --font-heading: 'Poppins', sans-serif;
+    --font-heading: 'Orbitron', 'Poppins', sans-serif;
     --font-body: 'Poppins', sans-serif;
-    --font-system: 'Orbitron', sans-serif;
+    --font-system: 'Orbitron', monospace, sans-serif;
 }
 
 * {
@@ -39,10 +43,13 @@ body {
     overflow-x: hidden;
 }
 
-/* Sidebar Layout */
+/* ============================================================
+   1. SIDEBAR NAVIGATION
+   Adopt clean Section 6 typography & spacing
+   ============================================================ */
 .adminSidebar {
     width: 260px;
-    background-color: var(--bg-card);
+    background-color: #0f1218;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -55,43 +62,38 @@ body {
 }
 
 .sidebarHeader {
-    padding: 2rem 1.5rem;
+    padding: 1.8rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 .sidebarBrand {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
     text-decoration: none;
 }
 
 .sidebarLogoImg {
-    max-height: 36px;
+    max-height: 34px;
     width: auto;
     object-fit: contain;
 }
 
 .sidebarBadge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+    display: inline-block;
     font-family: var(--font-system);
-    font-size: 0.65rem;
+    font-size: 0.68rem;
     font-weight: 800;
     letter-spacing: 1.5px;
     color: var(--brand-cyan);
-    background: rgba(var(--brand-cyan-rgb), 0.08);
-    padding: 0.25rem 0.6rem;
-    border-radius: 12px;
-    width: max-content;
+    text-transform: uppercase;
 }
 
 .sidebarNav {
     padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     flex-grow: 1;
 }
 
@@ -99,26 +101,26 @@ body {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    padding: 0.8rem 1rem;
-    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
     color: var(--text-sub);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     transition: all 0.2s ease;
 }
 
 .navLink:hover {
     color: var(--brand-cyan);
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgba(255, 255, 255, 0.04);
 }
 
 .navLink.active {
     background-color: var(--brand-cyan);
-    color: var(--brand-dark);
+    color: #080808;
     font-weight: 800;
-    box-shadow: 0 4px 12px rgba(var(--brand-cyan-rgb), 0.25);
 }
 
 .sidebarFooter {
@@ -126,7 +128,7 @@ body {
     border-top: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.75rem;
 }
 
 .btnStorefront {
@@ -135,18 +137,20 @@ body {
     justify-content: center;
     gap: 0.5rem;
     padding: 0.65rem;
-    border: 1px solid var(--border-accent);
-    color: var(--brand-cyan);
-    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: #ffffff;
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 0.78rem;
+    font-family: var(--font-system);
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 1px;
     transition: all 0.2s ease;
 }
 
 .btnStorefront:hover {
-    background: rgba(var(--brand-cyan-rgb), 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
 }
 
 .btnLogout {
@@ -157,9 +161,10 @@ body {
     padding: 0.65rem;
     border: 1px solid rgba(255, 75, 75, 0.3);
     color: #ff6b6b;
-    border-radius: 6px;
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 0.78rem;
+    font-family: var(--font-system);
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 1px;
     transition: all 0.2s ease;
@@ -169,7 +174,9 @@ body {
     background: rgba(255, 75, 75, 0.15);
 }
 
-/* Main Content Area */
+/* ============================================================
+   2. MAIN CONTENT & TOP BAR
+   ============================================================ */
 .adminMain {
     flex-grow: 1;
     display: flex;
@@ -185,41 +192,44 @@ body {
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border-color);
-    background-color: rgba(21, 25, 32, 0.75);
-    backdrop-filter: blur(10px);
+    background-color: #0f1218;
     position: sticky;
     top: 0;
     z-index: 40;
 }
 
 .topBarTitle {
-    font-size: 1.25rem;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
     font-weight: 800;
     letter-spacing: 1.5px;
     display: flex;
     align-items: center;
     gap: 0.8rem;
+    text-transform: uppercase;
 }
 
 .topBarTitle span {
     font-family: var(--font-system);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--brand-cyan);
 }
 
 .topBarRight {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
 .pilotTag {
     font-size: 0.8rem;
     color: var(--text-sub);
+    letter-spacing: 0.5px;
 }
 
 .pilotTag strong {
     color: var(--brand-cyan);
+    font-family: var(--font-system);
 }
 
 /* Page Content */
@@ -228,7 +238,10 @@ body {
     flex-grow: 1;
 }
 
-/* Stat Grid */
+/* ============================================================
+   3. STAT GRID & CARDS (Adopt productCard clean weight)
+   Clean 1px border, clear hierarchy, no heavy decorative bars
+   ============================================================ */
 .statGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -239,28 +252,23 @@ body {
 .statCard {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     position: relative;
-    overflow: hidden;
+    transition: border-color 0.2s ease;
 }
 
-.statCard::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background-color: var(--brand-cyan);
+.statCard:hover {
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .statLabel {
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    font-weight: 800;
     letter-spacing: 1px;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -272,6 +280,7 @@ body {
     font-family: var(--font-system);
     color: #ffffff;
     line-height: 1;
+    margin: 0.2rem 0;
 }
 
 .statSub {
@@ -279,11 +288,11 @@ body {
     color: var(--text-sub);
 }
 
-/* Card & Section Containers */
+/* Containers */
 .adminCard {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 1.8rem;
     margin-bottom: 2rem;
 }
@@ -293,64 +302,79 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .cardTitle {
-    font-size: 1.15rem;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
     font-weight: 800;
     letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-/* Buttons */
+/* ============================================================
+   4. BUTTONS
+   ============================================================ */
 .btnPrimary {
     background-color: var(--brand-cyan);
-    color: var(--brand-dark);
-    border: none;
-    border-radius: 6px;
-    padding: 0.65rem 1.4rem;
+    color: #080808;
+    border: 1px solid var(--brand-cyan);
+    border-radius: 3px;
+    padding: 0.6rem 1.4rem;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 1px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
 }
 
 .btnPrimary:hover {
-    background-color: #57d4ee;
-    box-shadow: 0 4px 14px rgba(var(--brand-cyan-rgb), 0.4);
-    transform: translateY(-1px);
+    background-color: #ffffff;
+    border-color: #ffffff;
+    color: #080808;
 }
 
 .btnSecondary {
     background-color: transparent;
     color: #ffffff;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0.65rem 1.2rem;
+    border-radius: 3px;
+    padding: 0.6rem 1.2rem;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .btnSecondary:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
 }
 
 .btnDanger {
-    background-color: rgba(255, 75, 75, 0.15);
+    background-color: transparent;
     color: #ff6b6b;
     border: 1px solid rgba(255, 75, 75, 0.4);
-    border-radius: 4px;
+    border-radius: 3px;
     padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -365,7 +389,9 @@ body {
     font-size: 0.75rem;
 }
 
-/* Tables */
+/* ============================================================
+   5. DATA TABLES (Restyled to match Section 6/Cart clean rows)
+   ============================================================ */
 .dataTable {
     width: 100%;
     border-collapse: collapse;
@@ -375,11 +401,12 @@ body {
 .dataTable th {
     text-align: left;
     padding: 0.9rem 1rem;
-    background-color: rgba(14, 17, 21, 0.6);
+    background-color: rgba(10, 13, 18, 0.8);
     color: var(--text-muted);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1.5px;
+    font-family: var(--font-system);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
     border-bottom: 1px solid var(--border-color);
 }
@@ -397,7 +424,7 @@ body {
 .prodThumbnail {
     width: 52px;
     height: 52px;
-    border-radius: 6px;
+    border-radius: 4px;
     object-fit: cover;
     background-color: #0c0e12;
     border: 1px solid var(--border-color);
@@ -406,9 +433,10 @@ body {
 /* Placement Badges */
 .badge {
     display: inline-block;
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    font-size: 0.68rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 3px;
+    font-family: var(--font-body);
+    font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -448,14 +476,15 @@ body {
     color: #999999;
 }
 
-/* Action Button Group */
 .actionBtns {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* Modal System */
+/* ============================================================
+   6. MODAL SYSTEM (Matching Section 6 header strip pattern)
+   ============================================================ */
 .modalOverlay {
     position: fixed;
     inset: 0;
@@ -474,14 +503,14 @@ body {
 
 .modalBox {
     background-color: var(--bg-card);
-    border: 1px solid var(--border-accent);
-    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     width: 100%;
     max-width: 650px;
     max-height: 90vh;
     overflow-y: auto;
     padding: 2.2rem;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(var(--brand-cyan-rgb), 0.15);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
     position: relative;
 }
 
@@ -495,26 +524,37 @@ body {
 }
 
 .modalTitle {
+    font-family: var(--font-heading);
     font-size: 1.25rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
 .closeModalBtn {
     background: transparent;
-    border: none;
+    border: 1px solid var(--border-color);
     color: var(--text-muted);
-    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 3px;
+    font-size: 1.3rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .closeModalBtn:hover {
     color: #ffffff;
+    border-color: #ffffff;
 }
 
-/* Form Styling in Modals */
+/* ============================================================
+   7. FORM STYLING IN MODALS
+   ============================================================ */
 .formRow {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -528,8 +568,9 @@ body {
 
 .formGroup label {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    font-weight: 800;
     letter-spacing: 1px;
     color: var(--text-sub);
     margin-bottom: 0.4rem;
@@ -541,9 +582,9 @@ body {
 .formGroup textarea {
     width: 100%;
     padding: 0.75rem 0.9rem;
-    background-color: rgba(14, 17, 21, 0.85);
+    background-color: #0c0e12;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 3px;
     color: #ffffff;
     font-family: var(--font-body);
     font-size: 0.88rem;
@@ -556,16 +597,16 @@ body {
 .formGroup textarea:focus {
     outline: none;
     border-color: var(--brand-cyan);
-    box-shadow: 0 0 10px rgba(var(--brand-cyan-rgb), 0.3);
+    box-shadow: 0 0 0 1px var(--brand-cyan);
 }
 
 .checkboxGroup {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    background: rgba(14, 17, 21, 0.5);
+    background: #0c0e12;
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: 3px;
     border: 1px solid var(--border-color);
 }
 
@@ -589,11 +630,12 @@ body {
     max-height: 400px;
     margin-bottom: 1.2rem;
     background-color: #0c0e12;
-    border-radius: 6px;
+    border-radius: 4px;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--border-color);
 }
 
 .cropperPreviewContainer img {
@@ -610,20 +652,21 @@ body {
 }
 
 .cropRatioBtn {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-sub);
     padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    border-radius: 3px;
+    font-family: var(--font-system);
+    font-size: 0.72rem;
+    font-weight: 800;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .cropRatioBtn.activeRatio {
     background-color: var(--brand-cyan);
-    color: var(--brand-dark);
+    color: #080808;
     border-color: var(--brand-cyan);
 }
 

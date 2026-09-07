@@ -32,7 +32,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
     <title>Unified Access Platform | THE HANGAR - GUND-ORDER SYSTEM</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/hud-design.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -53,30 +53,18 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
     <!-- Main Authentication Container -->
     <main class="authContainer">
         <div class="authCard">
-            <!-- HUD Corner Accents -->
-            <span class="hudCorner cornerTL"></span>
-            <span class="hudCorner cornerTR"></span>
-            <span class="hudCorner cornerBL"></span>
-            <span class="hudCorner cornerBR"></span>
-
             <!-- Brand Header -->
             <header class="authHeader">
                 <a href="../homepage/" class="authBrandLogo">
                     <img src="<?php echo $promotionalPath; ?>/Asset 8.png" alt="THE HANGAR" class="brandLogoImg">
                 </a>
-                <div class="systemBadge">
-                    <span class="pulseDot"></span>
-                    <span class="systemCode">GUND-ORDER SYSTEM // G.O.S</span>
-                </div>
                 <h1 class="authTitle">UNIFIED ACCESS PLATFORM</h1>
-                <p class="authSubtitle">Single portal for pilot reserves, order fulfillment, and command deck administration.</p>
             </header>
 
             <!-- Active Logged-in Session Banner -->
             <?php if ($isLoggedIn): ?>
                 <div class="sessionBanner">
                     <div class="sessionBannerHeader">
-                        <span class="pulseDot"></span>
                         <span>ACTIVE SESSION DETECTED</span>
                     </div>
                     <div class="sessionUserInfo">
@@ -184,7 +172,6 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                 <!-- Submit Button -->
                 <button type="submit" name="login-submit" class="submitAuthBtn">
                     <span class="btnText">AUTHENTICATE & ENTER</span>
-                    <span class="btnGlow"></span>
                 </button>
             </form>
 
@@ -233,7 +220,6 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
 
                 <button type="submit" name="register-submit" class="submitAuthBtn">
                     <span class="btnText">INITIALIZE PILOT ACCOUNT</span>
-                    <span class="btnGlow"></span>
                 </button>
             </form>
 

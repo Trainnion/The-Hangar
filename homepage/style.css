@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import url('../shared/hud-design.css');
 
 :root {
     /* The Hangar Official Brand Guide Colors */
@@ -633,110 +633,7 @@ html, body {
     will-change: transform;
 }
 
-/* Clickable Card Link & Section 5 Design */
-.productCard,
-.productCard:hover,
-.productCard:focus,
-.productCard:active,
-.productCard * {
-    text-decoration: none !important;
-}
-
-.productCard {
-    flex: 0 0 22rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    color: inherit;
-    cursor: pointer;
-    user-select: none;
-    background-color: transparent;
-    border: none;
-    border-radius: 0;
-}
-
-.productImgContainer {
-    width: 100%;
-    height: 62%;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: #f0f0f0;
-    border: none;
-}
-
-.productImgContainer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-    pointer-events: none;
-}
-
-.productCard:hover .productImgContainer img {
-    transform: scale(1.04);
-}
-
-.productDetails {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding-top: 0.8rem;
-    padding-left: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-    flex-grow: 1;
-    height: auto;
-    align-items: stretch;
-}
-
-.productBadges {
-    display: flex;
-    gap: 0.4rem;
-    margin-bottom: 0.6rem;
-}
-
-.productBadge {
-    background-color: #e5e5e5;
-    color: #333333;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-.productTitle {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #080808;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-    line-height: 1.25;
-}
-
-.productFooter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-top: auto;
-}
-
-.productPrice {
-    font-size: 0.95rem;
-    font-weight: 800;
-    color: #080808;
-}
-
-.productSold {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #333333;
-    letter-spacing: 0.8px;
-}
+/* Clickable Card Link & Product Card Design provided by shared/hud-design.css */
 
 /* Controls Placed Inside Bottom-Right */
 .sliderControlsNR {
@@ -1092,32 +989,12 @@ html, body {
     align-items: flex-start;
 }
 
-.headerContainerMK {
+/* Section 6 header positioning (base styles from shared/hud-design.css) */
+.modelKitsContainerMK .headerContainerMK {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 90px;
-    padding: 0 3rem;
-    z-index: 20;
-    color: #080808;
-    border-bottom: 0.5px solid #080808;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #ffffff;
 }
-
-.headerLeftMK, .headerCenterMK, .headerRightMK { 
-    flex: 1; 
-    display: flex; 
-    align-items: center; 
-    height: 100%; 
-}
-.headerLeftMK { justify-content: flex-start; gap: 1.25rem; }
-.headerCenterMK { justify-content: center; border-left: 1px solid #080808; border-right: 1px solid #080808; }
-.headerCenterMK h2 { font-size: 3.25rem; font-weight: 800; letter-spacing: 2px; color: #080808; text-transform: uppercase; margin: 0; }
-.headerRightMK { justify-content: flex-end; gap: 1rem; }
 
 /* Viewport Container */
 .productSetContainerMK {

@@ -1,5 +1,6 @@
 // THE HANGAR - GUND-ORDER SYSTEM
 // REAL-TIME CART & SUPPLY MANIFEST CONTROLLER (cart.js)
+// Drawer pattern retired; direct full-page cart interaction with Section 6 & 7 design language.
 
 (function() {
     'use strict';
@@ -30,7 +31,6 @@
             this.loadCart();
             this.setupEventListeners();
             this.updateNavBadges();
-            this.renderDrawer();
             this.renderDedicatedPage();
         },
 
@@ -66,7 +66,6 @@
 
             this.updateNavBadges();
             if (triggerRender) {
-                this.renderDrawer();
                 this.renderDedicatedPage();
             }
         },
@@ -98,7 +97,6 @@
             this.saveCart();
             this.showToast('UNIT REQUISITIONED', `Added ${qty}x ${product.name} to Supply Manifest`);
             this.bumpBadge();
-            this.openCart();
         },
 
         removeItem: function(productId) {
@@ -140,7 +138,6 @@
                 this.promoDetails = null;
                 localStorage.removeItem(PROMO_KEY);
                 localStorage.removeItem(PROMO_META_KEY);
-                this.renderDrawer();
                 this.renderDedicatedPage();
                 return;
             }
@@ -172,7 +169,6 @@
                 this.showToast('VERIFICATION ERROR', 'Failed to communicate with promo verification service.', true);
             }
 
-            this.renderDrawer();
             this.renderDedicatedPage();
         },
 
@@ -242,158 +238,18 @@
             });
         },
 
+        // Legacy compatibility helpers (drawer retired)
         openCart: function() {
-            const overlay = document.getElementById('hangarCartOverlay');
-            if (overlay) {
-                overlay.classList.add('isOpen');
-                overlay.setAttribute('aria-hidden', 'false');
-                document.body.classList.add('hangarModalOpen');
-                this.renderDrawer();
+            if (!window.location.pathname.endsWith('cart.php')) {
+                window.location.href = PATHS.cartPage;
             }
         },
 
-        closeCart: function() {
-            const overlay = document.getElementById('hangarCartOverlay');
-            if (overlay) {
-                overlay.classList.remove('isOpen');
-                overlay.setAttribute('aria-hidden', 'true');
-                document.body.classList.remove('hangarModalOpen');
-            }
-        },
-
-        renderDrawer: function() {
-            const bodyEl = document.getElementById('hangarCartBody');
-            const footerEl = document.getElementById('hangarCartFooter');
-            const countEl = document.getElementById('cartStatusCount');
-
-            if (!bodyEl || !footerEl) return;
-
-            const summary = this.getSummary();
-            if (countEl) {
-                countEl.textContent = `${summary.totalQty} REQUISITION${summary.totalQty === 1 ? '' : 'S'} ALLOCATED`;
-            }
-
-            // Empty State
-            if (this.items.length === 0) {
-                bodyEl.innerHTML = `
-                    <div class="cartEmptyState">
-                        <svg class="cartEmptyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <circle cx="9" cy="21" r="1"></circle>
-                            <circle cx="20" cy="21" r="1"></circle>
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                            <line x1="3" y1="3" x2="21" y2="21" stroke="#FF5555" stroke-width="2"></line>
-                        </svg>
-                        <h3 class="cartEmptyTitle">MANIFEST EMPTY</h3>
-                        <p class="cartEmptyDesc">No Mobile Suit units or equipment requisitioned for this sortie.</p>
-                        <a href="${PATHS.searchPage}" class="cartExploreBtn">
-                            <span>ACCESS CATALOGUE</span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
-                    </div>
-                `;
-
-                footerEl.innerHTML = `
-                    <div class="cartTrustBadge">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span>BANDAI SPIRITS &bull; OFFICIAL STOREFRONT DECK</span>
-                    </div>
-                `;
-                return;
-            }
-
-            // Render Items
-            let itemsHtml = '';
-            this.items.forEach(item => {
-                const lineTotal = item.price * item.quantity;
-                const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
-                    ? item.image_url 
-                    : `${this.promotionalPath}/${item.image_url}`;
-
-                itemsHtml += `
-                    <div class="cartItem" data-id="${item.id}">
-                        <div class="cartItemThumbWrap">
-                            <img src="${imgSrc}" alt="${item.name}" class="cartItemThumb" onerror="this.src='${this.promotionalPath}/Asset 8.png'">
-                            <span class="cartItemGradeBadge">${item.grade || 'KIT'}</span>
-                        </div>
-                        <div class="cartItemDetails">
-                            <div class="cartItemHeader">
-                                <h4 class="cartItemTitle">
-                                    <a href="${PATHS.productDetails}?id=${item.id}">${item.name}</a>
-                                </h4>
-                                <button type="button" class="cartItemRemoveBtn" data-remove="${item.id}" title="Discharge Unit">&times;</button>
-                            </div>
-                            <div class="cartItemMeta">
-                                <span class="cartItemMetaTag">${item.brand || 'BANDAI'}</span>
-                                <span>&bull;</span>
-                                <span>Unit: ${this.formatCurrency(item.price)}</span>
-                            </div>
-                            <div class="cartItemFooter">
-                                <div class="cartQtyPicker">
-                                    <button type="button" class="cartQtyBtn" data-qty-dec="${item.id}">-</button>
-                                    <input type="text" class="cartQtyInput" value="${item.quantity}" readonly>
-                                    <button type="button" class="cartQtyBtn" data-qty-inc="${item.id}">+</button>
-                                </div>
-                                <div class="cartItemPriceBox">
-                                    <span class="cartItemLineTotal">${this.formatCurrency(lineTotal)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            bodyEl.innerHTML = itemsHtml;
-
-            // Render Footer with Summary & Actions
-            let discountRow = '';
-            if (summary.discount > 0) {
-                discountRow = `
-                    <div class="cartSummaryRow" style="color: #00E676;">
-                        <span class="cartSummaryLabel">PROMO DISCOUNT:</span>
-                        <span class="cartSummaryVal">- ${this.formatCurrency(summary.discount)}</span>
-                    </div>
-                `;
-            }
-
-            footerEl.innerHTML = `
-                <div class="cartSummaryRow">
-                    <span class="cartSummaryLabel">SUBTOTAL:</span>
-                    <span class="cartSummaryVal">${this.formatCurrency(summary.subtotal)}</span>
-                </div>
-                ${discountRow}
-                <div class="cartSummaryRow">
-                    <span class="cartSummaryLabel">LOGISTICS DISPATCH:</span>
-                    <span class="cartSummaryVal">${summary.shipping === 0 ? '<span style="color:#3FC4E1">FREE (PROMO)</span>' : this.formatCurrency(summary.shipping)}</span>
-                </div>
-                <div class="cartSummaryRow totalRow">
-                    <span class="cartSummaryLabel">TOTAL REQUISITION:</span>
-                    <span class="cartTotalVal">${this.formatCurrency(summary.total)}</span>
-                </div>
-
-                <div class="cartPromoRow">
-                    <input type="text" id="cartPromoInput" class="cartPromoInput" placeholder="PILOT CLEARANCE CODE" value="${this.activePromo || ''}">
-                    <button type="button" id="cartPromoBtn" class="cartPromoBtn">APPLY</button>
-                </div>
-
-                <div class="cartActionGroup">
-                    <a href="${PATHS.cartPage}" class="cartCheckoutBtn">
-                        <span>INITIATE ORDER DISPATCH</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                    <div class="cartSecondaryActions">
-                        <a href="${PATHS.cartPage}" class="cartFullPageBtn">EXPAND MANIFEST</a>
-                        <button type="button" class="cartContinueBtn" id="cartCloseBtnAction">STANDBY</button>
-                    </div>
-                </div>
-
-                <div class="cartTrustBadge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>100% AUTHENTIC BANDAI SPIRITS GUARANTEED</span>
-                </div>
-            `;
-        },
+        closeCart: function() {},
+        renderDrawer: function() {},
 
         renderDedicatedPage: function() {
+            const listEl = document.getElementById('cartPageItemsList');
             const tableBody = document.getElementById('cartPageTableBody');
             const subtotalEl = document.getElementById('cartPageSubtotal');
             const totalEl = document.getElementById('cartPageTotal');
@@ -404,10 +260,22 @@
             const contentEl = document.getElementById('cartPageContent');
             const promoInput = document.getElementById('cartPagePromoInput');
             const promoStatus = document.getElementById('cartPagePromoStatus');
+            const activeCountEl = document.getElementById('cartHeaderActiveCount');
+            const totalCountEl = document.getElementById('cartHeaderTotalCount');
 
-            if (!tableBody) return;
+            // Determine target container (modern card list or fallback legacy table)
+            const targetContainer = listEl || tableBody;
+            if (!targetContainer && !emptyEl) return;
 
             const summary = this.getSummary();
+
+            // Update header strip counter
+            if (activeCountEl) {
+                activeCountEl.textContent = String(summary.totalQty).padStart(2, '0');
+            }
+            if (totalCountEl) {
+                totalCountEl.textContent = `${String(summary.totalQty).padStart(2, '0')} UNITS`;
+            }
 
             // Restore promo input value if a promo is active
             if (promoInput && this.activePromo) {
@@ -415,15 +283,16 @@
             }
 
             // Show/hide promo status message
-            if (promoStatus && this.activePromo && ACTIVE_PROMOS[this.activePromo]) {
-                promoStatus.textContent = '✓ ' + ACTIVE_PROMOS[this.activePromo].label;
+            if (promoStatus && this.activePromo) {
+                const label = (this.promoDetails && this.promoDetails.label) ? this.promoDetails.label : this.activePromo;
+                promoStatus.textContent = '✓ ' + label;
                 promoStatus.style.display = 'block';
             } else if (promoStatus) {
                 promoStatus.style.display = 'none';
             }
 
             if (this.items.length === 0) {
-                if (emptyEl) emptyEl.style.display = 'block';
+                if (emptyEl) emptyEl.style.display = 'flex';
                 if (contentEl) contentEl.style.display = 'none';
                 return;
             }
@@ -431,45 +300,88 @@
             if (emptyEl) emptyEl.style.display = 'none';
             if (contentEl) contentEl.style.display = 'grid';
 
-            let rowsHtml = '';
-            this.items.forEach(item => {
-                const lineTotal = item.price * item.quantity;
-                const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
-                    ? item.image_url 
-                    : `${this.promotionalPath}/${item.image_url}`;
+            if (!targetContainer) return;
 
-                rowsHtml += `
-                    <tr>
-                        <td>
-                            <div class="cartProductCell">
-                                <img src="${imgSrc}" alt="${item.name}" class="cartProductImg" onerror="this.src='${this.promotionalPath}/Asset 8.png'">
-                                <div class="cartProductInfo">
-                                    <h4><a href="${PATHS.productDetails}?id=${item.id}" style="color:inherit; text-decoration:none;">${item.name}</a></h4>
-                                    <span>${item.grade} &bull; ${item.brand}</span>
+            if (listEl) {
+                // Render modern card list (matching Section 6 card aesthetic extended with cart controls)
+                let cardsHtml = '';
+                this.items.forEach(item => {
+                    const lineTotal = item.price * item.quantity;
+                    const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
+                        ? item.image_url 
+                        : `${this.promotionalPath}/${item.image_url}`;
+
+                    cardsHtml += `
+                        <div class="cartProductCard" data-id="${item.id}">
+                            <div class="cartCardThumbWrap">
+                                <img src="${imgSrc}" alt="${item.name}" onerror="this.src='${this.promotionalPath}/Asset 8.png'">
+                            </div>
+                            <div class="cartCardInfo">
+                                <div class="productBadges">
+                                    <span class="productBadge">${item.brand || 'BANDAI'}</span>
+                                    <span class="productBadge">${item.grade || 'GUNPLA'}</span>
                                 </div>
+                                <h3 class="cartCardTitle">
+                                    <a href="${PATHS.productDetails}?id=${item.id}">${item.name}</a>
+                                </h3>
+                                <div class="cartCardUnitPrice">Unit: ${this.formatCurrency(item.price)}</div>
                             </div>
-                        </td>
-                        <td style="font-family:'Orbitron', monospace; font-weight:700;">${this.formatCurrency(item.price)}</td>
-                        <td>
-                            <div class="cartQtyPicker">
-                                <button type="button" class="cartQtyBtn" data-qty-dec="${item.id}">-</button>
-                                <input type="text" class="cartQtyInput" value="${item.quantity}" readonly>
-                                <button type="button" class="cartQtyBtn" data-qty-inc="${item.id}">+</button>
+                            <div class="cartCardActions">
+                                <div class="cartQtyPicker">
+                                    <button type="button" class="cartQtyBtn" data-qty-dec="${item.id}" aria-label="Decrease quantity">-</button>
+                                    <input type="text" class="cartQtyInput" value="${item.quantity}" readonly aria-label="Quantity">
+                                    <button type="button" class="cartQtyBtn" data-qty-inc="${item.id}" aria-label="Increase quantity">+</button>
+                                </div>
+                                <div class="cartCardPricing">
+                                    <span class="cartCardLineTotal">${this.formatCurrency(lineTotal)}</span>
+                                </div>
+                                <button type="button" class="cartItemRemoveBtn" data-remove="${item.id}" title="Remove item" aria-label="Remove item">&times;</button>
                             </div>
-                        </td>
-                        <td style="font-family:'Orbitron', monospace; font-weight:800; color:var(--brand-dark);">${this.formatCurrency(lineTotal)}</td>
-                        <td>
-                            <button type="button" class="cartItemRemoveBtn" data-remove="${item.id}" title="Remove item" style="font-size:1.5rem;">&times;</button>
-                        </td>
-                    </tr>
-                `;
-            });
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = cardsHtml;
+            } else if (tableBody) {
+                // Fallback table rendering
+                let rowsHtml = '';
+                this.items.forEach(item => {
+                    const lineTotal = item.price * item.quantity;
+                    const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
+                        ? item.image_url 
+                        : `${this.promotionalPath}/${item.image_url}`;
 
-            tableBody.innerHTML = rowsHtml;
+                    rowsHtml += `
+                        <tr>
+                            <td>
+                                <div class="cartProductCell">
+                                    <img src="${imgSrc}" alt="${item.name}" class="cartProductImg" onerror="this.src='${this.promotionalPath}/Asset 8.png'">
+                                    <div class="cartProductInfo">
+                                        <h4><a href="${PATHS.productDetails}?id=${item.id}" style="color:inherit; text-decoration:none;">${item.name}</a></h4>
+                                        <span>${item.grade} &bull; ${item.brand}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-family:'Orbitron', monospace; font-weight:700;">${this.formatCurrency(item.price)}</td>
+                            <td>
+                                <div class="cartQtyPicker">
+                                    <button type="button" class="cartQtyBtn" data-qty-dec="${item.id}">-</button>
+                                    <input type="text" class="cartQtyInput" value="${item.quantity}" readonly>
+                                    <button type="button" class="cartQtyBtn" data-qty-inc="${item.id}">+</button>
+                                </div>
+                            </td>
+                            <td style="font-family:'Orbitron', monospace; font-weight:800; color:var(--brand-dark);">${this.formatCurrency(lineTotal)}</td>
+                            <td>
+                                <button type="button" class="cartItemRemoveBtn" data-remove="${item.id}" title="Remove item" style="font-size:1.5rem;">&times;</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tableBody.innerHTML = rowsHtml;
+            }
 
             if (subtotalEl) subtotalEl.textContent = this.formatCurrency(summary.subtotal);
 
-            // Shipping — show FREE in cyan when applicable
+            // Shipping
             if (shippingEl) {
                 if (summary.shipping === 0) {
                     shippingEl.innerHTML = '<span style="color:#3FC4E1; font-weight:800;">FREE</span>';
@@ -478,7 +390,7 @@
                 }
             }
 
-            // Discount row — only show if there's an active discount
+            // Discount row
             if (discountRowEl) {
                 discountRowEl.style.display = summary.discount > 0 ? 'flex' : 'none';
             }
@@ -490,24 +402,8 @@
         setupEventListeners: function() {
             const self = this;
 
-            // Header Cart buttons trigger modal (skip if already on cart page)
-            const isCartPage = !!document.getElementById('cartPageTableBody');
+            // Note: .navCart links navigate normally to cart.php. No preventDefault or drawer popout.
             document.addEventListener('click', function(e) {
-                const cartLink = e.target.closest('.navCart');
-                if (cartLink) {
-                    if (isCartPage) return; // let the link navigate normally on cart.php
-                    e.preventDefault();
-                    self.openCart();
-                    return;
-                }
-
-                // Close cart triggers
-                if (e.target.closest('#cartCloseBtn') || e.target.closest('#cartCloseBtnAction') || e.target.closest('#hangarCartBackdrop')) {
-                    e.preventDefault();
-                    self.closeCart();
-                    return;
-                }
-
                 // Clear all
                 if (e.target.closest('#cartClearAllBtn') || e.target.closest('#cartPageClearBtn')) {
                     e.preventDefault();
@@ -548,14 +444,6 @@
                     return;
                 }
 
-                // Apply Promo in Drawer
-                if (e.target.closest('#cartPromoBtn')) {
-                    e.preventDefault();
-                    const input = document.getElementById('cartPromoInput');
-                    if (input) self.applyPromo(input.value);
-                    return;
-                }
-
                 // Apply Promo on Dedicated Page
                 if (e.target.closest('#cartPagePromoBtn')) {
                     e.preventDefault();
@@ -565,23 +453,10 @@
                 }
             });
 
-            // Keyboard ESC to close cart
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    const overlay = document.getElementById('hangarCartOverlay');
-                    if (overlay && overlay.classList.contains('isOpen')) {
-                        self.closeCart();
-                    }
-                }
-            });
-
-            // Enter key support for promo inputs
+            // Enter key support for promo input
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
-                    if (document.activeElement && document.activeElement.id === 'cartPromoInput') {
-                        e.preventDefault();
-                        self.applyPromo(document.activeElement.value);
-                    } else if (document.activeElement && document.activeElement.id === 'cartPagePromoInput') {
+                    if (document.activeElement && document.activeElement.id === 'cartPagePromoInput') {
                         e.preventDefault();
                         self.applyPromo(document.activeElement.value);
                     }
@@ -593,7 +468,6 @@
                 if (e.key === STORAGE_KEY || e.key === PROMO_KEY || e.key === PROMO_META_KEY) {
                     self.loadCart();
                     self.updateNavBadges();
-                    self.renderDrawer();
                     self.renderDedicatedPage();
                 }
             });
@@ -616,7 +490,7 @@
             toast.innerHTML = `
                 <div class="hangarToastIcon" style="color: ${accentColor};">
                     ${isError
-                        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+                        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`
                         : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`
                     }
                 </div>

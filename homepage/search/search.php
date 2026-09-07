@@ -1,6 +1,7 @@
 <?php
 // THE HANGAR - GUND-ORDER SYSTEM
 // MODEL KITS CATALOG SEARCH & PRODUCT GRID
+// Aligned with Section 6 (Model Kits) & Section 7 (Static Filter Banner) design language.
 
 require_once __DIR__ . '/../../shared/bootstrap.php';
 extract(hangarBootstrap());
@@ -61,6 +62,35 @@ if ($pdo) {
         error_log("Search execution failed: " . $e->getMessage());
     }
 }
+
+// Section 7 Static Banner Content based on active filter
+$heroBannerTitle = '';
+$heroBannerSub = '';
+if (!empty($filterGrade)) {
+    $gUpper = strtoupper($filterGrade);
+    if ($gUpper === 'MG') {
+        $heroBannerTitle = 'MASTER GRADE // 1/100 SCALE MECHANICS';
+        $heroBannerSub = 'Engineered internal skeletons, high articulation, and precision Gunpla detailing.';
+    } elseif ($gUpper === 'RG') {
+        $heroBannerTitle = 'REAL GRADE // 1/144 SCALE COMPACT ENGINEERING';
+        $heroBannerSub = 'Uncompromising miniaturization with advanced multi-jointed inner frames.';
+    } elseif ($gUpper === 'PG') {
+        $heroBannerTitle = 'PERFECT GRADE // 1/60 SCALE SUPREME ARTICULATION';
+        $heroBannerSub = 'The pinnacle of Gunpla mechanics, full inner frames, and unmatched presence.';
+    } elseif ($gUpper === 'HG') {
+        $heroBannerTitle = 'HIGH GRADE // 1/144 SCALE EXTENSIVE SORTIE';
+        $heroBannerSub = 'Vast mobile suit lineup spanning all Gundam eras and tactical timelines.';
+    } elseif (stripos($gUpper, 'METAL') !== false) {
+        $heroBannerTitle = 'METAL BUILD // DIE-CAST COLLECTOR ALLOY';
+        $heroBannerSub = 'Finished composite masterpieces featuring die-cast metal armatures.';
+    } else {
+        $heroBannerTitle = $gUpper . ' // SPECIFICATION SORTIE';
+        $heroBannerSub = 'Precision Bandai Spirits model kit units matched to active filters.';
+    }
+} elseif (!empty($query)) {
+    $heroBannerTitle = 'TARGET ACQUISITION // "' . $query . '"';
+    $heroBannerSub = 'Filtered inventory results matching requested tactical designations.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -71,18 +101,19 @@ if ($pdo) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../shared/hud-design.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="search.css?v=<?php echo time(); ?>">
 </head>
 <body class="searchPageBody">
 
-    <!-- NAVBAR (identical to homepage) -->
+    <!-- NAVBAR (identical to storefront) -->
     <header class="headerContainer headerStatic">
         <div class="headerLeft">
             <a href="../index.php" class="navItem navBtnHamburger" aria-label="Menu">
                 <img src="<?php echo $buttonsPath; ?>/hamberger menu icon.svg" alt="Menu">
             </a>
-            <a href="../index.php" class="navItem navLink">LANGUAGE</a>
+            <a href="../index.php" class="navItem navLink">HOME</a>
             <a href="search.php" class="navItem navLink" style="color: var(--brand-cyan);">PRODUCTS</a>
         </div>
         <div class="headerCenter">
@@ -102,15 +133,17 @@ if ($pdo) {
             <?php else: ?>
                 <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
-            <button class="navItem navBtnSearch" type="button" aria-label="Search">
+            <a href="search.php?focus=1" class="navItem navBtnSearch" aria-label="Search">
                 <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </button>
+            </a>
         </div>
     </header>
 
     <!-- SECTION HEADER STRIP - Matching SECTION 6: MODEL KITS -->
     <div class="headerContainerMK searchHeaderContainerMK">
-        <div class="headerLeftMK"></div>
+        <div class="headerLeftMK">
+            <a href="../index.php" class="spBackLink">&larr; STOREFRONT</a>
+        </div>
         <div class="headerCenterMK">
             <h2>MODEL KITS</h2>
         </div>
@@ -126,6 +159,22 @@ if ($pdo) {
     <!-- MAIN VIEWPORT CONTAINER - Matching SECTION 6: MODEL KITS -->
     <main class="productSetContainerMK searchContainerMK">
 
+        <?php if (!empty($heroBannerTitle)): ?>
+            <!-- Static Section-7-look Cinematic Filter Banner -->
+            <div class="hangarStaticBanner searchHeroBannerMK">
+                <div class="staticBannerHero">
+                    <div class="staticBannerContent">
+                        <span class="staticBannerBadge">SORTIE CATALOGUE // ACTIVE FILTER</span>
+                        <h3 class="staticBannerTitle"><?php echo htmlspecialchars($heroBannerTitle); ?></h3>
+                        <p class="staticBannerSub"><?php echo htmlspecialchars($heroBannerSub); ?></p>
+                    </div>
+                    <div class="staticBannerAction">
+                        <a href="search.php" class="filterBtnMK" style="color:#ffffff; border-color:rgba(255,255,255,0.4);">&times; RESET</a>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if (!empty($_GET['notfound'])): ?>
             <div style="width: 100%; margin-bottom: 1.5rem; padding: 1rem 1.5rem; background: #fff8e1; border: 1px solid #ffe082; color: #b78103; font-family: 'Poppins', sans-serif; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -136,14 +185,16 @@ if ($pdo) {
         <!-- Filter Options Bar -->
         <form method="GET" action="search.php" class="filterBarMK" id="spSearchForm">
             
-            <!-- Search Text Input -->
+            <!-- Search Text Input with Live Suggestion Dropdown -->
             <div class="filterSearchInputWrapMK">
-                <input type="text" name="q" value="<?php echo htmlspecialchars($query); ?>"
+                <input type="text" name="q" id="spSearchInput" value="<?php echo htmlspecialchars($query); ?>"
                        placeholder="Search model kits, grade, scale, brand..."
                        class="filterInputMK" autocomplete="off">
                 <?php if (!empty($query)): ?>
                     <a href="search.php<?php echo !empty($filterGrade) ? '?grade='.urlencode($filterGrade) : ''; ?>" class="filterClearBtnMK" title="Clear">&times;</a>
                 <?php endif; ?>
+                <!-- In-page Live Dropdown Suggestions -->
+                <div class="searchDropdownMK" id="searchDropdownMK" style="display: none;"></div>
             </div>
 
             <!-- Sort Shortcut Filter Buttons -->
@@ -232,9 +283,18 @@ if ($pdo) {
     <!-- FOOTER -->
     <?php require_once __DIR__ . '/../footer.php'; ?>
 
-    <!-- G.O.S SEARCH & CART HUD OVERLAYS -->
-    <script>window.HANGAR_PATHS = { cartPage: '../cart/cart.php', searchPage: 'search.php', apiSearch: 'api_search.php', productDetails: '../product-details.php', promotionalBase: '../../promotional', apiCheckout: '../cart/api_checkout.php' };</script>
-    <?php $_searchAssetPrefix = './'; require_once __DIR__ . '/search_modal.php'; ?>
-    <?php $_cartAssetPrefix   = './'; require_once __DIR__ . '/../cart/cart_modal.php'; ?>
+    <!-- CLIENT CONTROLLER SCRIPTS -->
+    <script>
+        window.HANGAR_PATHS = {
+            cartPage: '../cart/cart.php',
+            searchPage: 'search.php',
+            apiSearch: 'api_search.php',
+            productDetails: '../product-details.php',
+            promotionalBase: '../../promotional',
+            apiCheckout: '../cart/api_checkout.php'
+        };
+    </script>
+    <script src="search.js?v=<?php echo time(); ?>"></script>
+    <?php $_cartAssetPrefix = '../cart/'; require_once __DIR__ . '/../cart/cart_modal.php'; ?>
 </body>
 </html>

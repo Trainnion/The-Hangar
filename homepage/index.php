@@ -30,7 +30,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                 <a href="#" class="navItem navBtnHamburger" aria-label="Menu">
                     <img src="<?php echo $buttonsPath; ?>/hamberger menu icon.svg" alt="Menu">
                 </a>
-                <a href="#" class="navItem navLink">LANGUAGE</a>
+                <a href="index.php" class="navItem navLink">HOME</a>
                 <a href="search/search.php" class="navItem navLink">PRODUCTS</a>
             </div>
 
@@ -52,9 +52,9 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                 <?php else: ?>
                     <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
                 <?php endif; ?>
-                <button class="navItem navBtnSearch" type="button" aria-label="Search">
-                    <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-                </button>
+                <a href="search/search.php?focus=1" class="navItem navBtnSearch" aria-label="Search">
+                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
+            </a>
             </div>
         </header>
 
@@ -459,7 +459,6 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 
 <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
 <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: 'promotional', apiCheckout: 'cart/api_checkout.php' };</script>
-<?php $_searchAssetPrefix = 'search/'; require_once __DIR__ . '/search/search_modal.php'; ?>
 <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 
 <!-- Script tags -->
