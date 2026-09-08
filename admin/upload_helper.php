@@ -94,6 +94,56 @@ function csrfField() {
 }
 
 /**
+ * Delete a replaced image file from disk, but only when it is safe:
+ *  - a replacement was actually provided (or null when the owning row was deleted)
+ *  - the old path is a managed upload under assets/uploads/ (legacy bare promo
+ *    filenames live in a shared pool and are NEVER deleted; external URLs skipped)
+ *  - it is not the shared fallback asset
+ *  - no other row (category_tiles, products, sliders) still references the file
+ * Call AFTER the UPDATE/DELETE has been committed to the database.
+ */
+function deleteOrphanedImage(PDO $pdo, ?string $oldImage, ?string $newImage): void {
+    $old = trim((string)$oldImage);
+    if ($old === '' || $old === (string)$newImage) {
+        return; // nothing was replaced
+    }
+    if (stripos($old, 'http') === 0) {
+        return; // external URL
+    }
+    if (strpos($old, '/') === false) {
+        return; // legacy bare filename -> shared /promotional/ pool, never delete
+    }
+    if (strpos($old, 'assets/uploads/') !== 0) {
+        return; // only managed upload paths are deletable
+    }
+    if (strcasecmp(basename($old), 'Asset 8.png') === 0) {
+        return; // shared default fallback asset
+    }
+
+    // Resolve and confine to the managed uploads dir (blocks path traversal)
+    $base = realpath(__DIR__ . '/../assets/uploads');
+    $abs  = realpath(__DIR__ . '/../' . $old);
+    if (!$base || !$abs || strpos($abs, $base) !== 0 || !is_file($abs)) {
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT
+                (SELECT COUNT(*) FROM `category_tiles` WHERE `image_url` = :img) +
+                (SELECT COUNT(*) FROM `products`      WHERE `image_url` = :img) +
+                (SELECT COUNT(*) FROM `sliders`       WHERE `image_url` = :img)
+        ");
+        $stmt->execute(['img' => $old]);
+        if ((int)$stmt->fetchColumn() === 0) {
+            @unlink($abs);
+        }
+    } catch (Throwable $e) {
+        error_log('Orphan image cleanup skipped: ' . $e->getMessage());
+    }
+}
+
+/**
  * Base64-encoded MIME extension whitelist for image uploads.
  */
 const ADMIN_IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];

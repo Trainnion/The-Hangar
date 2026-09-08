@@ -17,8 +17,12 @@ if (isset($_GET['delete']) && $pdo) {
         header('Location: categories.php?msg=csrf');
         exit;
     }
+    $imgStmt = $pdo->prepare("SELECT `image_url` FROM `category_tiles` WHERE `id` = :id");
+    $imgStmt->execute(['id' => $delId]);
+    $deletedImg = $imgStmt->fetchColumn() ?: null;
     $stmt = $pdo->prepare("DELETE FROM `category_tiles` WHERE `id` = :id");
     $stmt->execute(['id' => $delId]);
+    deleteOrphanedImage($pdo, $deletedImg, null);
     header('Location: categories.php?msg=deleted');
     exit;
 }
@@ -91,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                     'is_active' => $is_active,
                     'id' => $editId
                 ]);
+                deleteOrphanedImage($pdo, $currentImg, $finalImg);
                 header('Location: categories.php?msg=updated');
                 exit;
             } catch (Throwable $e) {
@@ -159,6 +164,8 @@ if (is_dir($uploadCatDir)) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -409,10 +416,30 @@ if (is_dir($uploadCatDir)) {
                 </div>
 
                 <div class="formGroup">
-                    <label for="categoryFile">CATEGORY IMAGE</label>
-                    <input type="file" id="categoryFile" name="category_file" accept=".jpg,.jpeg,.png,.webp" class="formInput">
+                    <label>CATEGORY IMAGE &amp; CROPPER</label>
+                    <p style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 0.6rem;">
+                        Upload a photo from your device and crop it to the tile banner shape (~21:9).
+                    </p>
+
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.8rem;">
+                        <input type="file" id="categoryFileInput" name="category_file" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                        <button type="button" class="btnSecondary" onclick="document.getElementById('categoryFileInput').click();">
+                            📁 CHOOSE &amp; CROP TILE PHOTO
+                        </button>
+                        <span id="chosenCategoryFileName" style="font-size: 0.8rem; color: var(--text-muted);">No file selected</span>
+                    </div>
+
                     <input type="hidden" id="croppedImageData" name="cropped_image_data" value="">
-                    <small style="color: #8a8f98;">Upload a new image for this tile, or choose one below.</small>
+
+                    <div id="catImagePreviewBox" style="margin-top: 1rem; display: <?php echo !empty($editCategory['image_url']) ? 'block' : 'none'; ?>;">
+                        <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">CURRENT PREVIEW:</span>
+                        <div style="display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;">
+                            <img id="catPreviewImg" src="<?php echo !empty($editCategory['image_url']) ? adminAssetUrl($editCategory['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <button type="button" class="btnSecondary btnSmall" id="cropCurrentCatBtn" style="border-color: var(--brand-cyan); color: var(--brand-cyan);">
+                                ✂️ CROP THIS CURRENT IMAGE
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="formGroup">
@@ -420,7 +447,7 @@ if (is_dir($uploadCatDir)) {
                     <select id="existingImageSelect" name="existing_image" class="formInput">
                         <option value="">-- none --</option>
                         <?php foreach ($existingImages as $img): ?>
-                            <option value="<?php echo htmlspecialchars($img); ?>"><?php echo htmlspecialchars($img); ?></option>
+                            <option value="<?php echo htmlspecialchars($img); ?>" <?php if (($editCategory['image_url'] ?? '') === $img) echo 'selected'; ?>><?php echo htmlspecialchars($img); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -430,6 +457,43 @@ if (is_dir($uploadCatDir)) {
         </div>
     </div>
 
+    <!-- INTERACTIVE CATEGORY TILE CROPPER MODAL -->
+    <div class="modalOverlay" id="catCropperModal">
+        <div class="modalBox" style="max-width: 850px;">
+            <div class="modalHeader">
+                <h3 class="modalTitle">CROP CATEGORY TILE</h3>
+                <button type="button" class="closeModalBtn" id="closeCatCropperModalBtn">&times;</button>
+            </div>
+            <div class="cropControls" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" class="cropRatioBtn activeRatio" data-ratio="2.3333">21:9 TILE BANNER</button>
+                    <button type="button" class="cropRatioBtn" data-ratio="1.7777">16:9 WIDE</button>
+                    <button type="button" class="cropRatioBtn" data-ratio="1">1:1 SQUARE</button>
+                    <button type="button" class="cropRatioBtn" data-ratio="NaN">FREE CROP</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Export Quality:</label>
+                    <select id="catCropFormatSelect" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; background: rgba(14, 17, 21, 0.9); border: 1px solid var(--border-color); color: #fff; border-radius: 4px;">
+                        <option value="jpeg" selected>Ultra-Quality JPEG (98%)</option>
+                        <option value="png">Lossless Ultra-HD (PNG - Maximum Clarity)</option>
+                        <option value="webp">High-Res WebP (98%)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cropperPreviewContainer" style="max-height: 450px;">
+                <img id="catImageToCrop" src="" alt="To Crop">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                <span style="font-size: 0.78rem; color: var(--text-sub);">Adjust frame to fit your tile. Scroll mouse wheel to zoom.</span>
+                <div style="display: flex; gap: 0.8rem;">
+                    <button type="button" class="btnSecondary" id="cancelCatCropBtn">CANCEL</button>
+                    <button type="button" class="btnPrimary" id="applyCatCropBtn">APPLY &amp; USE IMAGE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script>
         const openAddCategoryModalBtn = document.getElementById('openAddCategoryModalBtn');
         const closeCategoryModalBtn = document.getElementById('closeCategoryModalBtn');
@@ -442,6 +506,129 @@ if (is_dir($uploadCatDir)) {
         if (closeCategoryModalBtn) {
             closeCategoryModalBtn.addEventListener('click', () => {
                 window.location.href = 'categories.php';
+            });
+        }
+
+        // Category Tile Cropper Logic
+        const CAT_TILE_RATIO = 2.3333; // ~21:9 banner, matches homepage tile shape
+        let catCropper = null;
+        let originalCatMime = 'image/jpeg';
+        const categoryFileInput = document.getElementById('categoryFileInput');
+        const chosenCategoryFileName = document.getElementById('chosenCategoryFileName');
+        const catCropperModal = document.getElementById('catCropperModal');
+        const catImageToCrop = document.getElementById('catImageToCrop');
+        const closeCatCropperModalBtn = document.getElementById('closeCatCropperModalBtn');
+        const cancelCatCropBtn = document.getElementById('cancelCatCropBtn');
+        const applyCatCropBtn = document.getElementById('applyCatCropBtn');
+        const croppedImageData = document.getElementById('croppedImageData');
+        const catPreviewImg = document.getElementById('catPreviewImg');
+        const catImagePreviewBox = document.getElementById('catImagePreviewBox');
+        const catCropFormatSelect = document.getElementById('catCropFormatSelect');
+
+        function openCatCropper(src, defaultMime) {
+            catImageToCrop.src = src;
+            catCropperModal.classList.add('active');
+            if (catCropper) {
+                catCropper.destroy();
+            }
+            if (catCropFormatSelect && defaultMime) {
+                catCropFormatSelect.value = defaultMime.includes('png') ? 'png' : 'jpeg';
+            }
+            catCropper = new Cropper(catImageToCrop, {
+                aspectRatio: CAT_TILE_RATIO,
+                viewMode: 1,
+                autoCropArea: 0.95,
+                background: false,
+                checkCrossOrigin: false
+            });
+        }
+
+        function closeCatCropper() {
+            catCropperModal.classList.remove('active');
+            if (catCropper) {
+                catCropper.destroy();
+                catCropper = null;
+            }
+        }
+
+        if (categoryFileInput) {
+            categoryFileInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    const file = files[0];
+                    chosenCategoryFileName.textContent = file.name;
+                    originalCatMime = file.type || 'image/jpeg';
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        openCatCropper(event.target.result, originalCatMime);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Ratio Buttons
+        const catRatioBtns = document.querySelectorAll('#catCropperModal .cropRatioBtn');
+        catRatioBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catRatioBtns.forEach(b => b.classList.remove('activeRatio'));
+                btn.classList.add('activeRatio');
+                const ratio = parseFloat(btn.getAttribute('data-ratio'));
+                if (catCropper) {
+                    catCropper.setAspectRatio(ratio);
+                }
+            });
+        });
+
+        if (closeCatCropperModalBtn) closeCatCropperModalBtn.addEventListener('click', closeCatCropper);
+        if (cancelCatCropBtn) cancelCatCropBtn.addEventListener('click', closeCatCropper);
+
+        // Apply High-Quality Tile Crop
+        if (applyCatCropBtn) {
+            applyCatCropBtn.addEventListener('click', () => {
+                if (!catCropper) return;
+
+                const format = catCropFormatSelect ? catCropFormatSelect.value : 'jpeg';
+                const mimeType = (format === 'png') ? 'image/png' : (format === 'jpeg' ? 'image/jpeg' : 'image/webp');
+                const quality = (format === 'png') ? 1.0 : 0.98;
+
+                const canvas = catCropper.getCroppedCanvas({
+                    maxWidth: 2560,
+                    maxHeight: 2560,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                    fillColor: (format === 'jpeg') ? '#ffffff' : undefined
+                });
+
+                const base64Url = canvas.toDataURL(mimeType, quality);
+                croppedImageData.value = base64Url;
+
+                catPreviewImg.src = base64Url;
+                catImagePreviewBox.style.display = 'block';
+                closeCatCropper();
+            });
+        }
+
+        const existingImageSelect = document.getElementById('existingImageSelect');
+        if (existingImageSelect) {
+            existingImageSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    catPreviewImg.src = (e.target.value.indexOf('/') !== -1) ? '../' + e.target.value : '../promotional/' + e.target.value;
+                    catImagePreviewBox.style.display = 'block';
+                    croppedImageData.value = '';
+                }
+            });
+        }
+
+        // Crop Current / Selected Tile Image
+        const cropCurrentCatBtn = document.getElementById('cropCurrentCatBtn');
+        if (cropCurrentCatBtn) {
+            cropCurrentCatBtn.addEventListener('click', () => {
+                if (!catPreviewImg.src || catPreviewImg.src === '' || catPreviewImg.src === window.location.href) {
+                    alert('No image is currently available to crop.');
+                    return;
+                }
+                openCatCropper(catPreviewImg.src, 'image/jpeg');
             });
         }
     </script>

@@ -50,7 +50,7 @@ if (!defined('HANGAR_ERROR_NET')) {
         foreach (['/homepage/', '/admin/', '/login/'] as $marker) {
             $pos = strpos($path, $marker);
             if ($pos !== false) {
-                return rtrim(substr($path, 0, $pos + 1), '/') . 'homepage/index.php';
+                return rtrim(substr($path, 0, $pos + 1), '/') . '/homepage/index.php';
             }
         }
         return 'homepage/index.php';

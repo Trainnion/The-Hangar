@@ -27,19 +27,28 @@ if ($pdo) {
 }
 
 if (!$product) {
-    $dbOffline = true;
-    $product = [
-        'id' => $id,
-        'name' => 'MG ASW-G-XX Gundam Vidar',
-        'grade' => 'MG',
-        'scale' => '1/100',
-        'price' => 4620.00,
-        'sold_count' => 250,
-        'brand' => 'BANDAI',
-        'stock_status' => 'IN-STOCK',
-        'image_url' => 'mg vidar.webp',
-        'description' => 'Equipped with the specialized Ahab reactor output and hunter edge sabers, this Master Grade model kit boasts unprecedented internal frame articulation and die-cast stability.'
-    ];
+    // Database unreachable — never show fake/demo catalog data. Render an
+    // honest, on-brand "temporarily offline" state instead (503).
+    http_response_code(503);
+    $home = htmlspecialchars(hangarRootUrl());
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+       . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+       . '<title>CATALOG OFFLINE | THE HANGAR</title>'
+       . '<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">'
+       . '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#080808;color:#fff;font-family:Poppins,Arial,sans-serif;text-align:center}'
+       . '.hz{background:#11141a;border:1px solid #3FC4E1;padding:48px 40px;max-width:520px;width:90%}'
+       . '.hz .code{color:#3FC4E1;letter-spacing:4px;font-size:.8rem;font-weight:700;margin-bottom:14px}'
+       . '.hz h1{font-size:1.5rem;letter-spacing:2px;margin:0 0 14px;text-transform:uppercase}'
+       . '.hz p{color:#9ea4b0;font-size:.9rem;line-height:1.6;margin:0 0 10px}'
+       . '.hz a{display:inline-block;margin-top:18px;padding:12px 26px;background:#3FC4E1;color:#080808;text-decoration:none;font-weight:700;letter-spacing:1px;font-size:.82rem;text-transform:uppercase}'
+       . '.hz a+a{margin-left:10px;background:transparent;border:1px solid #3FC4E1;color:#3FC4E1}</style></head>'
+       . '<body><div class="hz"><div class="code">▲ HANGAR DOORS SEALED ▲</div>'
+       . '<h1>Catalog Temporarily Offline</h1>'
+       . '<p>The hangar is re-aligning its inventory systems, so product pages are unavailable right now. Please try again in a few minutes.</p>'
+       . '<a href="javascript:location.reload();">RETRY NOW</a>'
+       . '<a href="' . $home . '">RETURN TO STOREFRONT</a></div></body></html>';
+    exit;
 }
 ?>
 <!DOCTYPE html>

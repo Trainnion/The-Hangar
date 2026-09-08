@@ -138,15 +138,13 @@ Seeded promo codes: `PILOT10` (10% off) and `GUNDAM2026` (₱500 off).
 
 ## Default Accounts
 
-Created only on first run (tables empty). Passwords are bcrypt-hashed via `password_hash()`.
+None are seeded. Accounts are created via normal registration; promote an admin manually with:
 
-| Username      | Email                | Password      | Role  |
-|---------------|----------------------|---------------|-------|
-| `admin`       | admin@thehangar.ph   | `hangar2026`  | admin |
-| `Amuro_Ray`   | amuro@thehangar.ph   | `pilot2026`   | user  |
-| `Char_Aznable`| char@thehangar.ph    | `redcomet`    | user  |
+```sql
+UPDATE `users` SET `role` = 'admin' WHERE `username` = 'your_username';
+```
 
-> ⚠️ **Change these immediately for any real deployment.** Seeded demo products/sliders are also created and can be edited/deleted in the admin panel.
+> ⚠️ Never commit credentials to source control. Seeded demo products/sliders are created on first run and can be edited/deleted in the admin panel.
 
 ## Directory Structure
 

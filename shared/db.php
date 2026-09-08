@@ -300,28 +300,10 @@ function ensureCategoryTiles($pdo) {
 }
 
 function seedInitialUsers($pdo) {
-    $insert = $pdo->prepare("
-        INSERT INTO `users` (`username`, `email`, `password`, `role`)
-        VALUES (:username, :email, :password, :role)
-    ");
-    $insert->execute([
-        ':username' => 'admin',
-        ':email'    => 'admin@thehangar.ph',
-        ':password' => password_hash('hangar2026', PASSWORD_DEFAULT),
-        ':role'     => 'admin',
-    ]);
-    $insert->execute([
-        ':username' => 'Amuro_Ray',
-        ':email'    => 'amuro@thehangar.ph',
-        ':password' => password_hash('pilot2026', PASSWORD_DEFAULT),
-        ':role'     => 'user',
-    ]);
-    $insert->execute([
-        ':username' => 'Char_Aznable',
-        ':email'    => 'char@thehangar.ph',
-        ':password' => password_hash('redcomet', PASSWORD_DEFAULT),
-        ':role'     => 'user',
-    ]);
+    // No user seeding: accounts are created through normal registration,
+    // then promoted manually if an admin is needed:
+    //   UPDATE `users` SET `role` = 'admin' WHERE `username` = '...';
+    // Never commit real or demo credentials to source control.
 }
 
 function seedInitialProducts($pdo) {
