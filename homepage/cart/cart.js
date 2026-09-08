@@ -5,9 +5,15 @@
 (function() {
     'use strict';
 
-    const STORAGE_KEY = 'hangar_cart_manifest';
-    const PROMO_KEY = 'hangar_cart_promo';
-    const PROMO_META_KEY = 'hangar_cart_promo_meta';
+    // Per-account cart isolation: localStorage is browser-wide (shared by every
+    // account on this browser), so keys are namespaced per logged-in user id.
+    // window.HANGAR_USER_ID is emitted by cart_modal.php (0 = guest bucket).
+    const cartUid = (window.HANGAR_USER_ID && Number(window.HANGAR_USER_ID) > 0)
+        ? Number(window.HANGAR_USER_ID)
+        : 'guest';
+    const STORAGE_KEY = 'hangar_cart_manifest_u' + cartUid;
+    const PROMO_KEY = 'hangar_cart_promo_u' + cartUid;
+    const PROMO_META_KEY = 'hangar_cart_promo_meta_u' + cartUid;
 
     // Path config — set via window.HANGAR_PATHS by the hosting PHP page
     const PATHS = Object.assign({
@@ -47,6 +53,20 @@
 
         loadCart: function() {
             try {
+                // One-time migration: carts stored before per-account isolation
+                // lived under fixed keys. They are moved into the guest bucket
+                // (their original owner is unknowable), then the legacy keys
+                // are removed so old items never leak into a user's cart.
+                const legacyManifest = localStorage.getItem('hangar_cart_manifest');
+                if (legacyManifest) {
+                    if (cartUid === 'guest' && !localStorage.getItem(STORAGE_KEY)) {
+                        localStorage.setItem(STORAGE_KEY, legacyManifest);
+                    }
+                    localStorage.removeItem('hangar_cart_manifest');
+                    localStorage.removeItem('hangar_cart_promo');
+                    localStorage.removeItem('hangar_cart_promo_meta');
+                }
+
                 const stored = localStorage.getItem(STORAGE_KEY);
                 this.items = stored ? JSON.parse(stored) : [];
 

@@ -42,6 +42,10 @@ function processLogin(): void
 
     try {
         $pdo = getDBConnection();
+        if (!$pdo) {
+            header('Location: index.php?status=error&tab=login&message=' . urlencode('Service temporarily unavailable. Please try again shortly.'));
+            exit;
+        }
 
         // Search for user by either username (callsign) or email address
         $sql = "SELECT id, username, email, password, role FROM users WHERE username = :ident OR email = :ident LIMIT 1";
@@ -83,8 +87,9 @@ function processLogin(): void
         header('Location: ../homepage/index.php?status=success&message=' . urlencode('Welcome to THE HANGAR, Pilot ' . $user['username'] . '! Systems nominal.'));
         exit;
 
-    } catch (PDOException $e) {
-        header('Location: index.php?status=error&tab=login&message=' . urlencode('Database error: ' . $e->getMessage()));
+    } catch (Throwable $e) {
+        error_log('Login error: ' . $e->getMessage());
+        header('Location: index.php?status=error&tab=login&message=' . urlencode('Service temporarily unavailable. Please try again shortly.'));
         exit;
     }
 }
@@ -101,11 +106,17 @@ function processRegister(): void
     }
 
     $callsign = $result['data']['callsign'];
+    $fullName = $result['data']['full_name'];
+    $phone    = $result['data']['phone'];
     $email    = $result['data']['email'];
     $password = $result['data']['password'];
 
     try {
         $pdo = getDBConnection();
+        if (!$pdo) {
+            header('Location: index.php?status=error&tab=register&message=' . urlencode('Service temporarily unavailable. Please try again shortly.'));
+            exit;
+        }
 
         // Check if callsign or email is already taken
         $checkStmt = $pdo->prepare("SELECT id, username, email FROM users WHERE username = :u OR email = :e LIMIT 1");
@@ -126,19 +137,29 @@ function processRegister(): void
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // Insert new user account with default 'user' role
-        $sql = "INSERT INTO users (username, email, password, role) VALUES (:username, :email, :password, 'user')";
+        $sql = "INSERT INTO users (username, email, password, role, full_name, phone) VALUES (:username, :email, :password, 'user', :full_name, :phone)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
-            ':username' => $callsign,
-            ':email'    => $email,
-            ':password' => $hashedPassword,
+            ':username'  => $callsign,
+            ':email'     => $email,
+            ':password'  => $hashedPassword,
+            ':full_name' => $fullName,
+            ':phone'     => $phone,
         ]);
 
-        header('Location: index.php?status=success&tab=login&message=' . urlencode("Pilot account [{$callsign}] registered successfully! Authenticate below to enter."));
+        // Auto-login: establish the same unified session processLogin() uses,
+        // so new pilots go straight into the hangar without a second login step.
+        $_SESSION['user_id']    = (int)$pdo->lastInsertId();
+        $_SESSION['username']   = $callsign;
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_role']  = 'user';
+
+        header('Location: ../homepage/index.php?status=success&message=' . urlencode("Pilot account [{$callsign}] registered successfully! Welcome to THE HANGAR."));
         exit;
 
-    } catch (PDOException $e) {
-        header('Location: index.php?status=error&tab=register&message=' . urlencode('Registration error: ' . $e->getMessage()));
+    } catch (Throwable $e) {
+        error_log('Registration error: ' . $e->getMessage());
+        header('Location: index.php?status=error&tab=register&message=' . urlencode('Service temporarily unavailable. Please try again shortly.'));
         exit;
     }
 }

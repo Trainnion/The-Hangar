@@ -6,6 +6,19 @@
 require_once __DIR__ . '/../../shared/bootstrap.php';
 extract(hangarBootstrap());
 require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() for the GCash QR path
+
+// Resolve the logged-in pilot's profile for checkout auto-fill and the
+// profile-completeness gate (address required before ordering).
+$currentUser = null;
+if (!empty($_SESSION['user_id'])) {
+    $pdo = getDBConnection();
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT id, username, email, full_name, phone, address, avatar_url FROM users WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => (int)$_SESSION['user_id']]);
+        $currentUser = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+}
+$profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +110,39 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             font-size: 0.88rem;
             color: #9ea4b0;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .successGcashQr {
+            text-align: center;
+            margin-bottom: 1.6rem;
+        }
+
+        .successQrCaption {
+            font-size: 0.78rem;
+            color: var(--brand-cyan, #3FC4E1);
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .successQrBox {
+            display: flex;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid var(--brand-cyan, #3FC4E1);
+            border-radius: 6px;
+            padding: 0.6rem;
+            width: 100%;
+        }
+
+        .successQrBox img {
+            max-width: 210px;
+            max-height: 210px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            border-radius: 3px;
         }
 
         .successDismissBtn {
@@ -155,6 +200,7 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../../shared/menu.php'; ?>
 
     <!-- SECTION 0: TOP NAVBAR -->
     <header class="headerContainer headerStatic">
@@ -179,15 +225,12 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                 <?php if ($userRole === 'admin'): ?>
                     <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                 <?php else: ?>
-                    <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                    <a href="<?php echo $profilePath; ?>" class="navItem navLink" style="color: #3FC4E1;">PILOT: <?php echo htmlspecialchars($userName); ?></a>
                 <?php endif; ?>
                 <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
             <?php else: ?>
                 <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
-            <a href="../search/search.php" class="navItem navBtnSearch" aria-label="Search">
-                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </a>
         </div>
     </header>
 
@@ -284,10 +327,13 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                         <!-- Contact & Payment Deck (GCash QR scan-to-pay) -->
                         <div class="cartContactDeckMK">
                             <label class="cartPromoLabelMK" for="coCustomerName">PILOT CONTACT DETAILS</label>
-                            <input type="text" id="coCustomerName" class="cartPromoInputMK" placeholder="Full Name *" autocomplete="name">
-                            <input type="email" id="coCustomerEmail" class="cartPromoInputMK" placeholder="Email Address *" autocomplete="email">
-                            <input type="tel" id="coCustomerPhone" class="cartPromoInputMK" placeholder="Mobile Number *" autocomplete="tel">
-                            <textarea id="coShippingAddress" class="cartPromoInputMK" placeholder="Delivery Address (street, city, province) *" rows="2" autocomplete="street-address"></textarea>
+                            <input type="text" id="coCustomerName" class="cartPromoInputMK" placeholder="Full Name *" autocomplete="name"
+                                   value="<?php echo htmlspecialchars($currentUser['full_name'] ?? ''); ?>">
+                            <input type="email" id="coCustomerEmail" class="cartPromoInputMK" placeholder="Email Address *" autocomplete="email"
+                                   value="<?php echo htmlspecialchars($currentUser['email'] ?? ''); ?>">
+                            <input type="tel" id="coCustomerPhone" class="cartPromoInputMK" placeholder="Mobile Number *" autocomplete="tel"
+                                   value="<?php echo htmlspecialchars($currentUser['phone'] ?? ''); ?>">
+                            <textarea id="coShippingAddress" class="cartPromoInputMK" placeholder="Delivery Address (street, city, province) *" rows="2" autocomplete="street-address"><?php echo htmlspecialchars($currentUser['address'] ?? ''); ?></textarea>
 
                             <label class="cartPromoLabelMK" for="coLogistics">DELIVERY LOGISTICS (COURIER)</label>
                             <select id="coLogistics" class="cartPromoInputMK">
@@ -310,7 +356,7 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                             </div>
 
                             <div id="coGcashBlock">
-                                <label class="cartPromoLabelMK" for="coGcashRef">PAY VIA GCASH QR (Amount shown at order total)</label>
+                                <label class="cartPromoLabelMK" for="coGcashRef">SCAN TO PAY WITH GCASH</label>
                                 <div class="gcashQrBoxMK">
                                 <?php
                                     $gcashCfg = hangarPaymentConfig();
@@ -340,11 +386,19 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                             </div>
                         </div>
 
+                        <?php if (!empty($_SESSION['user_id']) && !$profileComplete): ?>
+                            <!-- PROFILE COMPLETENESS GATE -->
+                            <div class="profileGateBannerMK">
+                                <strong>PROFILE INCOMPLETE:</strong> Complete your pilot profile (full name, mobile number, and delivery address) before placing an order.
+                                <a href="../profile/profile.php?edit=1">Complete your profile &rarr;</a>
+                            </div>
+                        <?php else: ?>
                         <!-- Dispatch Button -->
                         <button type="button" class="cartDispatchBtnMK" id="cartFinalizeDispatchBtn">
                             <span>INITIATE ORDER DISPATCH</span>
                             &rarr;
                         </button>
+                        <?php endif; ?>
 
                         <!-- Logistics Trust Strip -->
                         <div class="cartTrustStripMK">
@@ -352,8 +406,7 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                             <div class="trustLogosMK">
                                 <img src="<?php echo $footerPath; ?>/Logistics/logo.5f09a646.png" alt="J&T">
                                 <img src="<?php echo $footerPath; ?>/Logistics/ninjavan-logo-white.webp" alt="NinjaVan" class="invertLogo">
-                                <img src="<?php echo $footerPath; ?>/banks/BDO_50th_362_x_126_px_reverse (1).svg" alt="BDO" class="invertLogo">
-                                <img src="<?php echo $footerPath; ?>/banks/BPI_RT__96x42_header_Reverse.svg" alt="BPI" class="invertLogo">
+                                <img src="<?php echo $footerPath; ?>/banks/gcash.svg" alt="GCash" style="height:24px;width:auto;">
                             </div>
                         </div>
 
@@ -373,6 +426,10 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             <p class="successOrderDesc" id="successOrderDesc">
                 Your Gundam Mobile Suit units have been logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.
             </p>
+            <div class="successGcashQr" id="successGcashQr" style="display: none;">
+                <div class="successQrCaption">Didn't pay yet? Scan the GCash QR below &amp; paste the reference number.</div>
+                <div class="successQrBox" id="successGcashQrBox"></div>
+            </div>
             <div class="successOrderActions">
                 <button type="button" class="successDismissBtn" id="successDismissBtn">
                     RETURN TO STOREFRONT
@@ -526,15 +583,36 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                                 }
                             }
 
+                            // Re-show the GCash QR inside the confirmation dialog for pending-verification payments
+                            const successGcashQr = document.getElementById('successGcashQr');
+                            if (successGcashQr) {
+                                const coQrImg = document.getElementById('coGcashQr');
+                                if (result.payment_status === 'payment_pending' && coQrImg) {
+                                    const successQrBox = document.getElementById('successGcashQrBox');
+                                    if (successQrBox) {
+                                        successQrBox.innerHTML = '';
+                                        const qrImg = document.createElement('img');
+                                        qrImg.src = coQrImg.src;
+                                        qrImg.alt = 'GCash QR';
+                                        successQrBox.appendChild(qrImg);
+                                    }
+                                    successGcashQr.style.display = '';
+                                } else {
+                                    successGcashQr.style.display = 'none';
+                                }
+                            }
+
                             successOverlay.classList.add('show');
                             successOverlay.setAttribute('aria-hidden', 'false');
                             document.body.style.overflow = 'hidden';
 
                             // Clear cart upon verified server-side order dispatch
                             if (window.HangarCart) {
-                                localStorage.removeItem('hangar_cart_manifest');
-                                localStorage.removeItem('hangar_cart_promo');
-                                localStorage.removeItem('hangar_cart_promo_meta');
+                                // Use the per-account keys (same namespacing as cart.js)
+                                const cartUid = (window.HANGAR_USER_ID && Number(window.HANGAR_USER_ID) > 0) ? Number(window.HANGAR_USER_ID) : 'guest';
+                                localStorage.removeItem('hangar_cart_manifest_u' + cartUid);
+                                localStorage.removeItem('hangar_cart_promo_u' + cartUid);
+                                localStorage.removeItem('hangar_cart_promo_meta_u' + cartUid);
                                 window.HangarCart.items = [];
                                 window.HangarCart.activePromo = null;
                                 window.HangarCart.promoDetails = null;

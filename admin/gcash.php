@@ -103,6 +103,15 @@ if (is_dir(__DIR__ . '/../assets/uploads/gcash_qr')) {
                     </svg>
                     <span>PRODUCTS</span>
                 </a>
+                <a href="categories.php" class="navLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <line x1="9" y1="6" x2="15" y2="6"></line>
+                        <line x1="9" y1="12" x2="15" y2="12"></line>
+                        <line x1="9" y1="18" x2="15" y2="18"></line>
+                    </svg>
+                    <span>CATEGORIES</span>
+                </a>
                 <a href="orders.php" class="navLink">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>

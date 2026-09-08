@@ -28,6 +28,15 @@
             ? window.HANGAR_PATHS.promotionalBase 
             : '../promotional';
 
+        // Managed upload paths (assets/uploads/...) are stored relative to the project
+        // ROOT. promotionalPath already climbs out of this page folder to reach the
+        // root — derive the same climb so those images resolve correctly too.
+        const rootPrefix = (function() {
+            let p = promotionalPath, up = '';
+            while (p.indexOf('../') === 0) { up += '../'; p = p.substring(3); }
+            return up;
+        })();
+
         const apiPath = (window.HANGAR_PATHS && window.HANGAR_PATHS.apiSearch) 
             ? window.HANGAR_PATHS.apiSearch 
             : 'api_search.php';
@@ -107,7 +116,7 @@
                 const imgSrc = (item.image_url && item.image_url.startsWith('http')) 
                     ? item.image_url 
                     : (item.image_url && item.image_url.indexOf('/') !== -1)
-                    ? item.image_url
+                    ? rootPrefix + item.image_url
                     : `${promotionalPath}/${item.image_url || 'Asset 8.png'}`;
 
                 html += `

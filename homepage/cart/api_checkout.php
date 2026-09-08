@@ -100,7 +100,7 @@ try {
     }
 
     // Prepare product fetch statement to guarantee authoritative server-side prices
-    $productStmt = $pdo->prepare("SELECT `id`, `name`, `price`, `stock_status` FROM `products` WHERE `id` = :id LIMIT 1");
+    $productStmt = $pdo->prepare("SELECT `id`, `name`, `price`, `stock_status`, `stock` FROM `products` WHERE `id` = :id LIMIT 1");
 
     $orderItems = [];
     $subtotal = 0.00;
@@ -112,6 +112,17 @@ try {
         if (!$prod) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => "Unit ID #{$pid} could not be located in database inventory."]);
+            exit;
+        }
+
+        // Availability check — never allow selling more units than remain in stock.
+        $availStock = (int)($prod['stock'] ?? 0);
+        if ($availStock < $qty) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => "Only {$availStock} unit(s) of '{$prod['name']}' left in stock. Please reduce the quantity to {$availStock} or remove it from your manifest."
+            ]);
             exit;
         }
 
@@ -156,6 +167,22 @@ try {
 
     // Resolve authenticated user ID if logged in
     $userId = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+
+    // PROFILE COMPLETENESS GATE (server-authoritative): logged-in pilots must
+    // have full name, phone, and address on file before an order can be placed.
+    if ($userId !== null) {
+        $profileStmt = $pdo->prepare("SELECT full_name, phone, address FROM users WHERE id = :id LIMIT 1");
+        $profileStmt->execute([':id' => $userId]);
+        $profileRow = $profileStmt->fetch(PDO::FETCH_ASSOC);
+        if ($profileRow && !isProfileComplete($profileRow)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Your pilot profile is incomplete. Please add your full name, mobile number, and delivery address in your profile before placing an order.',
+                'redirect' => '../profile/profile.php?edit=1',
+            ]);
+            exit;
+        }
+    }
 
     // Generate unique order code (HGR-XXXXXX)
     $checkCodeStmt = $pdo->prepare("SELECT `id` FROM `orders` WHERE `order_code` = :code LIMIT 1");
@@ -263,6 +290,20 @@ try {
         ]);
     }
 
+    // Authoritative stock decrement — guarded so a concurrent purchase that drains
+    // stock mid-checkout aborts this order (rollback via the outer catch) rather
+    // than overselling. Sold counter moves in lock-step with the stock drop.
+    $stockStmt = $pdo->prepare("UPDATE `products` SET `stock` = `stock` - :q, `sold_count` = `sold_count` + :q WHERE `id` = :pid AND `stock` >= :q");
+    foreach ($orderItems as $item) {
+        $stockStmt->execute([
+            ':q'   => $item['quantity'],
+            ':pid' => $item['product_id'],
+        ]);
+        if ($stockStmt->rowCount() !== 1) {
+            throw new Exception("Insufficient stock for '{$item['name_snapshot']}' — units were claimed by another order. Please reduce the quantity and try again.");
+        }
+    }
+
     $pdo->commit();
 
     echo json_encode([
@@ -287,14 +328,24 @@ try {
                     : "Sortie Dispatch Authorized. Manifest Order #{$orderCode} pending payment confirmation."))
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
-        $pdo->rollBack();
+        try {
+            $pdo->rollBack();
+        } catch (Throwable $rb) {
+            error_log('Checkout rollback failed: ' . $rb->getMessage());
+        }
     }
     error_log("Checkout error: " . $e->getMessage());
     http_response_code(500);
+    // Never expose raw DB/system error text. Only the deliberate, user-actionable
+    // business message (insufficient stock) is surfaced; everything else gets a
+    // generic friendly message while technical detail stays in the server log.
+    $safeMsg = (strpos($e->getMessage(), 'Insufficient stock for') !== false)
+        ? $e->getMessage()
+        : 'Sorry, we could not process your order right now. The hangar crew has been alerted — please try again shortly.';
     echo json_encode([
         'success' => false,
-        'message' => 'An error occurred during order dispatch processing: ' . $e->getMessage()
+        'message' => $safeMsg
     ]);
 }

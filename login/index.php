@@ -57,7 +57,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                 <a href="../homepage/" class="authBrandLogo">
                     <img src="<?php echo $promotionalPath; ?>/Asset 8.png" alt="THE HANGAR" class="brandLogoImg">
                 </a>
-                <h1 class="authTitle">UNIFIED ACCESS PLATFORM</h1>
+                <h1 class="authTitle">Welcome to THE HANGAR</h1>
             </header>
 
             <!-- Active Logged-in Session Banner -->
@@ -106,7 +106,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
             <!-- Mode Switcher Tabs (Login / Register) -->
             <div class="authTabs">
                 <button type="button" class="tabBtn <?php echo ($activeTab !== 'register') ? 'activeTab' : ''; ?>" id="loginTabBtn">SIGN IN</button>
-                <button type="button" class="tabBtn <?php echo ($activeTab === 'register') ? 'activeTab' : ''; ?>" id="registerTabBtn">REGISTER PILOT</button>
+                <button type="button" class="tabBtn <?php echo ($activeTab === 'register') ? 'activeTab' : ''; ?>" id="registerTabBtn">REGISTER</button>
             </div>
 
             <!-- UNIFIED LOGIN FORM -->
@@ -170,7 +170,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
 
                 <!-- Submit Button -->
                 <button type="submit" name="login-submit" class="submitAuthBtn">
-                    <span class="btnText">AUTHENTICATE & ENTER</span>
+                    <span class="btnText">LOGIN</span>
                 </button>
             </form>
 
@@ -186,6 +186,28 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                         <input type="text" id="regCallsign" name="callsign" placeholder="e.g. Setsuna_F_Seiei" required>
+                    </div>
+                </div>
+
+                <div class="inputGroup">
+                    <label for="regFullName">FULL NAME</label>
+                    <div class="inputWrapper">
+                        <svg class="inputIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <input type="text" id="regFullName" name="full_name" placeholder="e.g. Juan Dela Cruz" required>
+                    </div>
+                </div>
+
+                <div class="inputGroup">
+                    <label for="regPhone">MOBILE NUMBER</label>
+                    <div class="inputWrapper">
+                        <svg class="inputIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                        <input type="tel" id="regPhone" name="phone" placeholder="e.g. 09171234567" required>
                     </div>
                 </div>
 
@@ -218,7 +240,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                 </div>
 
                 <button type="submit" name="register-submit" class="submitAuthBtn">
-                    <span class="btnText">INITIALIZE PILOT ACCOUNT</span>
+                    <span class="btnText">REGISTER</span>
                 </button>
             </form>
 

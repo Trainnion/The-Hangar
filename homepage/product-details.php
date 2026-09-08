@@ -11,15 +11,22 @@ $product = null;
 $dbOffline = false;
 
 if ($pdo) {
-    $stmt = $pdo->prepare("SELECT * FROM `products` WHERE `id` = :id");
-    $stmt->execute(['id' => $id]);
-    $product = $stmt->fetch();
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM `products` WHERE `id` = :id");
+        $stmt->execute(['id' => $id]);
+        $product = $stmt->fetch();
+    } catch (Throwable $e) {
+        error_log('Product details query failed: ' . $e->getMessage());
+        $dbOffline = true;
+    }
 
-    if (!$product) {
+    if (!$product && !$dbOffline) {
         header('Location: search/search.php?notfound=1');
         exit;
     }
-} else {
+}
+
+if (!$product) {
     $dbOffline = true;
     $product = [
         'id' => $id,
@@ -445,6 +452,7 @@ if ($pdo) {
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../shared/menu.php'; ?>
 
     <!-- TOP NAVIGATION (Exact Site Navbar) -->
     <header class="headerContainer">
@@ -468,15 +476,12 @@ if ($pdo) {
                 <?php if ($userRole === 'admin'): ?>
                     <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                 <?php else: ?>
-                    <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                    <a href="<?php echo $profilePath; ?>" class="navItem navLink" style="color: #3FC4E1;">PILOT: <?php echo htmlspecialchars($userName); ?></a>
                 <?php endif; ?>
                 <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
             <?php else: ?>
                 <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
-            <a href="search/search.php?focus=1" class="navItem navBtnSearch" aria-label="Search">
-                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </a>
         </div>
     </header>
 
@@ -539,12 +544,17 @@ if ($pdo) {
                     </div>
 
                     <div class="pdButtonsGroup">
-                        <button type="button" class="pdBtnOrderNow" id="pdBtnOrderNow">
-                            ORDER NOW!
-                        </button>
-                        <button type="button" class="pdBtnAddToCart" id="pdBtnAddToCart">
-                            ADD TO CART
-                        </button>
+                        <?php if ((int)($product['stock'] ?? 0) <= 0): ?>
+                            <button type="button" class="pdBtnOrderNow" disabled style="opacity: 0.45; cursor: not-allowed;">OUT OF STOCK</button>
+                            <button type="button" class="pdBtnAddToCart" disabled style="opacity: 0.45; cursor: not-allowed;">OUT OF STOCK</button>
+                        <?php else: ?>
+                            <button type="button" class="pdBtnOrderNow" id="pdBtnOrderNow">
+                                ORDER NOW!
+                            </button>
+                            <button type="button" class="pdBtnAddToCart" id="pdBtnAddToCart">
+                                ADD TO CART
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -568,6 +578,12 @@ if ($pdo) {
                             <td class="pdSpecKey">Availability</td>
                             <td class="pdSpecVal" style="color: var(--brand-dark); font-weight: 700;">
                                 <?php echo htmlspecialchars($product['stock_status']); ?>
+                                <?php $pdStock = (int)($product['stock'] ?? 0); ?>
+                                <?php if ($pdStock > 0): ?>
+                                    &mdash; <span style="color: <?php echo ($pdStock <= 5) ? '#c0392b' : 'var(--brand-cyan, #3FC4E1)'; ?>;"><?php echo $pdStock; ?> unit(s) left</span>
+                                <?php else: ?>
+                                    &mdash; <span style="color: #c0392b; font-weight: 700;">OUT OF STOCK</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <tr>

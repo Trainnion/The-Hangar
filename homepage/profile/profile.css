@@ -1,0 +1,290 @@
+/* THE HANGAR - PILOT PROFILE (profile.css) */
+
+.mainProfileDeck {
+    padding: 2rem 1.5rem 4rem;
+}
+
+.profileDeckWrap {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.profileHeading {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 1.5rem;
+    color: var(--brand-dark, #231F20);
+}
+
+/* Flash messages */
+.profileFlash {
+    padding: 0.9rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid transparent;
+}
+
+.profileFlashOK {
+    background: rgba(63, 196, 225, 0.12);
+    border-color: var(--brand-cyan, #3FC4E1);
+    color: #14586b;
+}
+
+.profileFlashErr {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.45);
+    color: #8b1f2a;
+}
+
+/* Profile-completeness gate note */
+.profileGateNote {
+    padding: 0.9rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    margin-bottom: 1.25rem;
+    background: rgba(255, 193, 7, 0.14);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    color: #7a5b00;
+}
+
+/* Card */
+.profileCard {
+    background: #ffffff;
+    border: 1px solid rgba(35, 31, 32, 0.1);
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Avatar row */
+.profileAvatarRow {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.profileAvatarImg {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--brand-cyan, #3FC4E1);
+    background: #f2f5f7;
+    flex-shrink: 0;
+}
+
+.profileAvatarView {
+    width: 88px;
+    height: 88px;
+}
+
+.profileAvatarControls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profileFileBtn {
+    display: inline-block;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--brand-cyan, #3FC4E1);
+    color: var(--brand-cyan, #3FC4E1);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.profileFileBtn:hover {
+    background: rgba(63, 196, 225, 0.1);
+}
+
+.profileFileBtn input[type="file"] {
+    display: none;
+}
+
+.profileRemoveAvatar {
+    font-size: 0.8rem;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* Identity (view mode) */
+.profileIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.profileDisplayName {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.profileSubLine {
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.profileBadgeOK,
+.profileBadgeWarn {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    width: fit-content;
+}
+
+.profileBadgeOK {
+    background: rgba(25, 135, 84, 0.12);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.4);
+}
+
+.profileBadgeWarn {
+    background: rgba(255, 193, 7, 0.14);
+    color: #7a5b00;
+    border: 1px solid rgba(255, 193, 7, 0.5);
+}
+
+/* Fields */
+.profileFieldGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+}
+
+.profileViewGrid {
+    margin-top: 1.5rem;
+}
+
+.profileField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profileFieldWide {
+    grid-column: 1 / -1;
+}
+
+.profileField label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #555;
+}
+
+.profileOptional {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #999;
+}
+
+.profileField input,
+.profileField textarea {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid rgba(35, 31, 32, 0.2);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: var(--font-body, 'Poppins', sans-serif);
+    background: #fff;
+    color: var(--brand-dark, #231F20);
+}
+
+.profileField input:focus,
+.profileField textarea:focus {
+    outline: none;
+    border-color: var(--brand-cyan, #3FC4E1);
+    box-shadow: 0 0 0 3px rgba(63, 196, 225, 0.15);
+}
+
+.profileField input:disabled {
+    background: #f2f5f7;
+    color: #888;
+}
+
+.profileValue {
+    padding: 0.6rem 0;
+    font-size: 0.98rem;
+    border-bottom: 1px dashed rgba(35, 31, 32, 0.15);
+    word-break: break-word;
+}
+
+/* Actions */
+.profileActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.profileBtn {
+    display: inline-block;
+    padding: 0.65rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.profileBtnPrimary {
+    background: var(--brand-cyan, #3FC4E1);
+    color: #fff;
+    border-color: var(--brand-cyan, #3FC4E1);
+}
+
+.profileBtnPrimary:hover {
+    filter: brightness(0.92);
+}
+
+.profileBtnGhost {
+    background: transparent;
+    color: #666;
+    border-color: rgba(35, 31, 32, 0.2);
+}
+
+.profileBtnGhost:hover {
+    background: rgba(35, 31, 32, 0.05);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .profileFieldGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .profileAvatarRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profileActions {
+        flex-direction: column-reverse;
+    }
+
+    .profileBtn {
+        width: 100%;
+        text-align: center;
+    }
+}

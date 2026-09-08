@@ -58,7 +58,7 @@ if ($pdo) {
         $stmt->execute($params);
         $products     = $stmt->fetchAll();
         $totalResults = count($products);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log("Search execution failed: " . $e->getMessage());
     }
 }
@@ -106,6 +106,7 @@ if (!empty($filterGrade)) {
     <link rel="stylesheet" href="search.css?v=<?php echo time(); ?>">
 </head>
 <body class="searchPageBody">
+<?php include __DIR__ . '/../../shared/menu.php'; ?>
 
     <!-- NAVBAR (identical to storefront) -->
     <header class="headerContainer headerStatic">
@@ -127,15 +128,12 @@ if (!empty($filterGrade)) {
                 <?php if ($userRole === 'admin'): ?>
                     <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color:#ffaa00;font-weight:700;">[COMMAND DECK]</a>
                 <?php else: ?>
-                    <span class="navItem navLink" style="color:var(--brand-cyan);cursor:default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                    <a href="<?php echo $profilePath; ?>" class="navItem navLink" style="color:var(--brand-cyan);">PILOT: <?php echo htmlspecialchars($userName); ?></a>
                 <?php endif; ?>
                 <a href="<?php echo $logoutPath; ?>" class="navItem navLink">LOG OUT</a>
             <?php else: ?>
                 <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
-            <a href="search.php?focus=1" class="navItem navBtnSearch" aria-label="Search">
-                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </a>
         </div>
     </header>
 

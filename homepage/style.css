@@ -47,8 +47,11 @@ html, body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.35);
     border-left: 1px solid rgba(255, 255, 255, 0.35);
     border-right: 1px solid rgba(255, 255, 255, 0.35);
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    /* 1fr auto 1fr: side columns are always equal, so the logo stays
+       perfectly centered no matter how many buttons either side has
+       (e.g. PILOT + LOG OUT appear on the right after login). */
+    grid-template-columns: 1fr auto 1fr;
     align-items: stretch;
     padding: 0;
     box-sizing: border-box;

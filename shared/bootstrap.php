@@ -26,6 +26,7 @@ function hangarBootstrap(): array {
 
     $loginDir = $resolvePath('login');
     $adminDir = $resolvePath('admin');
+    $profileDir = $resolvePath('homepage/profile');
 
     return [
         'isLoggedIn'      => $isLoggedIn,
@@ -38,5 +39,6 @@ function hangarBootstrap(): array {
         'loginPath'       => $loginDir . '/',
         'logoutPath'      => $loginDir . '/logout.php',
         'adminPath'       => $adminDir . '/index.php',
+        'profilePath'     => $profileDir . '/profile.php',
     ];
 }

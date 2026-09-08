@@ -11,6 +11,7 @@ $sec7Slides = !empty($sfData['section7Slides']) ? $sfData['section7Slides'] : []
 $nrProducts = !empty($sfData['newReleases']) ? $sfData['newReleases'] : [];
 $bsProducts = !empty($sfData['bestSellers']) ? $sfData['bestSellers'] : [];
 $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
+$ctTiles    = !empty($sfData['categoryTiles']) ? $sfData['categoryTiles'] : [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +22,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
     <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
 </head>
 <body>
+<?php include __DIR__ . '/../shared/menu.php'; ?>
 
     <!-- SECTION 0 & 1 -->
     <div class="promotionalContainer">
@@ -47,15 +49,12 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
                     <?php if ($userRole === 'admin'): ?>
                         <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                     <?php else: ?>
-                        <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                        <a href="<?php echo $profilePath; ?>" class="navItem navLink" style="color: #3FC4E1;">PILOT: <?php echo htmlspecialchars($userName); ?></a>
                     <?php endif; ?>
                     <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
                 <?php else: ?>
                     <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
                 <?php endif; ?>
-                <a href="search/search.php?focus=1" class="navItem navBtnSearch" aria-label="Search">
-                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </a>
             </div>
         </header>
 
@@ -233,37 +232,44 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
     <!-- Centered Viewport Container -->
     <div class="categorySetContainer">
         <div class="categoryGrid">
-            
-            <!-- Full Width Container: METALBUILD -->
-            <div class="catBox catBoxFull">
-                <span class="catTitleText">METALBUILD</span>
-                <img src="<?php echo $promotionalPath; ?>/rWKgWU4OCaLNzEFg20z6P7AroZR9iKXl66hhP6DL.jpg" alt="Metalbuild">
-            </div>
+            <?php if (!empty($ctTiles)): ?>
+                <?php foreach ($ctTiles as $ti => $ct): ?>
+                    <a href="search/search.php?grade=<?php echo urlencode($ct['grade_key']); ?>" class="catBox<?php echo ($ti === 0) ? ' catBoxFull' : ''; ?>" title="View <?php echo htmlspecialchars($ct['title']); ?>">
+                        <span class="catTitleText"><?php echo htmlspecialchars($ct['title']); ?></span>
+                        <img src="<?php echo htmlspecialchars(assetUrl($ct['image_url'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($ct['title']); ?>" onerror="this.src='<?php echo $promotionalPath; ?>/Asset 8.png'">
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <!-- Full Width Container: METALBUILD -->
+                <a href="search/search.php?grade=METAL BUILD" class="catBox catBoxFull">
+                    <span class="catTitleText">METALBUILD</span>
+                    <img src="<?php echo $promotionalPath; ?>/rWKgWU4OCaLNzEFg20z6P7AroZR9iKXl66hhP6DL.jpg" alt="Metalbuild">
+                </a>
 
-            <!-- Row 1 Left: PERFECT GRADE -->
-            <div class="catBox">
-                <span class="catTitleText">PERFECT GRADE</span>
-                <img src="<?php echo $promotionalPath; ?>/PG NU GUNDAM.webp" alt="Perfect Grade">
-            </div>
+                <!-- Row 1 Left: PERFECT GRADE -->
+                <a href="search/search.php?grade=PG" class="catBox">
+                    <span class="catTitleText">PERFECT GRADE</span>
+                    <img src="<?php echo $promotionalPath; ?>/PG NU GUNDAM.webp" alt="Perfect Grade">
+                </a>
 
-            <!-- Row 1 Right: MASTER GRADE -->
-            <div class="catBox">
-                <span class="catTitleText">MASTER GRADE</span>
-                <img src="<?php echo $promotionalPath; ?>/BAS5055457-6.jpg" alt="Master Grade">
-            </div>
+                <!-- Row 1 Right: MASTER GRADE -->
+                <a href="search/search.php?grade=MG" class="catBox">
+                    <span class="catTitleText">MASTER GRADE</span>
+                    <img src="<?php echo $promotionalPath; ?>/BAS5055457-6.jpg" alt="Master Grade">
+                </a>
 
-            <!-- Row 2 Left: REAL GRADE -->
-            <div class="catBox">
-                <span class="catTitleText">REAL GRADE</span>
-                <img src="<?php echo $promotionalPath; ?>/cut-out rg.png" alt="Real Grade">
-            </div>
+                <!-- Row 2 Left: REAL GRADE -->
+                <a href="search/search.php?grade=RG" class="catBox">
+                    <span class="catTitleText">REAL GRADE</span>
+                    <img src="<?php echo $promotionalPath; ?>/cut-out rg.png" alt="Real Grade">
+                </a>
 
-            <!-- Row 2 Right: HIGH GRADE -->
-            <div class="catBox">
-                <span class="catTitleText">HIGH GRADE</span>
-                <img src="<?php echo $promotionalPath; ?>/hg.webp" alt="High Grade">
-            </div>
-
+                <!-- Row 2 Right: HIGH GRADE -->
+                <a href="search/search.php?grade=HG" class="catBox">
+                    <span class="catTitleText">HIGH GRADE</span>
+                    <img src="<?php echo $promotionalPath; ?>/hg.webp" alt="High Grade">
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

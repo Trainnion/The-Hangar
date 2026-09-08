@@ -578,14 +578,14 @@
     justify-content: center;
     padding: 0.9rem;
     background: #121212;
-    border: 1px solid #333333;
+    border: 1px solid var(--brand-cyan, #3FC4E1);
     border-radius: 4px;
     width: 100%;
 }
 
 .gcashQrImageMK {
-    max-width: 180px;
-    max-height: 180px;
+    max-width: 240px;
+    max-height: 240px;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -675,4 +675,26 @@
     .cartCardPricing {
         align-items: flex-start;
     }
+}
+
+/* Profile-completeness gate banner (checkout blocked until profile complete) */
+.profileGateBannerMK {
+    margin-top: 1rem;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    background: rgba(255, 193, 7, 0.14);
+    border: 1px solid rgba(255, 193, 7, 0.5);
+    color: #7a5b00;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.profileGateBannerMK strong {
+    letter-spacing: 0.05em;
+}
+
+.profileGateBannerMK a {
+    color: #14586b;
+    font-weight: 700;
+    text-decoration: underline;
 }

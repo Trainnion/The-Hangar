@@ -14,6 +14,10 @@ define('HANGAR_DEFAULT_IMAGE', 'cut-out metal build.webp');
 // ---------------------------------------------------------------------------
 require_once __DIR__ . '/../database/config.php';
 
+// Global error-handling safety net — loaded before anything else so raw PHP
+// errors never reach visitors and uncaught fatals render a friendly 500.
+require_once __DIR__ . '/error_handler.php';
+
 function initDatabaseTables($pdo) {
     // 1. Products Table
     $pdo->exec("
@@ -192,6 +196,106 @@ function ensureOrderPaymentColumns($pdo) {
         ");
     } catch (Exception $e) {
         // non-fatal
+    }
+}
+
+/**
+ * Idempotent migration for EXISTING user accounts created before the profile
+ * feature existed. Adds the pilot profile columns (full name, phone, address,
+ * avatar) to the `users` table. Safe to call on every connection open.
+ */
+function ensureUserProfileColumns($pdo) {
+    if (!$pdo) return;
+    $migrations = [
+        "ALTER TABLE `users` ADD COLUMN `full_name` VARCHAR(150) NULL AFTER `username`",
+        "ALTER TABLE `users` ADD COLUMN `phone` VARCHAR(30) NULL AFTER `email`",
+        "ALTER TABLE `users` ADD COLUMN `address` TEXT NULL AFTER `phone`",
+        "ALTER TABLE `users` ADD COLUMN `avatar_url` VARCHAR(255) NULL AFTER `address`",
+    ];
+    foreach ($migrations as $stmt) {
+        try {
+            $pdo->exec($stmt);
+        } catch (Exception $e) {
+            // Column already present (or table layout differs) — non-fatal
+        }
+    }
+}
+
+/**
+ * A pilot's profile is "complete" once they have a full name, phone, and
+ * delivery address on file — the minimum required to place an order.
+ * Derived at read time (no stored flag to keep in sync).
+ */
+function isProfileComplete(array $user): bool {
+    return !empty($user['full_name']) && !empty($user['phone']) && !empty($user['address']);
+}
+
+/**
+ * Idempotent migration adding a numeric availability counter to `products`.
+ * Existing rows receive a starting stock of 10 (only the first time the column
+ * is added). The counter is decremented atomically at checkout and restored
+ * when a customer cancels a pending order. Safe to call on every connection.
+ */
+function ensureProductStockColumn($pdo) {
+    if (!$pdo) return;
+    try {
+        $pdo->exec("ALTER TABLE `products` ADD COLUMN `stock` INT NOT NULL DEFAULT 0 AFTER `sold_count`");
+        // Column was just created — seed a starting stock for every existing product.
+        $pdo->exec("UPDATE `products` SET `stock` = 10");
+    } catch (Exception $e) {
+        // Column already present — non-fatal (and the backfill above never re-runs)
+    }
+}
+
+/**
+ * Homepage Category Tiles (Section 4). Creates the `category_tiles` table and
+ * seeds the default 5 tiles (Metal Build, PG, MG, RG, HG) when the table is
+ * empty — preserving the original hardcoded category section, but now each tile
+ * stores an admin-editable image plus the PRODUCTS-section grade it links to
+ * (search.php?grade=...). Safe to call on every connection.
+ */
+function ensureCategoryTiles($pdo) {
+    if (!$pdo) return;
+    try {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `category_tiles` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `slug` VARCHAR(50) NOT NULL UNIQUE,
+                `title` VARCHAR(100) NOT NULL,
+                `grade_key` VARCHAR(50) NOT NULL DEFAULT 'MG',
+                `image_url` VARCHAR(255) NOT NULL,
+                `sort_order` INT DEFAULT 1,
+                `is_active` TINYINT(1) DEFAULT 1,
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+    } catch (Exception $e) {
+        // Table already present — non-fatal
+    }
+
+    // Seed the default tiles only when the table is empty (idempotent).
+    try {
+        $countStmt = $pdo->prepare("SELECT COUNT(*) AS `cnt` FROM `category_tiles`");
+        $countStmt->execute();
+        $cnt = (int)$countStmt->fetch()['cnt'];
+        if ($cnt > 0) return;
+
+        $seed = $pdo->prepare("
+            INSERT INTO `category_tiles` (`slug`, `title`, `grade_key`, `image_url`, `sort_order`)
+            VALUES (:slug, :title, :grade_key, :image_url, :sort_order)
+        ");
+        $defaultTiles = [
+            ['slug' => 'metalbuild',    'title' => 'METALBUILD',    'grade_key' => 'METAL BUILD', 'image_url' => 'rWKgWU4OCaLNzEFg20z6P7AroZR9iKXl66hhP6DL.jpg', 'sort_order' => 1],
+            ['slug' => 'perfect-grade', 'title' => 'PERFECT GRADE', 'grade_key' => 'PG',          'image_url' => 'PG NU GUNDAM.webp',                        'sort_order' => 2],
+            ['slug' => 'master-grade',  'title' => 'MASTER GRADE',  'grade_key' => 'MG',          'image_url' => 'BAS5055457-6.jpg',                          'sort_order' => 3],
+            ['slug' => 'real-grade',    'title' => 'REAL GRADE',    'grade_key' => 'RG',          'image_url' => 'cut-out rg.png',                            'sort_order' => 4],
+            ['slug' => 'high-grade',    'title' => 'HIGH GRADE',    'grade_key' => 'HG',          'image_url' => 'hg.webp',                                   'sort_order' => 5]
+        ];
+        foreach ($defaultTiles as $t) {
+            $seed->execute($t);
+        }
+    } catch (Exception $e) {
+        error_log('Category tiles seed failed: ' . $e->getMessage());
     }
 }
 

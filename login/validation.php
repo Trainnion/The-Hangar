@@ -32,6 +32,17 @@ function validateCallsignFormat(string $value): ?string
     return null;
 }
 
+function validatePhoneFormat(string $value): ?string
+{
+    if (trim($value) === '') {
+        return null; // Checked by validateRequired
+    }
+    // Normalize: strip spaces and dashes so "0917 123 4567" and "0917-123-4567" pass
+    $normalized = preg_replace('/[\s\-]/', '', $value);
+    // PH mobile: 09XXXXXXXXX or +639XXXXXXXXX
+    return preg_match('/^(09|\+639)\d{9}$/', $normalized) ? null : "Enter a valid PH mobile number (e.g. 09171234567).";
+}
+
 function validateLoginInput(array $post): array
 {
     $identifier = trim($post['identifier'] ?? '');
@@ -55,12 +66,20 @@ function validateLoginInput(array $post): array
 function validateRegisterInput(array $post): array
 {
     $callsign = trim($post['callsign'] ?? '');
+    $fullName = trim($post['full_name'] ?? '');
+    $phone    = trim($post['phone'] ?? '');
     $email    = trim($post['email'] ?? '');
     $password = trim($post['password'] ?? '');
+
+    // Normalize phone (strip spaces/dashes) so the stored value matches the validator's format
+    $phoneNormalized = preg_replace('/[\s\-]/', '', $phone);
 
     $errors = array_filter([
         validateRequired($callsign, 'Pilot Callsign'),
         validateCallsignFormat($callsign),
+        validateRequired($fullName, 'Full Name'),
+        validateRequired($phone, 'Mobile Number'),
+        validatePhoneFormat($phoneNormalized),
         validateRequired($email, 'Email Address'),
         validateEmailFormat($email),
         validateRequired($password, 'Security Passcode'),
@@ -71,9 +90,11 @@ function validateRegisterInput(array $post): array
     return [
         'errors' => $errors,
         'data'   => [
-            'callsign' => $callsign,
-            'email'    => $email,
-            'password' => $password,
+            'callsign'  => $callsign,
+            'full_name' => $fullName,
+            'phone'     => $phoneNormalized,
+            'email'     => $email,
+            'password'  => $password,
         ],
     ];
 }

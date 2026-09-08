@@ -114,10 +114,12 @@ try {
         'results'      => $results
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    error_log('Search API error: ' . $e->getMessage());
+    http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error'   => $e->getMessage(),
+        'error'   => 'Search service temporarily unavailable. Please try again.',
         'count'   => 0,
         'results' => []
     ]);

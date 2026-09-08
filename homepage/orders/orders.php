@@ -6,6 +6,7 @@
 require_once __DIR__ . '/../../shared/bootstrap.php';
 extract(hangarBootstrap());
 require_once __DIR__ . '/../../shared/db.php';
+require_once __DIR__ . '/../../admin/upload_helper.php'; // csrfToken / csrfField / csrfValid()
 
 // Only registered customers can view their order history (matched by user_id).
 if (empty($_SESSION['user_id'])) {
@@ -15,6 +16,68 @@ if (empty($_SESSION['user_id'])) {
 
 $pdo = getDBConnection();
 $userId = (int)$_SESSION['user_id'];
+
+// ---- CUSTOMER-INITIATED CANCELLATION --------------------------------------
+// Only orders still in 'pending' (not yet approved by the admin) can be cancelled
+// by the customer. Cancelling restores the reserved stock back to inventory.
+if ($pdo && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'cancel_order') {
+    if (!csrfValid()) {
+        header('Location: orders.php?flash=error&msg=' . urlencode('Security token expired. Please try again.'));
+        exit;
+    }
+
+    $orderId = (int)($_POST['order_id'] ?? 0);
+
+    $checkStmt = $pdo->prepare("SELECT `id`, `status` FROM `orders` WHERE `id` = :id AND `user_id` = :uid LIMIT 1");
+    $checkStmt->execute([':id' => $orderId, ':uid' => $userId]);
+    $orderRow = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$orderRow) {
+        header('Location: orders.php?flash=error&msg=' . urlencode('Order not found.'));
+        exit;
+    }
+    if (($orderRow['status'] ?? '') !== 'pending') {
+        header('Location: orders.php?flash=error&msg=' . urlencode('This order can no longer be cancelled — it has already been approved.'));
+        exit;
+    }
+
+    $pdo->beginTransaction();
+    try {
+        // Guarded update: only flips the row if it is STILL pending (no double-cancel).
+        $upd = $pdo->prepare("UPDATE `orders` SET `status` = 'cancelled' WHERE `id` = :id AND `status` = 'pending'");
+        $upd->execute([':id' => $orderId]);
+        if ($upd->rowCount() !== 1) {
+            throw new Exception('Order was already processed and can no longer be cancelled.');
+        }
+
+        // Return reserved stock to inventory (and pull the sold counter back down).
+        $iStmt = $pdo->prepare("SELECT `product_id`, `quantity` FROM `order_items` WHERE `order_id` = :oid");
+        $iStmt->execute([':oid' => $orderId]);
+        $cancelItems = $iStmt->fetchAll();
+
+        $rStmt = $pdo->prepare("UPDATE `products` SET `stock` = `stock` + :q, `sold_count` = IF(`sold_count` >= :q, `sold_count` - :q, 0) WHERE `id` = :pid");
+        foreach ($cancelItems as $ci) {
+            $rStmt->execute([':q' => (int)$ci['quantity'], ':pid' => (int)$ci['product_id']]);
+        }
+
+        $pdo->commit();
+        header('Location: orders.php?flash=ok&msg=' . urlencode('Order cancelled. Reserved stock has been returned to inventory.'));
+        exit;
+    } catch (Throwable $e) {
+        try {
+            $pdo->rollBack();
+        } catch (Throwable $rb) {
+            error_log('Order cancel rollback failed: ' . $rb->getMessage());
+        }
+        error_log('Order cancel error: ' . $e->getMessage());
+        // Show the friendly business message only; never raw DB details.
+        $safeMsg = (strpos($e->getMessage(), 'was already processed and can no longer be cancelled') !== false)
+            ? $e->getMessage()
+            : 'Could not cancel the order. Please try again or contact support.';
+        header('Location: orders.php?flash=error&msg=' . urlencode($safeMsg));
+        exit;
+    }
+}
 
 $orders       = [];
 $itemsByOrder = [];
@@ -122,9 +185,35 @@ $countPast   = count($pastOrders);
             display: flex;
             flex-direction: column;
         }
+        .ocFlash {
+            max-width: 960px;
+            margin: 0.75rem auto 0.25rem;
+            padding: 0.85rem 1.1rem;
+            border-radius: 6px;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+        .ocFlashOK  { background: #e7f6ec; border: 1px solid #b7e3c1; color: #1a7f3a; }
+        .ocFlashErr { background: #fdeeee; border: 1px solid #f2c9c9; color: #b33a3a; }
+        .ocCancelForm { margin-top: 0.85rem; }
+        .ocCancelBtn {
+            font-family: var(--font-system, 'Poppins', sans-serif);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 0.6rem 1.3rem;
+            background: transparent;
+            color: #b33a3a;
+            border: 1px solid #d97f7f;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .ocCancelBtn:hover { background: #b33a3a; color: #ffffff; border-color: #b33a3a; }
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../../shared/menu.php'; ?>
 
     <!-- SECTION 0: TOP NAVBAR -->
     <header class="headerContainer headerStatic">
@@ -149,15 +238,12 @@ $countPast   = count($pastOrders);
                 <?php if ($userRole === 'admin'): ?>
                     <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
                 <?php else: ?>
-                    <span class="navItem navLink" style="color: #3FC4E1; cursor: default;">PILOT: <?php echo htmlspecialchars($userName); ?></span>
+                    <a href="<?php echo $profilePath; ?>" class="navItem navLink" style="color: #3FC4E1;">PILOT: <?php echo htmlspecialchars($userName); ?></a>
                 <?php endif; ?>
                 <a href="<?php echo $logoutPath; ?>" class="navItem navLink" title="Sign out of G.O.S">LOG OUT</a>
             <?php else: ?>
                 <a href="<?php echo $loginPath; ?>" class="navItem navLink">LOG IN</a>
             <?php endif; ?>
-            <a href="../search/search.php" class="navItem navBtnSearch" aria-label="Search">
-                <img src="<?php echo $buttonsPath; ?>/Search.svg" alt="Search">
-            </a>
         </div>
     </header>
 
@@ -177,6 +263,12 @@ $countPast   = count($pastOrders);
             </div>
         </div>
     </div>
+
+    <?php if (($_GET['flash'] ?? '') !== ''): ?>
+        <div class="ocFlash <?php echo (($_GET['flash'] ?? '') === 'ok') ? 'ocFlashOK' : 'ocFlashErr'; ?>">
+            <?php echo htmlspecialchars(trim($_GET['msg'] ?? (($_GET['flash'] ?? '') === 'ok' ? 'Done.' : 'Something went wrong.'))); ?>
+        </div>
+    <?php endif; ?>
 
     <!-- MAIN DECK -->
     <div class="ordersDeck">
@@ -242,6 +334,18 @@ $countPast   = count($pastOrders);
                 }
             }
 
+            // Cancel button — available ONLY while the order is still 'pending'
+            // (the admin has not yet approved/started processing it).
+            $cancelForm = '';
+            if (($o['status'] ?? '') === 'pending') {
+                $cancelForm = '<form method="POST" action="orders.php" class="ocCancelForm" onsubmit="return confirm(\'Cancel this order? Reserved stock will be returned to inventory.\');">'
+                    . '<input type="hidden" name="form_action" value="cancel_order">'
+                    . csrfField()
+                    . '<input type="hidden" name="order_id" value="' . (int)$o['id'] . '">'
+                    . '<button type="submit" class="ocCancelBtn">CANCEL ORDER</button>'
+                    . '</form>';
+            }
+
             $h = '<details class="orderCard">'
                 . '<summary>'
                 . '<span class="ocCode">' . htmlspecialchars($o['order_code']) . '</span>'
@@ -271,6 +375,7 @@ $countPast   = count($pastOrders);
                 . '<span class="ocTotalRow ocGrand">TOTAL <span class="ocTv">' . ocMoney($o['total']) . '</span></span>'
                 . '</div>'
                 . $note
+                . $cancelForm
                 . '</div>'
                 . '</details>';
             return $h;
@@ -326,5 +431,6 @@ $countPast   = count($pastOrders);
             if (btnEl) btnEl.classList.add('active');
         }
     </script>
+<?php require __DIR__ . '/../footer.php'; ?>
 </body>
 </html>

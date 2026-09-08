@@ -12,7 +12,8 @@ function getStorefrontData() {
         'section7Slides' => [],
         'newReleases' => [],
         'bestSellers' => [],
-        'modelKits' => []
+        'modelKits' => [],
+        'categoryTiles' => []
     ];
 
     if ($pdo) {
@@ -54,6 +55,10 @@ function getStorefrontData() {
             if (empty($data['modelKits'])) {
                 $data['modelKits'] = $pdo->query("SELECT * FROM `products` ORDER BY `id` DESC")->fetchAll();
             }
+
+            // Category tiles (Section 4) — active tiles render on the homepage and
+            // link to search.php?grade=<grade_key> (the PRODUCTS-section categories).
+            $data['categoryTiles'] = $pdo->query("SELECT * FROM `category_tiles` WHERE `is_active` = 1 ORDER BY `sort_order` ASC, `id` ASC")->fetchAll();
         } catch (Exception $e) {
             error_log("Failed to query storefront data: " . $e->getMessage());
         }
@@ -73,10 +78,24 @@ function assetUrl($imageUrl, $basePath = 'promotional') {
     if ($img === '') {
         return $basePath . '/Asset 8.png';
     }
-    // Already a managed path (or absolute URL) -> use as-is
-    if (strpos($img, '/') !== false || stripos($img, 'http') === 0) {
-        return $img;
+    if (stripos($img, 'http') === 0) {
+        return $img; // absolute URL — use as-is
     }
+    if (strpos($img, '/') !== false) {
+        // Managed upload path (e.g. assets/uploads/products/...) — stored
+        // relative to the project ROOT. $basePath already climbs out of the
+        // current page folder to reach the root (e.g. '../promotional' from
+        // /homepage/, '../../promotional' from /homepage/search/). Mirror that
+        // same climb so managed paths resolve from any page depth.
+        $up = '';
+        $bp = (string)$basePath;
+        while (substr($bp, 0, 3) === '../') {
+            $up .= '../';
+            $bp = substr($bp, 3);
+        }
+        return $up . $img;
+    }
+    // Legacy bare filename — rendered under the promotional/seed base
     return $basePath . '/' . $img;
 }
 
