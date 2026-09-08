@@ -15,8 +15,12 @@ if (isset($_GET['delete']) && $pdo) {
         header('Location: products.php?msg=csrf');
         exit;
     }
+    $imgStmt = $pdo->prepare("SELECT `image_url` FROM `products` WHERE `id` = :id");
+    $imgStmt->execute(['id' => $delId]);
+    $deletedImg = $imgStmt->fetchColumn() ?: null;
     $stmt = $pdo->prepare("DELETE FROM `products` WHERE `id` = :id");
     $stmt->execute(['id' => $delId]);
+    deleteOrphanedImage($pdo, $deletedImg, null);
     header('Location: products.php?msg=deleted');
     exit;
 }
@@ -110,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                 'is_model_kit' => $is_model_kit,
                 'id' => $editId
             ]);
+            deleteOrphanedImage($pdo, $currentImg, $finalImg);
             header('Location: products.php?msg=updated');
             exit;
         }

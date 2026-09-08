@@ -125,7 +125,7 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                             type="text" 
                             id="loginIdentifier" 
                             name="identifier" 
-                            placeholder="e.g. admin or Amuro_Ray" 
+                            placeholder="Callsign or Email" 
                             required 
                             autofocus
                         >

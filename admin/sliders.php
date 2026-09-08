@@ -15,8 +15,12 @@ if (isset($_GET['delete']) && $pdo) {
         header('Location: sliders.php?msg=csrf');
         exit;
     }
+    $imgStmt = $pdo->prepare("SELECT `image_url` FROM `sliders` WHERE `id` = :id");
+    $imgStmt->execute(['id' => $delId]);
+    $deletedImg = $imgStmt->fetchColumn() ?: null;
     $stmt = $pdo->prepare("DELETE FROM `sliders` WHERE `id` = :id");
     $stmt->execute(['id' => $delId]);
+    deleteOrphanedImage($pdo, $deletedImg, null);
     header('Location: sliders.php?msg=deleted');
     exit;
 }
@@ -112,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                 'is_active' => $is_active,
                 'id' => $editId
             ]);
+            deleteOrphanedImage($pdo, $currentImg, $finalImg);
             header('Location: sliders.php?msg=updated');
             exit;
         }

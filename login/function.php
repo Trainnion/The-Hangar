@@ -69,6 +69,10 @@ function processLogin(): void
             }
         }
 
+        // Prevent session fixation: issue a fresh session ID before populating
+        // the session with authenticated user data.
+        session_regenerate_id(true);
+
         // Establish unified session
         $_SESSION['user_id']    = $user['id'];
         $_SESSION['username']   = $user['username'];
@@ -149,6 +153,8 @@ function processRegister(): void
 
         // Auto-login: establish the same unified session processLogin() uses,
         // so new pilots go straight into the hangar without a second login step.
+        // Prevent session fixation on auto-login after registration
+        session_regenerate_id(true);
         $_SESSION['user_id']    = (int)$pdo->lastInsertId();
         $_SESSION['username']   = $callsign;
         $_SESSION['user_email'] = $email;
