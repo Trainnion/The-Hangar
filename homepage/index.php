@@ -42,6 +42,7 @@ $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
 
             <div class="headerRight">
                 <a href="cart/cart.php" class="navItem navLink navCart">CART</a>
+                <a href="orders/orders.php" class="navItem navLink">MY ORDERS</a>
                 <?php if ($isLoggedIn): ?>
                     <?php if ($userRole === 'admin'): ?>
                         <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>

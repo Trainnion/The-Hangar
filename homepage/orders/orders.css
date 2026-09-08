@@ -1,0 +1,328 @@
+/* ==========================================================================
+   THE HANGAR - G.O.S CUSTOMER ORDER TRACKING (MY ORDERS)
+   Styling aligned with Section 6 / Section 7 design language:
+   Poppins, dark banner strips, translucent cards, brand-cyan accents.
+   ========================================================================== */
+
+.ordersDeck {
+    flex: 1;
+    width: 100%;
+}
+
+/* ---- Tab bar ---- */
+.ordersTabs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin: 1rem 0 1.25rem;
+}
+
+.ordersTabBtn {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 0.6rem 1.1rem;
+    background: #14171e;
+    color: #9ea4b0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.ordersTabBtn:hover {
+    color: #ffffff;
+    border-color: var(--brand-cyan, #3FC4E1);
+}
+
+.ordersTabBtn.active {
+    background: var(--brand-cyan, #3FC4E1);
+    color: #080808;
+    border-color: var(--brand-cyan, #3FC4E1);
+}
+
+.ordersTabBtn .tabCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    margin-left: 0.35rem;
+    border-radius: 999px;
+    background: rgba(63, 196, 225, 0.18);
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.ordersTabBtn.active .tabCount {
+    background: rgba(8, 8, 8, 0.25);
+    color: #080808;
+}
+
+/* ---- Sections ---- */
+.ordersSection {
+    display: none;
+}
+
+.ordersSection .sectionHead {
+    font-family: var(--font-heading, 'Poppins', sans-serif);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #7f8794;
+    margin: 0.2rem 0 0.9rem;
+    padding-left: 0.5rem;
+}
+
+/* ---- Order card (details/summary expandable) ---- */
+.orderCard {
+    background: #14171e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-bottom: 0.9rem;
+    overflow: hidden;
+}
+
+.orderCard summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem 1.1rem;
+    cursor: pointer;
+    list-style: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.orderCard summary::-webkit-details-marker { display: none; }
+
+.orderCard summary .ocCode {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-weight: 700;
+    color: var(--brand-cyan, #3FC4E1);
+    letter-spacing: 0.5px;
+    font-size: 0.86rem;
+}
+
+.orderCard summary .ocDate {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.72rem;
+    color: #9ea4b0;
+}
+
+.orderCard summary .ocSpacer {
+    flex: 1;
+}
+
+.orderCard summary .ocTotal {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.orderCard summary .ocCaret {
+    font-size: 0.8rem;
+    color: #7f8794;
+    transition: transform 0.15s ease;
+}
+
+.orderCard[open] summary .ocCaret {
+    transform: rotate(180deg);
+}
+/* ---- Chips ---- */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.7rem;
+    border-radius: 999px;
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.chip.cyan    { background: rgba(63, 196, 225, 0.15); color: #3FC4E1; }
+.chip.green   { background: rgba(80, 200, 120, 0.15); color: #58d199; }
+.chip.amber   { background: rgba(255, 170, 0, 0.15);  color: #ffaa00; }
+.chip.muted   { background: rgba(255, 255, 255, 0.08); color: #c9ced6; }
+.chip.red     { background: rgba(255, 90, 90, 0.16);  color: #ff6b6b; }
+
+/* ---- Expanded detail ---- */
+.orderDetail {
+    padding: 1.1rem 1.1rem;
+}
+
+.orderDetail .ocGroupLabel {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #7f8794;
+    margin: 0 0 0.4rem;
+}
+
+.orderMetaGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.9rem;
+}
+
+.orderMetaGrid .ocField {
+    display: flex;
+    flex-direction: column;
+}
+
+.orderMetaGrid .ocField .ocK {
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #7f8794;
+    margin-bottom: 0.15rem;
+}
+
+.orderMetaGrid .ocField .ocV {
+    font-size: 0.82rem;
+    color: #e8eaef;
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.orderMetaGrid .ocField .ocV .ocSub {
+    display: block;
+    font-size: 0.74rem;
+    color: #9ea4b0;
+}
+
+/* ---- Items table ---- */
+.ocItemsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+}
+
+.ocItemsTable th {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 0.64rem;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #7f8794;
+}
+
+.ocItemsTable td {
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    color: #e8eaef;
+}
+
+.ocItemsTable .ocNum { text-align: right; font-weight: 700; color: #ffffff; }
+
+/* ---- Totals ---- */
+.ocTotals {
+    margin: 0.7rem 0 0.2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ocTotals .ocTotalRow {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.76rem;
+    color: #c9ced6;
+    padding: 0.35rem 0.7rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.ocTotals .ocTotalRow .ocTv {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.ocTotals .ocGrand {
+    border-color: var(--brand-cyan, #3FC4E1);
+    color: #3FC4E1;
+    font-weight: 700;
+}
+
+/* ---- Payment settlement note (To Pay) ---- */
+.ocSettleNote {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #ffbf6b;
+    background: rgba(255, 170, 0, 0.07);
+    border: 1px solid rgba(255, 170, 0, 0.18);
+    border-radius: 4px;
+    padding: 0.6rem 0.9rem;
+}
+
+.ocSettleNote.cod {
+    color: #58d199;
+    border-color: rgba(80, 200, 120, 0.22);
+    background: rgba(80, 200, 120, 0.07);
+}
+
+.ocSettleNote.gcash {
+    color: #3FC4E1;
+    border-color: rgba(63, 196, 225, 0.22);
+    background: rgba(63, 196, 225, 0.07);
+}
+
+/* ---- Empty state ---- */
+.emptyOrders {
+    padding: 2.4rem 1.4rem;
+    background: #14171e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #9ea4b0;
+    text-align: center;
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+.emptyOrders strong {
+    color: #e8eaef;
+    display: block;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.5px;
+}
+
+.emptyOrders .emptyActions {
+    margin-top: 0.9rem;
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+}
+
+.emptyOrders a {
+    font-family: var(--font-system, 'Poppins', sans-serif);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 0.55rem 1.1rem;
+    background: var(--brand-cyan, #3FC4E1);
+    color: #080808;
+    border: 1px solid var(--brand-cyan, #3FC4E1);
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.emptyOrders a.secondary {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}

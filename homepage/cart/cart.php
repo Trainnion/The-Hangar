@@ -121,6 +121,37 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             background: #ffffff;
             border-color: #ffffff;
         }
+
+        /* Track order + dismiss pair inside the success modal */
+        .successOrderActions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            width: 100%;
+        }
+
+        .successTrackBtn {
+            display: inline-block;
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            background: transparent;
+            color: var(--brand-cyan, #3FC4E1);
+            border: 1px solid var(--brand-cyan, #3FC4E1);
+            font-family: var(--font-heading, 'Poppins', sans-serif);
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .successTrackBtn:hover {
+            background: var(--brand-cyan, #3FC4E1);
+            color: #080808;
+        }
     </style>
 </head>
 <body>
@@ -143,6 +174,7 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
 
         <div class="headerRight">
             <a href="cart.php" class="navItem navLink navCart" style="color: var(--brand-cyan);">CART</a>
+            <a href="../orders/orders.php" class="navItem navLink" style="color: var(--brand-cyan);">MY ORDERS</a>
             <?php if ($isLoggedIn): ?>
                 <?php if ($userRole === 'admin'): ?>
                     <a href="<?php echo $adminPath; ?>" class="navItem navLink" style="color: #ffaa00; font-weight: 700;">[COMMAND DECK]</a>
@@ -257,10 +289,29 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                             <input type="tel" id="coCustomerPhone" class="cartPromoInputMK" placeholder="Mobile Number *" autocomplete="tel">
                             <textarea id="coShippingAddress" class="cartPromoInputMK" placeholder="Delivery Address (street, city, province) *" rows="2" autocomplete="street-address"></textarea>
 
+                            <label class="cartPromoLabelMK" for="coLogistics">DELIVERY LOGISTICS (COURIER)</label>
+                            <select id="coLogistics" class="cartPromoInputMK">
+                                <option value="J&T Express">J&T Express</option>
+                                <option value="NinjaVan">NinjaVan</option>
+                            </select>
+
                             <div class="payDividerMK"></div>
 
-                            <label class="cartPromoLabelMK" for="coGcashRef">PAY VIA GCASH QR (Amount shown at order total)</label>
-                            <div class="gcashQrBoxMK">
+                            <label class="cartPromoLabelMK">PAYMENT METHOD</label>
+                            <div class="cartPayMethodPickerMK">
+                                <label class="payMethodOptionMK">
+                                    <input type="radio" name="coPaymentMethod" value="gcash" checked>
+                                    <span class="payOptionLabelMK"><strong>GCash</strong>&nbsp;&middot;&nbsp;Pay now via QR scan</span>
+                                </label>
+                                <label class="payMethodOptionMK">
+                                    <input type="radio" name="coPaymentMethod" value="cod">
+                                    <span class="payOptionLabelMK"><strong>Cash on Delivery</strong>&nbsp;&middot;&nbsp;Pay the courier when it arrives</span>
+                                </label>
+                            </div>
+
+                            <div id="coGcashBlock">
+                                <label class="cartPromoLabelMK" for="coGcashRef">PAY VIA GCASH QR (Amount shown at order total)</label>
+                                <div class="gcashQrBoxMK">
                                 <?php
                                     $gcashCfg = hangarPaymentConfig();
                                     $gcashQrPdo = getDBConnection();
@@ -281,6 +332,12 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                                 <span class="payMethodNoteMK">1. Open GCash &nbsp;&bull;&nbsp; 2. Scan QR &nbsp;&bull;&nbsp; 3. Pay exact total &nbsp;&bull;&nbsp; 4. Paste reference below</span>
                             </div>
                             <input type="text" id="coGcashRef" class="cartPromoInputMK" placeholder="GCash reference / transaction number *" autocomplete="off">
+                            </div>
+
+                            <div id="coCodBlock" style="display: none;">
+                                <label class="cartPromoLabelMK">CASH ON DELIVERY</label>
+                                <div class="codNoteMK">Pay the exact order total to the courier when your items arrive. No upfront payment required.</div>
+                            </div>
                         </div>
 
                         <!-- Dispatch Button -->
@@ -316,9 +373,14 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             <p class="successOrderDesc" id="successOrderDesc">
                 Your Gundam Mobile Suit units have been logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.
             </p>
-            <button type="button" class="successDismissBtn" id="successDismissBtn">
-                RETURN TO STOREFRONT
-            </button>
+            <div class="successOrderActions">
+                <button type="button" class="successDismissBtn" id="successDismissBtn">
+                    RETURN TO STOREFRONT
+                </button>
+                <a href="../orders/orders.php" class="successTrackBtn" id="successTrackBtn">
+                    TRACK MY ORDER
+                </a>
+            </div>
         </div>
     </div>
 
@@ -344,6 +406,24 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             const successOverlay = document.getElementById('orderSuccessOverlay');
             const successDismissBtn = document.getElementById('successDismissBtn');
             const orderNumberEl = document.getElementById('successOrderNumber');
+
+            // Payment method (GCash / Cash on Delivery) toggle elements — shared between the
+            // dispatch handler and the UI switcher below.
+            const coGcashBlockEl = document.getElementById('coGcashBlock');
+            const coCodBlockEl = document.getElementById('coCodBlock');
+            const coPaymentEls = document.querySelectorAll('input[name="coPaymentMethod"]');
+
+            // Toggle GCash vs Cash on Delivery sections when the payment method changes
+            function syncPaymentMethodUI() {
+                const sel = document.querySelector('input[name="coPaymentMethod"]:checked');
+                const isCod = sel ? sel.value === 'cod' : false;
+                if (coGcashBlockEl) coGcashBlockEl.style.display = isCod ? 'none' : '';
+                if (coCodBlockEl) coCodBlockEl.style.display = isCod ? '' : 'none';
+            }
+            if (coPaymentEls.length > 0) {
+                coPaymentEls.forEach(function(r) { r.addEventListener('change', syncPaymentMethodUI); });
+            }
+            syncPaymentMethodUI();
 
             if (dispatchBtn && successOverlay) {
                 dispatchBtn.addEventListener('click', async function() {
@@ -371,12 +451,16 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                     const coPhoneEl = document.getElementById('coCustomerPhone');
                     const coAddressEl = document.getElementById('coShippingAddress');
                     const coGcashRefEl = document.getElementById('coGcashRef');
+                    const coLogisticsEl = document.getElementById('coLogistics');
 
                     const customerName = coNameEl ? coNameEl.value.trim() : '';
                     const customerEmail = coEmailEl ? coEmailEl.value.trim() : '';
                     const customerPhone = coPhoneEl ? coPhoneEl.value.trim() : '';
                     const shippingAddress = coAddressEl ? coAddressEl.value.trim() : '';
                     const gcashRef = coGcashRefEl ? coGcashRefEl.value.trim() : '';
+                    const logistics = coLogisticsEl ? coLogisticsEl.value.trim() : 'J&T Express';
+                    const paymentSel = document.querySelector('input[name="coPaymentMethod"]:checked');
+                    const paymentMethod = paymentSel ? paymentSel.value : 'gcash';
 
                     if (!customerName || !customerEmail || !customerPhone || !shippingAddress) {
                         if (window.HangarCart) {
@@ -386,7 +470,7 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                         }
                         return;
                     }
-                    if (!gcashRef) {
+                    if (paymentMethod !== 'cod' && !gcashRef) {
                         if (window.HangarCart) {
                             window.HangarCart.showToast('GCASH REFERENCE REQUIRED', 'Pay via the QR code, then paste your GCash reference number.', true);
                         } else {
@@ -411,12 +495,13 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                                 action: 'checkout',
                                 items: payloadItems,
                                 promo_code: promoCode,
-                                payment_method: 'gcash',
+                                payment_method: paymentMethod,
                                 customer_name: customerName,
                                 customer_email: customerEmail,
                                 customer_phone: customerPhone,
                                 shipping_address: shippingAddress,
-                                gcash_ref: gcashRef
+                                logistics: logistics,
+                                gcash_ref: paymentMethod === 'cod' ? '' : gcashRef
                             })
                         });
 
@@ -427,10 +512,12 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
                                 orderNumberEl.textContent = `MANIFEST ORDER #${result.order_code}`;
                             }
 
-                            // Reflect payment outcome in confirmation dialog (GCash)
+                            // Reflect payment outcome in confirmation dialog (GCash / Cash on Delivery)
                             const successDesc = document.getElementById('successOrderDesc');
                             if (successDesc) {
-                                if (result.payment_status === 'paid') {
+                                if (result.payment_status === 'cod') {
+                                    successDesc.textContent = `Order #${result.order_code} confirmed with Cash on Delivery (${'₱' + (result.total || '0.00')}). Pay the exact amount to the courier upon delivery. Your Gundam Mobile Suit units are logged into the Hangar distribution queue. Tracking will be relayed to your registered pilot terminal.`;
+                                } else if (result.payment_status === 'paid') {
                                     successDesc.textContent = `GCash payment authorized (Reference: ${result.payment_ref}). Your Gundam Mobile Suit units are PAID and logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.`;
                                 } else if (result.payment_status === 'payment_pending') {
                                     successDesc.textContent = `Order #${result.order_code} received. Your payment of ${'₱' + (result.total || '0.00')} is being verified against GCash reference ${result.gcash_ref || '—'}. We'll confirm once checked.`;
@@ -481,6 +568,15 @@ require_once __DIR__ . '/../../shared/db.php'; // exposes hangarPaymentConfig() 
             if (successDismissBtn && successOverlay) {
                 successDismissBtn.addEventListener('click', function() {
                     window.location.href = '../index.php';
+                });
+            }
+
+            // Track the freshly dispatched order in MY ORDERS
+            const successTrackBtn = document.getElementById('successTrackBtn');
+            if (successTrackBtn && successOverlay) {
+                successTrackBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = this.getAttribute('href');
                 });
             }
 

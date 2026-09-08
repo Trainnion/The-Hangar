@@ -454,7 +454,8 @@
 }
 
 .cartContactDeckMK input,
-.cartContactDeckMK textarea {
+.cartContactDeckMK textarea,
+.cartContactDeckMK select {
     width: 100%;
     background: #181818;
     border: 1px solid #333333;
@@ -469,7 +470,8 @@
 }
 
 .cartContactDeckMK input:focus,
-.cartContactDeckMK textarea:focus {
+.cartContactDeckMK textarea:focus,
+.cartContactDeckMK select:focus {
     border-color: var(--brand-cyan);
 }
 
@@ -502,6 +504,65 @@
     font-size: 0.72rem;
     color: #9ea4b0;
     letter-spacing: 0.3px;
+}
+
+/* Payment method picker (GCash / Cash on Delivery) */
+.cartPayMethodPickerMK {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding-top: 0.4rem;
+}
+
+.payMethodOptionMK {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 0.9rem;
+    background: #141414;
+    border: 1px solid #333333;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.payMethodOptionMK:hover {
+    border-color: var(--brand-cyan);
+}
+
+.payMethodOptionMK input[type="radio"] {
+    accent-color: var(--brand-cyan);
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+.payMethodOptionMK:has(input:checked) {
+    border-color: var(--brand-cyan);
+    background: #0d0d0d;
+}
+
+.payOptionLabelMK {
+    font-family: var(--font-system);
+    font-size: 0.78rem;
+    color: #d6d6d6;
+}
+
+.payOptionLabelMK strong {
+    font-family: var(--font-system);
+    color: #ffffff;
+}
+
+.codNoteMK {
+    font-family: var(--font-system);
+    font-size: 0.78rem;
+    color: #9ea4b0;
+    line-height: 1.6;
+    padding: 0.8rem 0.9rem;
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
 }
 
 /* GCash QR scan-to-pay deck */

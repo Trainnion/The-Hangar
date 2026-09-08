@@ -88,6 +88,7 @@ function initDatabaseTables($pdo) {
             `customer_email` VARCHAR(255) NULL,
             `customer_phone` VARCHAR(30) NULL,
             `shipping_address` TEXT NULL,
+            `logistics` VARCHAR(50) NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -169,7 +170,8 @@ function ensureOrderPaymentColumns($pdo) {
         "ALTER TABLE `orders` ADD COLUMN `customer_name` VARCHAR(150) NULL AFTER `promo_code`",
         "ALTER TABLE `orders` ADD COLUMN `customer_email` VARCHAR(255) NULL AFTER `customer_name`",
         "ALTER TABLE `orders` ADD COLUMN `customer_phone` VARCHAR(30) NULL AFTER `customer_email`",
-        "ALTER TABLE `orders` ADD COLUMN `shipping_address` TEXT NULL AFTER `customer_phone`"
+        "ALTER TABLE `orders` ADD COLUMN `shipping_address` TEXT NULL AFTER `customer_phone`",
+        "ALTER TABLE `orders` ADD COLUMN `logistics` VARCHAR(50) NULL AFTER `shipping_address`"
     ];
     foreach ($migrations as $stmt) {
         try {
@@ -601,6 +603,17 @@ function seedInitialPromoCodes($pdo) {
 // Compatibility wrapper for modules expecting getConnection()
 function getConnection(): ?PDO {
     return getDBConnection();
+}
+
+/**
+ * The list of logistics / courier partners offered at checkout and editable in the admin
+ * Order Dispatch panel. Kept as the single source of truth so the storefront, checkout API,
+ * admin detail view, and receipt render the exact same options.
+ *
+ * @return array<string>
+ */
+function hangarCourierOptions(): array {
+    return ['J&T Express', 'NinjaVan'];
 }
 
 /**

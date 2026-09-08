@@ -170,15 +170,31 @@ try {
     $payMode = trim($paymentCfg['mode'] ?? 'qr');
     if (!in_array($payMode, ['qr', 'stub', 'live'], true)) $payMode = 'qr';
 
-    $paymentMethod = trim($data['payment_method'] ?? 'gcash');
+    $paymentMethod = trim(strtolower($data['payment_method'] ?? 'gcash'));
+    if (!in_array($paymentMethod, ['gcash', 'cod'], true)) $paymentMethod = 'gcash';
+
     $customerName  = trim($data['customer_name']  ?? '');
     $customerEmail = trim($data['customer_email'] ?? '');
     $customerPhone = trim($data['customer_phone'] ?? '');
     $shippingAddr  = trim($data['shipping_address'] ?? '');
     $gcashRef      = trim($data['gcash_ref'] ?? '');
 
-    // Determine payment outcome based on the configured mode.
-    if ($payMode === 'qr') {
+    // Logistics / courier selection — sanitized against the shared whitelist.
+    // Defaults to the first supported courier if missing or unrecognized (never trusted from the client).
+    $logistics = trim($data['logistics'] ?? '');
+    $couriers = hangarCourierOptions();
+    if ($logistics === '' || !in_array($logistics, $couriers, true)) {
+        $logistics = (count($couriers) > 0) ? $couriers[0] : 'J&T Express';
+    }
+
+    // Determine payment outcome based on the payment method and configured mode.
+    if ($paymentMethod === 'cod') {
+        // Cash on Delivery: collect the exact total from the customer at the door.
+        // No online payment to pre-verify — the order is ready for fulfilment, and
+        // payment is settled when the courier delivers.
+        $paymentStatus = 'cod';
+        $paymentRef    = null;
+    } elseif ($payMode === 'qr') {
         // QR scan-to-pay: NOT auto-confirmed. The customer pays in their GCash app and
         // provides the transaction reference; the order waits for admin verification.
         $paymentStatus = 'payment_pending';
@@ -204,10 +220,10 @@ try {
     $orderInsert = $pdo->prepare("
         INSERT INTO `orders`
         (`user_id`, `order_code`, `subtotal`, `discount`, `shipping`, `total`, `promo_code`, `status`,
-         `payment_method`, `payment_status`, `payment_ref`, `gcash_ref`, `customer_name`, `customer_email`, `customer_phone`, `shipping_address`, `created_at`)
+         `payment_method`, `payment_status`, `payment_ref`, `gcash_ref`, `customer_name`, `customer_email`, `customer_phone`, `shipping_address`, `logistics`, `created_at`)
         VALUES
         (:user_id, :order_code, :subtotal, :discount, :shipping, :total, :promo_code, 'pending',
-         :payment_method, :payment_status, :payment_ref, :gcash_ref, :customer_name, :customer_email, :customer_phone, :shipping_address, NOW())
+         :payment_method, :payment_status, :payment_ref, :gcash_ref, :customer_name, :customer_email, :customer_phone, :shipping_address, :logistics, NOW())
     ");
     $orderInsert->execute([
         ':user_id'          => $userId,
@@ -224,7 +240,8 @@ try {
         ':customer_name'    => $customerName,
         ':customer_email'   => $customerEmail,
         ':customer_phone'   => $customerPhone,
-        ':shipping_address' => $shippingAddr
+        ':shipping_address' => $shippingAddr,
+        ':logistics'        => $logistics
     ]);
 
     $orderId = (int)$pdo->lastInsertId();
@@ -265,7 +282,9 @@ try {
             ? "GCash payment authorized. Manifest Order #{$orderCode} confirmed."
             : (($paymentStatus === 'payment_pending')
                 ? "Order #{$orderCode} logged. Payment is pending GCash verification — we'll confirm shortly."
-                : "Sortie Dispatch Authorized. Manifest Order #{$orderCode} pending payment confirmation.")
+                : (($paymentStatus === 'cod')
+                    ? "Order #{$orderCode} confirmed via Cash on Delivery. Pay the exact total to the courier upon delivery."
+                    : "Sortie Dispatch Authorized. Manifest Order #{$orderCode} pending payment confirmation."))
     ]);
 
 } catch (Exception $e) {

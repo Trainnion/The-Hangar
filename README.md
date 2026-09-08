@@ -31,7 +31,8 @@ A full-stack e-commerce web application for a Gundam model-kit shop, built in pl
 - Product detail pages
 - Cart persisted in `localStorage` (`/homepage/cart/`)
 - Promo code validation at checkout (percent or fixed-amount discounts)
-- **GCash QR checkout**: scan → pay → submit reference number
+- **GCash QR checkout** (scan → pay → reference number) **or Cash on Delivery**
+- **Order tracking** — logged-in customers can review active / to-pay / past orders with status, courier, items and totals (`/homepage/orders/`)
 - Customer login/registration (`/login/`)
 
 ### Admin Panel (`/admin/`)
@@ -119,7 +120,7 @@ Single source of truth: **`shared/db.php`**. Every page calls `getDBConnection()
 | `products`     | Catalog | `name`, `grade`, `scale`, `price`, `sold_count`, `brand`, `stock_status`, `image_url`, `is_new_release`, `is_best_seller`, `is_model_kit` |
 | `sliders`      | Homepage banners | image, title/subtitle, section placement, `active` |
 | `promo_codes`  | Discounts | `code` (unique), `type` (`percent`/`fixed`), `value`, `active` |
-| `orders`       | Checkout results | `order_code`, `subtotal`, `discount`, `shipping`, `total`, `promo_code`, `status`, `payment_method`, `payment_status`, `payment_ref`, `gcash_ref`, `customer_name/email/phone`, `shipping_address`, `created_at` |
+| `orders`       | Checkout results | `order_code`, `subtotal`, `discount`, `shipping`, `total`, `promo_code`, `status`, `payment_method`, `payment_status`, `payment_ref`, `gcash_ref`, `customer_name/email/phone`, `shipping_address`, `logistics` (courier), `created_at` |
 | `order_items`  | Line items (price snapshots) | `order_id`, `product_id`, `name_snapshot`, `price_snapshot`, `quantity` |
 | `settings`     | Key/value store (e.g. GCash QR path) | `skey` (PK), `svalue`, `updated_at` |
 
@@ -128,8 +129,8 @@ Single source of truth: **`shared/db.php`**. Every page calls `getDBConnection()
 | Column           | Values | Meaning |
 |------------------|--------|---------|
 | `status`         | `pending` → `processing` → `shipped` → `completed` · `cancelled` | Fulfilment workflow (admin-controlled) |
-| `payment_status` | `payment_pending` · `paid` | QR flow saves `payment_pending`; admin verification sets `paid` |
-| `payment_method` | `gcash` | Set at checkout |
+| `payment_status` | `payment_pending` · `paid` · `cod` | QR flow saves `payment_pending`; admin verification sets `paid`; Cash on Delivery saves `cod` (settled at the door, no online verify) |
+| `payment_method` | `gcash` · `cod` | Set at checkout |
 
 Seeded promo codes: `PILOT10` (10% off) and `GUNDAM2026` (₱500 off).
 
@@ -169,11 +170,12 @@ TheHangar/
 │   ├── footer.php
 │   ├── script.js / style.css
 │   ├── search/                # Live search (search.php + api_search.php)
+│   ├── orders/                # Customer "MY ORDERS" tracking (orders.php + orders.css)
 │   └── cart/                  # Cart + checkout
-│       ├── cart.php           # Cart page & checkout UI (GCash QR deck)
+│       ├── cart.php           # Cart page & checkout UI (GCash QR deck / COD)
 │       ├── cart.js            # Cart state (localStorage) + checkout AJAX
 │       ├── cart.css
-│       └── api_checkout.php   # Promo validation + order creation (JSON API)
+│       └── api_checkout.php   # Promo validation + order creation + courier/payment (JSON API)
 │
 ├── login/                     # Customer & admin login/registration
 │   ├── index.php
@@ -185,6 +187,7 @@ TheHangar/
 │   ├── index.php              # Dashboard
 │   ├── products.php           # Products CRUD + image upload/crop
 │   ├── orders.php             # Order list/detail, status workflow, payment verify
+│   ├── receipt.php            # Print-ready order receipt (A4 / save-as-PDF)
 │   ├── sliders.php            # Homepage slider management
 │   ├── promos.php             # Promo code management
 │   ├── gcash.php              # GCash QR upload/replace/remove
@@ -209,9 +212,10 @@ TheHangar/
 2. **Add to cart** → cart state lives in `localStorage`, rendered by `cart.js`
 3. **Checkout** (`/homepage/cart/cart.php`):
    - Apply promo code (validated server-side via `api_checkout.php?action=validate_promo`)
-   - Fill in contact details (name, email, phone) + delivery address
-   - Scan the GCash QR → pay the exact total in the GCash app → paste the reference number
+   - Fill in contact details (name, email, phone), delivery address, and choose **delivery courier** (J&T / NinjaVan)
+   - Choose payment: **GCash** (scan QR → pay exact total → paste reference) **or Cash on Delivery** (pay the courier on arrival)
 4. **Dispatch order** → `api_checkout.php` re-validates stock & totals **server-side** (cart prices are never trusted), writes `orders` + `order_items` in one transaction, and shows a confirmation with the order code and payment status
+5. **Track orders** (`/homepage/orders/`) — while logged in, view **MY ORDERS** (active), **TO PAY** (COD awaiting door payment, or GCash awaiting verification), and **PAST ORDERS**; expand any order to see items, status, courier, delivery address and totals
 
 ### Admin
 1. Log in at `/login/` with an admin account → **COMMAND DASHBOARD** link, or go straight to `/admin/`
@@ -234,6 +238,9 @@ TheHangar/
 ### Other modes
 - **`stub`** — dev-only auto-approval: orders are saved as `paid` immediately (with a `GCASH-STUB-*` reference) so the whole flow can be tested locally without a QR. Switch back to `qr` before going live.
 - **`live`** — reserved for an automated PSP integration (PayMongo-style): needs merchant credentials, a public HTTPS webhook, and signature verification. The code branch exists but is intentionally inert; `gcash_*` credential keys in `database/config.php` are placeholders.
+
+### Cash on Delivery (COD)
+At checkout the customer picks **GCash (QR scan-to-pay)** or **Cash on Delivery**. COD orders are stored with `payment_method = 'cod'` and `payment_status = 'cod'` — no upfront payment reference is required and no admin verification is needed. They ship once `status` is advanced (the fulfilment gate treats `cod` like `paid`), and payment is collected by the courier at the door. The receipt and admin badge show **CASH ON DELIVERY**.
 
 ### Where QR images live
 `assets/uploads/gcash_qr/` — managed entirely from the admin page (upload, reuse a previous image, or remove). Removing the QR makes checkout display a *"QR not set yet — upload it in Admin"* notice instead of an image.
@@ -263,7 +270,7 @@ All admin pages live under `/admin/` and are guarded by `auth.php` (`requireAdmi
 |------|------|--------------|
 | Dashboard | `index.php` | Stats (total products, pending orders, ...), recently added products, quick links |
 | Products | `products.php` | Create/edit/delete products, image upload or crop, flags (new release / best seller / model kit), stock status |
-| Orders | `orders.php` | Order list (search + status filter, stat cards), detail view (line items, payment info, customer/delivery data), **VERIFY GCASH PAYMENT**, fulfilment status form |
+| Orders | `orders.php` | Order list (search + status filter, stat cards), detail view (line items, payment info, customer/delivery data, editable **LOGISTICS/COURIER**), **VERIFY GCASH PAYMENT**, fulfilment status form, **PRINT / SAVE RECEIPT** (`receipt.php` — print-ready A4 receipt incl. courier) |
 | Sliders | `sliders.php` | Manage homepage banners for sections 1, 2, 7 |
 | Promo Codes | `promos.php` | Create/edit/delete promo codes (`percent` / `fixed`, active toggle) |
 | GCash & Payments | `gcash.php` | Upload/replace/remove the checkout GCash QR; shows current payment mode and where to verify payments |

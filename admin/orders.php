@@ -14,7 +14,7 @@ $ALLOWED_STATUS = ['pending', 'processing', 'shipped', 'completed', 'cancelled']
 
 // 1. Handle POST actions (CSRF-validated)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
-    if (!csrfValid() || !in_array($_POST['form_action'] ?? '', ['verify', 'status'], true)) {
+    if (!csrfValid() || !in_array($_POST['form_action'] ?? '', ['verify', 'status', 'logistics'], true)) {
         header('Location: orders.php?msg=csrf');
         exit;
     }
@@ -40,14 +40,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
         exit;
     }
 
+    // ---- 1a2. UPDATE DELIVERY LOGISTICS (admin corrects/adjusts the courier on the order) ----
+    if ($action === 'logistics' && $orderId > 0) {
+        $newLogistics = trim($_POST['logistics'] ?? '');
+        $couriers = hangarCourierOptions();
+        if ($newLogistics !== '' && in_array($newLogistics, $couriers, true)) {
+            $lgStmt = $pdo->prepare('UPDATE `orders` SET `logistics` = :l WHERE `id` = :id');
+            $lgStmt->execute(['l' => $newLogistics, 'id' => $orderId]);
+        }
+        header('Location: ' . $redirect);
+        exit;
+    }
+
     // ---- 1b. ADVANCE FULFILMENT STATUS (gated on confirmed payment) ----
+    // COD orders ship without online verification — payment is collected at the door.
     $newStatus = trim($_POST['status'] ?? '');
     $allowed = ($orderId > 0 && in_array($newStatus, $ALLOWED_STATUS, true));
     if ($allowed && in_array($newStatus, ['processing', 'shipped', 'completed'], true)) {
         $payStmt = $pdo->prepare('SELECT `payment_status` FROM `orders` WHERE `id` = :id');
         $payStmt->execute(['id' => $orderId]);
         $payRow = $payStmt->fetch();
-        if (!$payRow || trim($payRow['payment_status'] ?? '') !== 'paid') {
+        $payRowStatus = $payRow ? trim($payRow['payment_status'] ?? '') : '';
+        if (!$payRow || !in_array($payRowStatus, ['paid', 'cod'], true)) {
             $allowed = false;
             $redirect = 'orders.php?msg=unpaid';
             if (!empty($_POST['view'])) $redirect .= '&view=' . (int)$_POST['view'];
@@ -149,6 +163,7 @@ function paymentStatusBadge(string $status) {
         case 'paid':               return ['badge-active', 'PAID'];
         case 'failed':             return ['badge-inactive', 'FAILED'];
         case 'payment_pending':    return ['badge-bs', 'AWAITING VERIFY'];
+        case 'cod':                return ['badge-grade', 'CASH ON DELIVERY'];
         default:                   return ['badge-nr', 'PENDING'];
     }
 }
@@ -368,6 +383,7 @@ function paymentStatusBadge(string $status) {
                                         <td>
                                             <div class="actionBtns">
                                                 <a href="orders.php?view=<?php echo (int)$o['id']; ?>" class="btnSecondary btnSmall">VIEW</a>
+                                                <a href="receipt.php?order_id=<?php echo (int)$o['id']; ?>" class="btnSecondary btnSmall" title="Print / download receipt">PRINT</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -402,7 +418,7 @@ function paymentStatusBadge(string $status) {
                 </div>
 
                 <div class="formGroup">
-                    <label>PAYMENT (GCASH)</label>
+                    <label>PAYMENT</label>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                         <span class="badge <?php echo $pBadgeInfo[0]; ?>"><?php echo $pBadgeInfo[1]; ?></span>
                         <span class="badge badge-grade"><?php echo htmlspecialchars(strtoupper($viewOrder['payment_method'] ?? '—')); ?></span>
@@ -435,6 +451,25 @@ function paymentStatusBadge(string $status) {
                     <label>DELIVERY</label>
                     <div><?php echo htmlspecialchars($viewOrder['customer_phone'] ?? 'No mobile number on file.'); ?></div>
                     <div style="white-space: pre-line; margin-top: 0.35rem; color: var(--text-sub);"><?php echo htmlspecialchars($viewOrder['shipping_address'] ?? ''); ?></div>
+                </div>
+
+                <div class="formGroup">
+                    <label>LOGISTICS (COURIER)</label>
+                    <form method="POST" action="orders.php" style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="hidden" name="form_action" value="logistics">
+                        <?php echo csrfField(); ?>
+                        <input type="hidden" name="order_id" value="<?php echo (int)$viewOrder['id']; ?>">
+                        <input type="hidden" name="view" value="<?php echo (int)$viewOrder['id']; ?>">
+                        <select name="logistics" style="flex-grow: 1;">
+                            <?php foreach (hangarCourierOptions() as $c): ?>
+                                <option value="<?php echo htmlspecialchars($c); ?>" <?php if (($viewOrder['logistics'] ?? '') === $c) echo 'selected'; ?>><?php echo htmlspecialchars($c); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="submit" class="btnSecondary btnSmall">UPDATE COURIER</button>
+                    </form>
+                    <?php if (empty($viewOrder['logistics'])): ?>
+                        <div style="margin-top: 0.4rem; color: var(--text-muted); font-size: 0.78rem;">Not set — assign a courier to this order.</div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="formGroup">
@@ -504,7 +539,8 @@ function paymentStatusBadge(string $status) {
                         </select>
                     </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem; flex-wrap: wrap;">
+                        <a href="receipt.php?order_id=<?php echo (int)$viewOrder['id']; ?>" class="btnSecondary" style="text-decoration: none;">PRINT / SAVE RECEIPT</a>
                         <a href="orders.php" class="btnSecondary">CLOSE</a>
                         <button type="submit" class="btnPrimary">UPDATE STATUS</button>
                     </div>
