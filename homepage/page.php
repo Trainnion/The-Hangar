@@ -2,10 +2,13 @@
 // THE HANGAR - GUND-ORDER SYSTEM
 // STATIC CONTENT PAGES (page.php) — About / Privacy / Contact
 // Reached from the storefront footer links (admin-editable in ADMIN -> FOOTER CONTENT).
+// About & Privacy body content is admin-editable in ADMIN -> STATIC PAGES (settings keys
+// page_about / page_privacy, rendered by shared/static_pages.php with built-in defaults).
 
 require_once __DIR__ . '/../shared/bootstrap.php';
 extract(hangarBootstrap());
 require_once __DIR__ . '/../shared/db.php';
+require_once __DIR__ . '/../shared/static_pages.php';
 
 $allowedPages = [
     'about'    => ['title' => 'ABOUT THE HANGAR'],
@@ -86,6 +89,7 @@ try {
     </style>
 </head>
 <body>
+<?php include __DIR__ . '/../shared/menu.php'; ?>
 
     <!-- SECTION 0: TOP NAVBAR (same structure as profile.php) -->
     <header class="headerContainer headerStatic">
@@ -133,38 +137,8 @@ try {
     <main class="staticPageDeck">
         <div class="staticPageWrap">
             <div class="staticPageCard">
-<?php if ($p === 'about'): ?>
-                <h3>ABOUT THE HANGAR</h3>
-                <p>THE HANGAR is a Philippine-based online store for Gundam model kits and hobby collectibles. We stock genuine Bandai kits — from entry-grade builds for first-timers to master-grade displays for seasoned builders — and deliver them straight to your door nationwide.</p>
-                <h3>WHY SHOP WITH US</h3>
-                <ul>
-                    <li><strong>100% authentic kits</strong> — sourced directly from official Bandai distributors.</li>
-                    <li><strong>Fresh stock</strong> — kits ship sealed in their original boxes.</li>
-<?php elseif ($p === 'privacy'): ?>
-                <h3>POLICY OF PRIVACY</h3>
-                <p>THE HANGAR ("we", "our", "us") respects your privacy and is committed to protecting the personal information you share with us. This policy explains what we collect, why, and how we protect it — in accordance with the Philippine Data Privacy Act of 2012 (RA 10173).</p>
-                <h3>INFORMATION WE COLLECT</h3>
-                <ul>
-                    <li><strong>Account details</strong> — your callsign (username), full name, email address, and mobile number.</li>
-                    <li><strong>Delivery details</strong> — the shipping address you provide when placing an order.</li>
-                    <li><strong>Order history</strong> — the items you purchase and your payment references.</li>
-                </ul>
-                <h3>HOW WE USE YOUR INFORMATION</h3>
-                <ul>
-                    <li>To process and deliver your orders.</li>
-                    <li>To contact you about your order status or concerns.</li>
-                    <li>To secure your account and prevent fraudulent transactions.</li>
-                </ul>
-                <h3>WHAT WE NEVER DO</h3>
-                <ul>
-                    <li>We never sell or rent your personal information to third parties.</li>
-                    <li>We never share your contact details with anyone beyond the courier handling your delivery.</li>
-                </ul>
-                <h3>DATA SECURITY &amp; RETENTION</h3>
-                <p>Passwords are stored using industry-standard one-way encryption. Order and account records are retained only for as long as needed to serve you and comply with legal obligations. You may request access to, correction of, or deletion of your personal data by contacting us via the details on our Contact Us page.</p>
-                <h3>COOKIES</h3>
-                <p>We use essential browser cookies and local storage strictly to keep you signed in and remember your cart. No advertising trackers are used.</p>
-
+<?php if ($p === 'about' || $p === 'privacy'): ?>
+                <?php echo getStaticPageContent($pdo, $p); ?>
 <?php else: ?>
                 <h3>CONTACT US</h3>
                 <p>Questions about an order, a kit's availability, or anything else — we're here to help. Reach us through any of the channels below.</p>
@@ -196,11 +170,3 @@ try {
 <?php require __DIR__ . '/footer.php'; ?>
 </body>
 </html>
-
-                    <li><strong>Nationwide delivery</strong> — dispatched via trusted couriers (J&amp;T Express / NinjaVan).</li>
-                    <li><strong>Secure payment</strong> — pay instantly with GCash.</li>
-                </ul>
-                <h3>OUR MISSION</h3>
-                <p>To make the gunpla hobby accessible to every Filipino builder — whether you're snapping your first runner or adding to a decades-old collection. Every kit we sell is one we'd proudly build ourselves.</p>
-
-<?php include __DIR__ . '/../shared/menu.php'; ?>

@@ -692,11 +692,39 @@ function getConnection(): ?PDO {
 }
 
 /**
- * The list of logistics / courier partners offered at checkout and editable in the admin
- * Order Dispatch panel. Kept as the single source of truth so the storefront, checkout API,
- * admin detail view, and receipt render the exact same options.
+ * Resolve the displayed stock_status for a product given its numeric stock and
+ * its currently stored status.
  *
- * @return array<string>
+ * Admins can manually pin a product to 'PRE-ORDER' or 'SOLD OUT' regardless of
+ * the raw stock count. When the manual status is 'IN-STOCK' (or empty/unknown),
+ * the status is auto-derived from the stock quantity:
+ *   - stock > 0  → 'IN-STOCK'
+ *   - stock <= 0 → 'OUT OF STOCK'
+ *
+ * This is applied on every product save so the status keeps staying accurate as
+ * stock is edited, without clobbering a deliberate manual override.
+ *
+ * @param int    $stockQty    Current numeric stock (from the `stock` column).
+ * @param string $currentStatus Stored `stock_status` value.
+ * @return string              One of: 'IN-STOCK', 'OUT OF STOCK', 'PRE-ORDER', 'SOLD OUT'.
+ */
+function hangarResolveStockStatus(int $stockQty, string $currentStatus): string {
+    $manual = ['PRE-ORDER', 'SOLD OUT'];
+    $s = strtoupper(trim($currentStatus));
+    if (in_array($s, $manual, true)) {
+        return $s;
+    }
+    return ($stockQty > 0) ? 'IN-STOCK' : 'OUT OF STOCK';
+}
+
+/**
+ * Return the supported delivery couriers (logistics) for the storefront checkout
+ * and the admin Orders manager.
+ *
+ * This is the single source of truth so the checkout endpoint, the admin courier
+ * picker and the storefront logistics dropdown all stay in sync.
+ *
+ * @return string[] Array of courier names.
  */
 function hangarCourierOptions(): array {
     return ['J&T Express', 'NinjaVan'];
@@ -729,5 +757,39 @@ function setSetting($pdo, string $key, $value) {
     } catch (Exception $e) {
         // non-fatal
     }
+}
+
+/** Default Section-7 FEATURED content (used until first admin save). */
+function defaultFeaturedContent(): array {
+    return [
+        'main' => [
+            'title' => '45TH GUNDAM ANNIVERSARY', 'subtitle' => 'PG UNLEASHED 1/60 ν GUNDAM',
+            'status_text' => 'NOW AVAILABLE!', 'image' => 'ban969914box.webp', 'logo' => '',
+        ],
+        'ro' => [
+            'title' => 'GUNDAM ROGUE ORBIT', 'subtitle' => '',
+            'status_text' => 'C O M I N G  S O O N', 'image' => 'select_img02.png', 'logo' => 'logo_rogueOrbit.svg',
+        ],
+        'xz' => [
+            'title' => 'XARX-ZERO', 'subtitle' => '',
+            'status_text' => 'C O M I N G  S O O N', 'image' => 'select_img01.png', 'logo' => 'logo_xarx-zero_en.svg',
+        ],
+    ];
+}
+
+/** Load Section-7 FEATURED content from the settings table, merged over defaults. */
+function getFeaturedContent($pdo): array {
+    $defaults = defaultFeaturedContent();
+    if (!$pdo) return $defaults;
+    $raw = getSetting($pdo, 'featured_content', '');
+    if ($raw === '') return $defaults;
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) return $defaults;
+    foreach ($defaults as $slot => $base) {
+        foreach ($base as $k => $v) {
+            $defaults[$slot][$k] = isset($decoded[$slot][$k]) ? trim((string)$decoded[$slot][$k]) : $v;
+        }
+    }
+    return $defaults;
 }
 

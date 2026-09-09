@@ -342,18 +342,6 @@ body {
     align-items: center;
 }
 
-.forgotLink {
-    font-size: 0.72rem;
-    color: var(--brand-cyan);
-    text-decoration: none;
-    transition: opacity 0.2s ease;
-}
-
-.forgotLink:hover {
-    text-decoration: underline;
-    opacity: 0.85;
-}
-
 .inputWrapper {
     position: relative;
     display: flex;

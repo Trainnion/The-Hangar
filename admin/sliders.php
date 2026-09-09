@@ -199,91 +199,7 @@ if (isset($_GET['edit']) && $pdo) {
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="adminSidebar">
-        <div>
-            <div class="sidebarHeader">
-                <a href="index.php" class="sidebarBrand">
-                    <img src="../promotional/Asset 8.png" alt="THE HANGAR" class="sidebarLogoImg">
-                    <div class="sidebarBadge">
-                        <span>G.O.S ADMIN v2.6</span>
-                    </div>
-                </a>
-            </div>
-
-            <nav class="sidebarNav">
-                <a href="index.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    <span>DASHBOARD</span>
-                </a>
-                <a href="products.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                    <span>PRODUCTS</span>
-                </a>
-                <a href="categories.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                        <line x1="9" y1="6" x2="15" y2="6"></line>
-                        <line x1="9" y1="12" x2="15" y2="12"></line>
-                        <line x1="9" y1="18" x2="15" y2="18"></line>
-                    </svg>
-                    <span>CATEGORIES</span>
-                </a>
-                <a href="orders.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
-                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
-                        <line x1="5" y1="6" x2="13" y2="6"></line>
-                    </svg>
-                    <span>ORDERS</span>
-                </a>
-                <a href="sliders.php" class="navLink active">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                    <span>SLIDERS (SEC 1, 2, 7)</span>
-                </a>
-                <a href="promos.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                    </svg>
-                    <span>PROMO CODES</span>
-                </a>
-                <a href="gcash.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                    </svg>
-                    <span>GCASH &amp; PAYMENTS</span>
-                </a>
-            </nav>
-        </div>
-
-        <div class="sidebarFooter">
-            <a href="../homepage/" target="_blank" class="btnStorefront">
-                <span>VIEW STOREFRONT</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-            </a>
-            <a href="logout.php" class="btnLogout">
-                <span>LOGOUT PILOT</span>
-            </a>
-        </div>
-    </aside>
+    <?php require __DIR__ . '/sidebar.php'; ?>
 
     <!-- MAIN CONTENT -->
     <main class="adminMain">
@@ -376,7 +292,7 @@ if (isset($_GET['edit']) && $pdo) {
                                         <td>
                                             <?php if (!empty($s['linked_product_name'])): ?>
                                                 <div style="display: flex; align-items: center; gap: 0.4rem;">
-                                                    <span style="color: var(--brand-cyan); font-weight: 700;">🔗 <?php echo htmlspecialchars($s['linked_product_name']); ?></span>
+                                                    <span style="color: var(--brand-cyan); font-weight: 700;"> <?php echo htmlspecialchars($s['linked_product_name']); ?></span>
                                                     <span class="badge badge-grade"><?php echo htmlspecialchars($s['linked_product_grade']); ?></span>
                                                 </div>
                                             <?php elseif (!empty($s['custom_url'])): ?>
@@ -444,7 +360,7 @@ if (isset($_GET['edit']) && $pdo) {
 
                 <div class="formGroup">
                     <label for="sTitle">SLIDE TITLE / MECHA NAME *</label>
-                    <input type="text" id="sTitle" name="title" value="<?php echo htmlspecialchars($editSlide['title'] ?? ''); ?>" placeholder="e.g. RX-98-ν2 Hi-ν GUNDAM" required>
+                    <input type="text" id="sTitle" name="title" value="<?php echo htmlspecialchars($editSlide['title'] ?? ''); ?>" placeholder="e.g. RX-98-&#957;2 Hi-&#957; GUNDAM" required>
                 </div>
 
                 <div class="formRow">
@@ -462,7 +378,7 @@ if (isset($_GET['edit']) && $pdo) {
                 <div class="formRow" id="sec2QuoteRow">
                     <div class="formGroup">
                         <label for="sQuote">LORE QUOTE (SECTION 2)</label>
-                        <textarea id="sQuote" name="quote" rows="2" placeholder="“Even so, there is still a future we must protect!”"><?php echo htmlspecialchars($editSlide['quote'] ?? ''); ?></textarea>
+                        <textarea id="sQuote" name="quote" rows="2" placeholder="&#8220;Even so, there is still a future we must protect!&#8221;"><?php echo htmlspecialchars($editSlide['quote'] ?? ''); ?></textarea>
                     </div>
                     <div class="formGroup">
                         <label for="sAuthor">QUOTE AUTHOR (SECTION 2)</label>
@@ -472,7 +388,7 @@ if (isset($_GET['edit']) && $pdo) {
 
                 <!-- LINK TO PRODUCT SELECTOR -->
                 <div class="formGroup" style="background: rgba(63, 196, 225, 0.06); border: 1px solid rgba(63, 196, 225, 0.25); border-radius: 6px; padding: 1.2rem;">
-                    <label style="color: var(--brand-cyan);">🔗 LINK TO PRODUCT (CLICKING SLIDE / ORDER NOW! DIRECTS HERE)</label>
+                    <label style="color: var(--brand-cyan);"> LINK TO PRODUCT (CLICKING SLIDE / ORDER NOW! DIRECTS HERE)</label>
                     <p style="font-size: 0.78rem; color: var(--text-sub); margin-bottom: 0.6rem;">
                         Select an existing Gunpla model kit from your store. When visitors click the slide or the "ORDER NOW!" button, they will be sent straight to this product.
                     </p>
@@ -480,7 +396,7 @@ if (isset($_GET['edit']) && $pdo) {
                         <option value="">-- No Direct Product Link (Custom URL or None) --</option>
                         <?php foreach ($allProducts as $ap): ?>
                             <option value="<?php echo $ap['id']; ?>" <?php if (($editSlide['product_id'] ?? '') == $ap['id']) echo 'selected'; ?>>
-                                [<?php echo htmlspecialchars($ap['grade']); ?>] <?php echo htmlspecialchars($ap['name']); ?> &bull; ₱ <?php echo number_format($ap['price'], 2); ?>
+                                [<?php echo htmlspecialchars($ap['grade']); ?>] <?php echo htmlspecialchars($ap['name']); ?> &bull; &#8369; <?php echo number_format($ap['price'], 2); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -514,7 +430,7 @@ if (isset($_GET['edit']) && $pdo) {
                     <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.8rem;">
                         <input type="file" id="sliderFileInput" name="slider_file" accept="image/png, image/jpeg, image/webp" style="display: none;">
                         <button type="button" class="btnSecondary" onclick="document.getElementById('sliderFileInput').click();">
-                            📁 CHOOSE &amp; CROP BANNER PHOTO
+                             CHOOSE &amp; CROP BANNER PHOTO
                         </button>
                         <span id="chosenSliderFileName" style="font-size: 0.8rem; color: var(--text-muted);">No file selected</span>
                     </div>
@@ -538,7 +454,7 @@ if (isset($_GET['edit']) && $pdo) {
                         <div style="display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;">
                             <img id="sliderPreviewImg" src="<?php echo !empty($editSlide['image_url']) ? adminAssetUrl($editSlide['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
                             <button type="button" class="btnSecondary btnSmall" id="cropCurrentSlideBtn" style="border-color: var(--brand-cyan); color: var(--brand-cyan);">
-                                ✂️ CROP THIS CURRENT BANNER
+                                 CROP THIS CURRENT BANNER
                             </button>
                         </div>
                     </div>

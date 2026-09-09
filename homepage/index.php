@@ -8,6 +8,8 @@ $sfData = getStorefrontData();
 $sec1Slides = !empty($sfData['section1Slides']) ? $sfData['section1Slides'] : [];
 $sec2Slides = !empty($sfData['section2Slides']) ? $sfData['section2Slides'] : [];
 $sec7Slides = !empty($sfData['section7Slides']) ? $sfData['section7Slides'] : [];
+// Section 7 FEATURED card content (admin-editable via Admin > FEATURED; falls back to defaults)
+$featuredContent = getFeaturedContent(getDBConnection());
 $nrProducts = !empty($sfData['newReleases']) ? $sfData['newReleases'] : [];
 $bsProducts = !empty($sfData['bestSellers']) ? $sfData['bestSellers'] : [];
 $mkProducts = !empty($sfData['modelKits']) ? $sfData['modelKits'] : [];
@@ -416,45 +418,49 @@ $ctTiles    = !empty($sfData['categoryTiles']) ? $sfData['categoryTiles'] : [];
         <h2 class="featuredHeadlineFT">F E A T U R E D</h2>
     </div>
 
-    <!-- Main Grid Content -->
+    <!-- Main Grid Content (card content managed in Admin > FEATURED) -->
     <div class="featuredGridFT">
-        <!-- Left Column: Main Anniversary Feature -->
+        <!-- Left Column: Main Feature -->
         <div class="featuredCardLeftFT">
             <div class="featuredImgContainerFT">
-                <img src="<?php echo $promotionalPath; ?>/ban969914box.webp" alt="PG Unleashed Nu Gundam">
+                <img src="<?php echo htmlspecialchars(assetUrl($featuredContent['main']['image'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($featuredContent['main']['title']); ?>">
             </div>
             <div class="featuredDetailsFT">
-                <h3 class="featuredTitleFT">45TH GUNDAM<br>ANNIVERSARY</h3>
-                <p class="featuredSubFT">PG UNLEASHED 1/60 ν GUNDAM</p>
-                <span class="featuredStatusFT statusAvailableFT">NOW AVAILABLE!</span>
+                <h3 class="featuredTitleFT"><?php echo htmlspecialchars($featuredContent['main']['title']); ?></h3>
+                <p class="featuredSubFT"><?php echo htmlspecialchars($featuredContent['main']['subtitle']); ?></p>
+                <span class="featuredStatusFT statusAvailableFT"><?php echo htmlspecialchars($featuredContent['main']['status_text']); ?></span>
             </div>
         </div>
 
         <!-- Right Column: Stacked Banners -->
         <div class="featuredRightColFT">
-            <!-- Top Stacked Banner: Rogue Orbit -->
+            <!-- Top Stacked Banner -->
             <div class="featuredBannerRowFT bannerRogueOrbit">
                 <div class="bannerImgBoxFT">
-                    <img src="<?php echo $promotionalPath; ?>/select_img02.png" alt="Gundam Rogue Orbit">
+                    <img src="<?php echo htmlspecialchars(assetUrl($featuredContent['ro']['image'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($featuredContent['ro']['title']); ?>">
                 </div>
                 <div class="bannerTextBoxFT textRightFT">
                     <div class="bannerLogoWrapperFT">
-                        <img src="<?php echo $logosPath; ?>/logo_rogueOrbit.svg" alt="GUNDAM ROGUE ORBIT" class="bannerLogoSvgFT">
+                        <?php if ($featuredContent['ro']['logo'] !== ''): ?>
+                        <img src="<?php echo htmlspecialchars(assetUrl($featuredContent['ro']['logo'], $logosPath)); ?>" alt="<?php echo htmlspecialchars($featuredContent['ro']['title']); ?>" class="bannerLogoSvgFT">
+                        <?php endif; ?>
                     </div>
-                    <span class="featuredStatusFT statusSpacedFT">C O M I N G &nbsp; S O O N</span>
+                    <span class="featuredStatusFT statusSpacedFT"><?php echo htmlspecialchars($featuredContent['ro']['status_text']); ?></span>
                 </div>
             </div>
 
-            <!-- Bottom Stacked Banner: XARX-ZERO -->
+            <!-- Bottom Stacked Banner -->
             <div class="featuredBannerRowFT bannerXarxZero">
                 <div class="bannerTextBoxFT textLeftFT">
                     <div class="bannerLogoWrapperFT">
-                        <img src="<?php echo $logosPath; ?>/logo_xarx-zero_en.svg" alt="XARX-ZERO" class="bannerLogoSvgFT">
+                        <?php if ($featuredContent['xz']['logo'] !== ''): ?>
+                        <img src="<?php echo htmlspecialchars(assetUrl($featuredContent['xz']['logo'], $logosPath)); ?>" alt="<?php echo htmlspecialchars($featuredContent['xz']['title']); ?>" class="bannerLogoSvgFT">
+                        <?php endif; ?>
                     </div>
-                    <span class="featuredStatusFT statusSpacedFT">C O M I N G &nbsp; S O O N</span>
+                    <span class="featuredStatusFT statusSpacedFT"><?php echo htmlspecialchars($featuredContent['xz']['status_text']); ?></span>
                 </div>
                 <div class="bannerImgBoxFT">
-                    <img src="<?php echo $promotionalPath; ?>/select_img01.png" alt="XARX-ZERO">
+                    <img src="<?php echo htmlspecialchars(assetUrl($featuredContent['xz']['image'], $promotionalPath)); ?>" alt="<?php echo htmlspecialchars($featuredContent['xz']['title']); ?>">
                 </div>
             </div>
         </div>

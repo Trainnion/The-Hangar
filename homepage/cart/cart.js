@@ -20,7 +20,8 @@
         cartPage:       'cart.php',
         searchPage:     '../search/search.php',
         productDetails: '../product-details.php',
-        apiCheckout:    'api_checkout.php'
+        apiCheckout:    'api_checkout.php',
+        loginPage:      '../login/'
     }, window.HANGAR_PATHS || {});
 
     // Defensive image-path normalisation: ensure only a bare filename (or an
@@ -32,6 +33,31 @@
         if (value.startsWith('http') || value.startsWith('assets/')) return value;
         const parts = value.split('/');
         return parts[parts.length - 1] || 'Asset 8.png';
+    }
+
+    // Extract the leading '../' climb from a base path (e.g. '../../promotional'
+    // on the cart page) so a managed 'assets/...' path can be resolved relative
+    // to the project ROOT from any page depth — mirroring the PHP assetUrl() helper.
+    function dirClimbFrom(basePath) {
+        let up = '';
+        const bp = String(basePath || '');
+        let i = 0;
+        while (bp.indexOf('../', i) === i) { up += '../'; i += 3; }
+        return up;
+    }
+
+    // Resolve an image_url into a correct web-relative URL:
+    //  - ''            -> fallback logo under the promotional base
+    //  - http(s)://... -> absolute, use as-is
+    //  - assets/...    -> managed upload path, climb to project root first
+    //  - bare filename -> legacy/seed image under the promotional base
+    function resolveImgSrc(basePath, value) {
+        if (!value || typeof value !== 'string') return basePath + '/Asset 8.png';
+        if (value.indexOf('http') === 0) return value;
+        if (value.indexOf('assets/') === 0) return dirClimbFrom(basePath) + value;
+        const parts = value.split('/');
+        const file = parts[parts.length - 1] || 'Asset 8.png';
+        return basePath + '/' + file;
     }
 
     const HangarCart = {
@@ -121,6 +147,15 @@
         },
 
         addItem: function(product, qty = 1) {
+            // LOGIN GATE: a pilot must be signed in to requisition (add) units to the
+            // cart. Guests are redirected to the sign-in page and the item is NOT added.
+            if (cartUid === 'guest') {
+                this.showToast('LOGIN REQUIRED', 'Please sign in to add items to your cart.', true);
+                const loginPage = PATHS.loginPage || '../login/';
+                window.setTimeout(function() { window.location.href = loginPage; }, 900);
+                return false;
+            }
+
             qty = parseInt(qty, 10);
             if (isNaN(qty) || qty <= 0) qty = 1;
 
@@ -143,6 +178,7 @@
             this.saveCart();
             this.showToast('UNIT REQUISITIONED', `Added ${qty}x ${product.name} to Supply Manifest`);
             this.bumpBadge();
+            return true;
         },
 
         removeItem: function(productId) {
@@ -353,8 +389,7 @@
                 let cardsHtml = '';
                 this.items.forEach(item => {
                     const lineTotal = item.price * item.quantity;
-                    const srcFile = normalizeImageFilename(item.image_url);
-                    const imgSrc = (srcFile.startsWith('http') || srcFile.indexOf('/') !== -1) ? srcFile : `${this.promotionalPath}/${srcFile}`;
+                    const imgSrc = resolveImgSrc(this.promotionalPath, item.image_url);
 
                     cardsHtml += `
                         <div class="cartProductCard" data-id="${item.id}">
@@ -391,8 +426,7 @@
                 let rowsHtml = '';
                 this.items.forEach(item => {
                     const lineTotal = item.price * item.quantity;
-                    const srcFile = normalizeImageFilename(item.image_url);
-                    const imgSrc = (srcFile.startsWith('http') || srcFile.indexOf('/') !== -1) ? srcFile : `${this.promotionalPath}/${srcFile}`;
+                    const imgSrc = resolveImgSrc(this.promotionalPath, item.image_url);
 
                     rowsHtml += `
                         <tr>

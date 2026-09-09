@@ -56,6 +56,8 @@ body {
     justify-content: space-between;
     flex-shrink: 0;
     min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
     position: sticky;
     top: 0;
     z-index: 50;
@@ -324,9 +326,9 @@ body {
     border-radius: 3px;
     padding: 0.6rem 1.4rem;
     font-family: var(--font-heading);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -344,14 +346,14 @@ body {
 
 .btnSecondary {
     background-color: transparent;
-    color: #ffffff;
+    color: var(--text-main);
     border: 1px solid var(--border-color);
     border-radius: 3px;
     padding: 0.6rem 1.2rem;
     font-family: var(--font-heading);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -363,7 +365,7 @@ body {
 
 .btnSecondary:hover {
     background-color: rgba(255, 255, 255, 0.08);
-    border-color: #ffffff;
+    border-color: var(--text-main);
 }
 
 .btnDanger {
@@ -372,9 +374,11 @@ body {
     border: 1px solid rgba(255, 75, 75, 0.4);
     border-radius: 3px;
     padding: 0.4rem 0.8rem;
-    font-family: var(--font-system);
-    font-size: 0.72rem;
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
     font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -382,6 +386,7 @@ body {
 .btnDanger:hover {
     background-color: #ff4b4b;
     color: #ffffff;
+    border-color: #ff4b4b;
 }
 
 .btnSmall {
@@ -678,6 +683,8 @@ body {
     .adminSidebar {
         width: 100%;
         min-height: auto;
+        max-height: none;
+        overflow-y: visible;
         position: relative;
     }
     .formRow {

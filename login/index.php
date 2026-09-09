@@ -135,8 +135,6 @@ $currentRole = $_SESSION['user_role'] ?? (!empty($_SESSION['hangar_admin_logged'
                 <!-- Password -->
                 <div class="inputGroup">
                     <div class="labelRow">
-                        <label for="loginPassword">SECURITY PASSCODE</label>
-                        <a href="#" class="forgotLink" onclick="alert('Contact your flight supervisor or administrator to reset your passcode.'); return false;">Forgot passcode?</a>
                     </div>
                     <div class="inputWrapper">
                         <svg class="inputIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">

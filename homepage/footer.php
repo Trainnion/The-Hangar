@@ -1,8 +1,11 @@
 <?php
 // THE HANGAR - GUND-ORDER SYSTEM
 // REUSABLE STOREFRONT FOOTER COMPONENT
-// Text content is admin-editable via the `settings` table (ADMIN -> FOOTER CONTENT).
-// Empty settings fall back to safe built-in defaults.
+// Text content (contact number/email) is admin-editable via the `settings` table
+// (ADMIN -> FOOTER CONTENT). The CUSTOMER SERVICE / ABOUT THE HANGAR links are
+// fixed to the built-in storefront pages (page.php?p=contact|privacy|about) whose
+// text is admin-editable under ADMIN -> STATIC PAGES. Empty settings fall back
+// to safe built-in defaults.
 
 if (!isset($footerPath)) {
     $footerPath = is_dir('../../footer') ? '../../footer' : (is_dir('../footer') ? '../footer' : 'footer');
@@ -21,9 +24,6 @@ if (!$footerPdo) {
 $footerSettings = [
     'contact_number' => '',
     'contact_email'  => '',
-    'url_contact'    => 'homepage/page.php?p=contact',
-    'url_privacy'    => 'homepage/page.php?p=privacy',
-    'url_about'      => 'homepage/page.php?p=about',
     'social_fb'      => '#',
     'social_ig'      => '#',
     'social_x'       => '#',
@@ -38,19 +38,6 @@ if ($footerPdo) {
 // Depth-aware prefix for managed asset paths (assets/uploads/...), derived from $footerPath
 $footerRootPrefix = rtrim(str_replace('footer', '', $footerPath), '/');
 $footerRootPrefix = ($footerRootPrefix === '') ? '' : $footerRootPrefix . '/';
-
-// Treat unset/'#' content links as "use the built-in static page" (page.php)
-$footerBuiltinPages = [
-    'url_contact' => 'homepage/page.php?p=contact',
-    'url_privacy' => 'homepage/page.php?p=privacy',
-    'url_about'   => 'homepage/page.php?p=about',
-];
-foreach ($footerBuiltinPages as $fBKey => $fBDefault) {
-    $fVal = trim($footerSettings[$fBKey]);
-    if ($fVal === '' || $fVal === '#') {
-        $footerSettings[$fBKey] = $fBDefault;
-    }
-}
 
 // Resolve a footer link for the current page depth: absolute URLs / anchors /
 // tel: / mailto: pass through untouched, relative paths get the root prefix.
@@ -83,7 +70,7 @@ $footerPaymentLogo = trim($footerSettings['payment_logo']) !== ''
                 <div class="footerColFT">
                     <h4 class="footerHeadingFT">CUSTOMER SERVICE</h4>
                     <ul class="footerLinksFT">
-                        <li><a href="<?php echo htmlspecialchars($footerLink($footerSettings['url_contact'])); ?>">contact us</a></li>
+                        <li><a href="<?php echo htmlspecialchars($footerLink('homepage/page.php?p=contact')); ?>">contact us</a></li>
                         <?php if ($footerSettings['contact_number'] !== ''): ?>
                         <li><a href="tel:<?php echo htmlspecialchars(preg_replace('/[^\d+]/', '', $footerSettings['contact_number'])); ?>">contact number: <?php echo htmlspecialchars($footerSettings['contact_number']); ?></a></li>
                         <?php endif; ?>
@@ -96,8 +83,8 @@ $footerPaymentLogo = trim($footerSettings['payment_logo']) !== ''
                 <div class="footerColFT">
                     <h4 class="footerHeadingFT">ABOUT THE HANGAR</h4>
                     <ul class="footerLinksFT">
-                        <li><a href="<?php echo htmlspecialchars($footerLink($footerSettings['url_privacy'])); ?>">policy of privacy</a></li>
-                        <li><a href="<?php echo htmlspecialchars($footerLink($footerSettings['url_about'])); ?>">about us</a></li>
+                        <li><a href="<?php echo htmlspecialchars($footerLink('homepage/page.php?p=privacy')); ?>">policy of privacy</a></li>
+                        <li><a href="<?php echo htmlspecialchars($footerLink('homepage/page.php?p=about')); ?>">about us</a></li>
                     </ul>
                 </div>
 

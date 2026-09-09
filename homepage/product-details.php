@@ -612,7 +612,7 @@ if (!$product) {
     <?php require_once __DIR__ . '/footer.php'; ?>
 
     <!-- G.O.S SEARCH & CART HUD OVERLAYS (Self-contained modular components) -->
-    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: '../promotional', apiCheckout: 'cart/api_checkout.php' };</script>
+    <script>window.HANGAR_PATHS = { cartPage: 'cart/cart.php', searchPage: 'search/search.php', apiSearch: 'search/api_search.php', productDetails: 'product-details.php', promotionalBase: '../promotional', apiCheckout: 'cart/api_checkout.php', loginPage: '../login/' };</script>
     <?php $_cartAssetPrefix   = 'cart/';   require_once __DIR__ . '/cart/cart_modal.php'; ?>
 
     <!-- PRODUCT PURCHASE ACTIONS CONTROLLER -->
@@ -667,9 +667,13 @@ if (!$product) {
             if (btnOrderNow) {
                 btnOrderNow.addEventListener('click', function() {
                     throttleAction(function() {
+                        let added = false;
                         if (window.HangarCart) {
-                            window.HangarCart.addItem(currentProduct, getSelectedQty());
+                            added = window.HangarCart.addItem(currentProduct, getSelectedQty());
                         }
+                        // Only navigate to the cart once the item was actually added
+                        // (guests are blocked by the login gate inside addItem).
+                        if (!added) return;
                         const cartUrl = (window.HANGAR_PATHS && window.HANGAR_PATHS.cartPage)
                             ? window.HANGAR_PATHS.cartPage
                             : 'cart/cart.php';

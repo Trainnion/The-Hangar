@@ -168,6 +168,18 @@ try {
     // Resolve authenticated user ID if logged in
     $userId = !empty($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 
+    // LOGIN GATE (server-authoritative): a pilot must be signed in to place an
+    // order. Guests are rejected here even if a stale guest cart is submitted.
+    if ($userId === null) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Please sign in to your account before placing an order.',
+            'redirect' => '../../login/',
+        ]);
+        exit;
+    }
+
     // PROFILE COMPLETENESS GATE (server-authoritative): logged-in pilots must
     // have full name, phone, and address on file before an order can be placed.
     if ($userId !== null) {

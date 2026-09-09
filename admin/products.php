@@ -41,7 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     $stock_status = trim($_POST['stock_status'] ?? 'IN-STOCK');
     $is_new_release = isset($_POST['is_new_release']) ? 1 : 0;
     $is_best_seller = isset($_POST['is_best_seller']) ? 1 : 0;
-    $is_model_kit = isset($_POST['is_model_kit']) ? 1 : 0;
+    $is_model_kit   = isset($_POST['is_model_kit'])   ? 1 : 0;
+    // 3. Stock quantity input
+    $stock = isset($_POST['stock']) && $_POST['stock'] !== '' ? max(0, (int)$_POST['stock']) : ($action === 'add' ? 10 : 0);
+
+    // Resolve the displayed stock_status:
+    //  - Manual overrides (PRE-ORDER, SOLD OUT) are preserved.
+    //  - Otherwise status is auto-derived from stock (> 0 → IN-STOCK, ≤ 0 → OUT OF STOCK).
+    $resolvedStatus = hangarResolveStockStatus($stock, $stock_status);
     // Server-side validation (T18)
     $grade = in_array(trim($_POST['grade'] ?? 'MG'), ['MG','RG','PG','HG','SD','FG','BB','METAL BUILD','HI-RES','RE 1/100','RE'], true) ? trim($_POST['grade']) : 'MG';
     $scale = in_array(trim($_POST['scale'] ?? '1/100'), ['1/60','1/100','1/144','1/220','NONSCALE'], true) ? trim($_POST['scale']) : '1/100';
@@ -59,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
             $imgUrl = $uploadedImg ?: HANGAR_DEFAULT_IMAGE;
             $stmt = $pdo->prepare("
                 INSERT INTO `products` 
-                (`name`, `grade`, `scale`, `price`, `sold_count`, `brand`, `stock_status`, `image_url`, `is_new_release`, `is_best_seller`, `is_model_kit`) 
+                (`name`, `grade`, `scale`, `price`, `sold_count`, `brand`, `stock`, `stock_status`, `image_url`, `is_new_release`, `is_best_seller`, `is_model_kit`) 
                 VALUES 
-                (:name, :grade, :scale, :price, :sold_count, :brand, :stock_status, :image_url, :is_new_release, :is_best_seller, :is_model_kit)
+                (:name, :grade, :scale, :price, :sold_count, :brand, :stock, :stock_status, :image_url, :is_new_release, :is_best_seller, :is_model_kit)
             ");
             $stmt->execute([
                 'name' => $name,
@@ -70,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                 'price' => $price,
                 'sold_count' => $sold_count,
                 'brand' => $brand,
-                'stock_status' => $stock_status,
+                'stock' => $stock,
+                'stock_status' => $resolvedStatus,
                 'image_url' => $imgUrl,
                 'is_new_release' => $is_new_release,
                 'is_best_seller' => $is_best_seller,
@@ -93,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                 `price` = :price,
                 `sold_count` = :sold_count,
                 `brand` = :brand,
+                `stock` = :stock,
                 `stock_status` = :stock_status,
                 `image_url` = :image_url,
                 `is_new_release` = :is_new_release,
@@ -107,7 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
                 'price' => $price,
                 'sold_count' => $sold_count,
                 'brand' => $brand,
-                'stock_status' => $stock_status,
+                'stock' => $stock,
+                'stock_status' => $resolvedStatus,
                 'image_url' => $finalImg,
                 'is_new_release' => $is_new_release,
                 'is_best_seller' => $is_best_seller,
@@ -193,84 +203,7 @@ if (isset($_GET['edit']) && $pdo) {
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="adminSidebar">
-        <div>
-            <div class="sidebarHeader">
-                <a href="index.php" class="sidebarBrand">
-                    <img src="../promotional/Asset 8.png" alt="THE HANGAR" class="sidebarLogoImg">
-                    <div class="sidebarBadge">
-                        <span>G.O.S ADMIN v2.6</span>
-                    </div>
-                </a>
-            </div>
-
-            <nav class="sidebarNav">
-                <a href="index.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    <span>DASHBOARD</span>
-                </a>
-                <a href="products.php" class="navLink active">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                    <span>PRODUCTS</span>
-                </a>
-                <a href="categories.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                        <line x1="9" y1="6" x2="15" y2="6"></line>
-                        <line x1="9" y1="12" x2="15" y2="12"></line>
-                        <line x1="9" y1="18" x2="15" y2="18"></line>
-                    </svg>
-                    <span>CATEGORIES</span>
-                </a>
-                <a href="orders.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
-                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
-                        <line x1="5" y1="6" x2="13" y2="6"></line>
-                    </svg>
-                    <span>ORDERS</span>
-                </a>
-                <a href="sliders.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                    <span>SLIDERS (SEC 1, 2, 7)</span>
-                </a>
-                <a href="gcash.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                    </svg>
-                    <span>GCASH &amp; PAYMENTS</span>
-                </a>
-            </nav>
-        </div>
-
-        <div class="sidebarFooter">
-            <a href="../homepage/" target="_blank" class="btnStorefront">
-                <span>VIEW STOREFRONT</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-            </a>
-            <a href="logout.php" class="btnLogout">
-                <span>LOGOUT PILOT</span>
-            </a>
-        </div>
-    </aside>
+    <?php require __DIR__ . '/sidebar.php'; ?>
 
     <!-- MAIN CONTENT -->
     <main class="adminMain">
@@ -365,7 +298,7 @@ if (isset($_GET['edit']) && $pdo) {
                                             <span style="font-size: 0.78rem; color: var(--text-sub); margin-left: 4px;"><?php echo htmlspecialchars($p['scale']); ?></span>
                                         </td>
                                         <td>
-                                            <strong style="color: var(--brand-cyan);">₱ <?php echo number_format($p['price'], 2); ?></strong>
+                                            <strong style="color: var(--brand-cyan);">&#8369; <?php echo number_format($p['price'], 2); ?></strong>
                                         </td>
                                         <td><?php echo number_format($p['sold_count']); ?></td>
                                         <td>
@@ -452,7 +385,7 @@ if (isset($_GET['edit']) && $pdo) {
 
                 <div class="formRow">
                     <div class="formGroup">
-                        <label for="pPrice">PRICE (PHP ₱) *</label>
+                        <label for="pPrice">PRICE (PHP &#8369;) *</label>
                         <input type="number" step="0.01" id="pPrice" name="price" value="<?php echo htmlspecialchars($editProduct['price'] ?? '0.00'); ?>" required>
                     </div>
                     <div class="formGroup">
@@ -461,18 +394,23 @@ if (isset($_GET['edit']) && $pdo) {
                     </div>
                 </div>
 
+                <!-- Stock Quantity Input -->
                 <div class="formRow">
                     <div class="formGroup">
-                        <label for="pBrand">BRAND</label>
-                        <input type="text" id="pBrand" name="brand" value="<?php echo htmlspecialchars($editProduct['brand'] ?? 'BANDAI'); ?>">
+                        <label for="pStock">STOCK QUANTITY</label>
+                        <input type="number" id="pStock" name="stock" min="0" step="1" value="<?php echo htmlspecialchars($editProduct['stock'] ?? '10'); ?>" required>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">The actual number of units available. Set to 0 to mark as OUT OF STOCK (unless manually overridden below).</p>
                     </div>
                     <div class="formGroup">
-                        <label for="pStock">STOCK STATUS</label>
-                        <select id="pStock" name="stock_status">
+                        <label for="pStockStatus">STOCK STATUS</label>
+                        <select id="pStockStatus" name="stock_status">
                             <option value="IN-STOCK" <?php if (($editProduct['stock_status'] ?? '') === 'IN-STOCK') echo 'selected'; ?>>IN-STOCK</option>
                             <option value="PRE-ORDER" <?php if (($editProduct['stock_status'] ?? '') === 'PRE-ORDER') echo 'selected'; ?>>PRE-ORDER</option>
                             <option value="SOLD OUT" <?php if (($editProduct['stock_status'] ?? '') === 'SOLD OUT') echo 'selected'; ?>>SOLD OUT</option>
                         </select>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">
+                            Status is auto-derived from stock <strong>unless</strong> you manually select PRE-ORDER or SOLD OUT.
+                        </p>
                     </div>
                 </div>
 
@@ -505,7 +443,7 @@ if (isset($_GET['edit']) && $pdo) {
                     <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.8rem;">
                         <input type="file" id="productFileInput" name="product_file" accept="image/png, image/jpeg, image/webp" style="display: none;">
                         <button type="button" class="btnSecondary" onclick="document.getElementById('productFileInput').click();">
-                            📁 CHOOSE &amp; CROP NEW PHOTO
+                             CHOOSE &amp; CROP NEW PHOTO
                         </button>
                         <span id="chosenFileName" style="font-size: 0.8rem; color: var(--text-muted);">No file selected</span>
                     </div>
@@ -530,7 +468,7 @@ if (isset($_GET['edit']) && $pdo) {
                         <div style="display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;">
                             <img id="previewImg" src="<?php echo !empty($editProduct['image_url']) ? adminAssetUrl($editProduct['image_url']) : ''; ?>" alt="Preview" style="max-height: 120px; border-radius: 6px; border: 1px solid var(--border-color);">
                             <button type="button" class="btnSecondary btnSmall" id="cropCurrentProductBtn" style="border-color: var(--brand-cyan); color: var(--brand-cyan);">
-                                ✂️ CROP THIS CURRENT PICTURE
+                                 CROP THIS CURRENT PICTURE
                             </button>
                         </div>
                     </div>

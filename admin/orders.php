@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $pdo) {
     }
 
     // ---- 1b. ADVANCE FULFILMENT STATUS (gated on confirmed payment) ----
-    // COD orders ship without online verification — payment is collected at the door.
+    // COD orders ship without online verification &#8212; payment is collected at the door.
     $newStatus = trim($_POST['status'] ?? '');
     $allowed = ($orderId > 0 && in_array($newStatus, $ALLOWED_STATUS, true));
     if ($allowed && in_array($newStatus, ['processing', 'shipped', 'completed'], true)) {
@@ -182,96 +182,7 @@ function paymentStatusBadge(string $status) {
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="adminSidebar">
-        <div>
-            <div class="sidebarHeader">
-                <a href="index.php" class="sidebarBrand">
-                    <img src="../promotional/Asset 8.png" alt="THE HANGAR" class="sidebarLogoImg">
-                    <div class="sidebarBadge">
-                        <span>G.O.S ADMIN v2.6</span>
-                    </div>
-                </a>
-            </div>
-
-            <nav class="sidebarNav">
-                <a href="index.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    <span>DASHBOARD</span>
-                </a>
-                <a href="products.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                    <span>PRODUCTS</span>
-                </a>
-<a href="categories.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                        <line x1="9" y1="6" x2="15" y2="6"></line>
-                        <line x1="9" y1="12" x2="15" y2="12"></line>
-                        <line x1="9" y1="18" x2="15" y2="18"></line>
-                    </svg>
-                    <span>CATEGORIES</span>
-                </a>
-                <a href="orders.php" class="navLink active">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 2h12v16a2 2 0 0 1-2-2M6.5 6l4 4M8 8l-2 2"></path>
-                        <polyline points="3 4 9 4 9 14 3 14"></polyline>
-                        <line x1="5" y1="6" x2="13" y2="6"></line>
-                    </svg>
-                    <span>ORDERS</span>
-                </a>
-                <a href="sliders.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                    </svg>
-                    <span>SLIDERS (SEC 1, 2, 7)</span>
-                </a>
-                <a href="promos.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                    </svg>
-                    <span>PROMO CODES</span>
-                </a>
-                <a href="gcash.php" class="navLink">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                    </svg>
-                    <span>GCASH &amp; PAYMENTS</span>
-                </a>
-            </nav>
-        </div>
-
-        <div class="sidebarFooter">
-            <a href="../homepage/" target="_blank" class="btnStorefront">
-                <span>VIEW STOREFRONT</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-            </a>
-            <a href="logout.php" class="btnLogout">
-                <span>LOGOUT PILOT</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-            </a>
-        </div>
-    </aside>
+    <?php require __DIR__ . '/sidebar.php'; ?>
 
     <!-- MAIN CONTENT -->
     <main class="adminMain">
@@ -290,7 +201,7 @@ function paymentStatusBadge(string $status) {
                     <strong style="color: var(--brand-cyan);">System Status:</strong>
                     <?php
                         if ($_GET['msg'] === 'updated') echo 'Order status successfully updated.';
-                        elseif ($_GET['msg'] === 'paid') echo 'GCash payment confirmed — this order is now processable.';
+                        elseif ($_GET['msg'] === 'paid') echo 'GCash payment confirmed &#8212; this order is now processable.';
                         elseif ($_GET['msg'] === 'csrf') echo 'Request rejected: invalid security token.';
                         elseif ($_GET['msg'] === 'unpaid') echo 'Fulfilment locked: payment has not been confirmed for this order.';
                     ?>
@@ -430,7 +341,7 @@ function paymentStatusBadge(string $status) {
                     <label>PAYMENT</label>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                         <span class="badge <?php echo $pBadgeInfo[0]; ?>"><?php echo $pBadgeInfo[1]; ?></span>
-                        <span class="badge badge-grade"><?php echo htmlspecialchars(strtoupper($viewOrder['payment_method'] ?? '—')); ?></span>
+                        <span class="badge badge-grade"><?php echo htmlspecialchars(strtoupper($viewOrder['payment_method'] ?? '&#8212;')); ?></span>
                         <?php if (!empty($viewOrder['payment_ref'])): ?>
                             <span class="badge badge-bs"><?php echo htmlspecialchars($viewOrder['payment_ref']); ?></span>
                         <?php endif; ?>
@@ -477,7 +388,7 @@ function paymentStatusBadge(string $status) {
                         <button type="submit" class="btnSecondary btnSmall">UPDATE COURIER</button>
                     </form>
                     <?php if (empty($viewOrder['logistics'])): ?>
-                        <div style="margin-top: 0.4rem; color: var(--text-muted); font-size: 0.78rem;">Not set — assign a courier to this order.</div>
+                        <div style="margin-top: 0.4rem; color: var(--text-muted); font-size: 0.78rem;">Not set &#8212; assign a courier to this order.</div>
                     <?php endif; ?>
                 </div>
 

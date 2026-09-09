@@ -73,8 +73,8 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
             position: relative;
             background: #11141a;
             border: 1px solid var(--brand-cyan, #3FC4E1);
-            padding: 2.5rem;
-            max-width: 480px;
+            padding: 2.25rem;
+            max-width: 560px;
             width: 100%;
             text-align: center;
             color: #ffffff;
@@ -111,38 +111,6 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
             color: #9ea4b0;
             line-height: 1.6;
             margin-bottom: 1rem;
-        }
-
-        .successGcashQr {
-            text-align: center;
-            margin-bottom: 1.6rem;
-        }
-
-        .successQrCaption {
-            font-size: 0.78rem;
-            color: var(--brand-cyan, #3FC4E1);
-            font-weight: 700;
-            margin-bottom: 0.6rem;
-        }
-
-        .successQrBox {
-            display: flex;
-            justify-content: center;
-            background: #ffffff;
-            border: 1px solid var(--brand-cyan, #3FC4E1);
-            border-radius: 6px;
-            padding: 0.6rem;
-            width: 100%;
-        }
-
-        .successQrBox img {
-            max-width: 210px;
-            max-height: 210px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            display: block;
-            border-radius: 3px;
         }
 
         .successDismissBtn {
@@ -426,10 +394,6 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
             <p class="successOrderDesc" id="successOrderDesc">
                 Your Gundam Mobile Suit units have been logged into the Hangar distribution queue. Logistics tracking will be relayed to your registered pilot terminal.
             </p>
-            <div class="successGcashQr" id="successGcashQr" style="display: none;">
-                <div class="successQrCaption">Didn't pay yet? Scan the GCash QR below &amp; paste the reference number.</div>
-                <div class="successQrBox" id="successGcashQrBox"></div>
-            </div>
             <div class="successOrderActions">
                 <button type="button" class="successDismissBtn" id="successDismissBtn">
                     RETURN TO STOREFRONT
@@ -452,7 +416,8 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
             apiSearch: '../search/api_search.php',
             productDetails: '../product-details.php',
             promotionalBase: '../../promotional',
-            apiCheckout: 'api_checkout.php'
+            apiCheckout: 'api_checkout.php',
+            loginPage: '../../login/'
         };
     </script>
     <?php $_cartAssetPrefix = './'; require_once __DIR__ . '/cart_modal.php'; ?>
@@ -489,6 +454,17 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
                         if (window.HangarCart) {
                             window.HangarCart.showToast('MANIFEST EMPTY', 'Requisition Mobile Suit units before dispatching.', true);
                         }
+                        return;
+                    }
+
+                    // LOGIN GATE: a guest cannot check out — redirect to sign-in.
+                    const currentUserId = window.HANGAR_USER_ID ? Number(window.HANGAR_USER_ID) : 0;
+                    if (!currentUserId || currentUserId <= 0) {
+                        if (window.HangarCart) {
+                            window.HangarCart.showToast('LOGIN REQUIRED', 'Please sign in to check out your order.', true);
+                        }
+                        const loginPage = (window.HANGAR_PATHS && window.HANGAR_PATHS.loginPage) ? window.HANGAR_PATHS.loginPage : '../../login/';
+                        window.setTimeout(function() { window.location.href = loginPage; }, 900);
                         return;
                     }
 
@@ -580,25 +556,6 @@ $profileComplete = $currentUser ? isProfileComplete($currentUser) : false;
                                     successDesc.textContent = `Order #${result.order_code} received. Your payment of ${'₱' + (result.total || '0.00')} is being verified against GCash reference ${result.gcash_ref || '—'}. We'll confirm once checked.`;
                                 } else {
                                     successDesc.textContent = `Your Gundam Mobile Suit units are logged into the Hangar queue. Payment is pending confirmation. Tracking will be relayed to your registered pilot terminal.`;
-                                }
-                            }
-
-                            // Re-show the GCash QR inside the confirmation dialog for pending-verification payments
-                            const successGcashQr = document.getElementById('successGcashQr');
-                            if (successGcashQr) {
-                                const coQrImg = document.getElementById('coGcashQr');
-                                if (result.payment_status === 'payment_pending' && coQrImg) {
-                                    const successQrBox = document.getElementById('successGcashQrBox');
-                                    if (successQrBox) {
-                                        successQrBox.innerHTML = '';
-                                        const qrImg = document.createElement('img');
-                                        qrImg.src = coQrImg.src;
-                                        qrImg.alt = 'GCash QR';
-                                        successQrBox.appendChild(qrImg);
-                                    }
-                                    successGcashQr.style.display = '';
-                                } else {
-                                    successGcashQr.style.display = 'none';
                                 }
                             }
 
